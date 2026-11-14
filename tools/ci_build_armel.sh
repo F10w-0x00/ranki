@@ -38,6 +38,7 @@ else
     patch -p1 < ../rslib-src-lib-rs.patch
 fi
 
+rustup target add arm-unknown-linux-gnueabi
 cargo build --release --target arm-unknown-linux-gnueabi -p anki
 cd ..
 

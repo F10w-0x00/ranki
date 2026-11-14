@@ -9,6 +9,8 @@ RUN echo 'deb http://archive.debian.org/debian buster main' > /etc/apt/sources.l
 # 1. Install host cross-compilation tools & python utilities
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
+        gcc \
+        g++ \
         make \
         gcc-arm-linux-gnueabi \
         g++-arm-linux-gnueabi \
@@ -87,8 +89,8 @@ RUN mkdir -p /tmp/extract && cd /tmp/extract && \
     dpkg -x libjson-glib-dev_1.4.4-2_armel.deb / && \
     cd / && rm -rf /tmp/extract
 
-# 4. Install Rust & armel target (minimal profile for fast CI build)
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable --profile minimal
+# 4. Install Rust & armel target (pinned to 1.89.0 matching anki/rust-toolchain.toml)
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain 1.89.0 --profile minimal
 ENV PATH="/root/.cargo/bin:${PATH}"
 RUN rustup target add arm-unknown-linux-gnueabi
 
