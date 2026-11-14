@@ -11,6 +11,7 @@ RUN echo 'deb http://archive.debian.org/debian buster main' > /etc/apt/sources.l
 # Multiarch setup for armel and install cross-toolchain and ARMEL development libraries
 RUN dpkg --add-architecture armel && \
     apt-get update && \
+    apt-get dist-upgrade -y && \
     apt-get install -y --no-install-recommends \
         make \
         gcc-arm-linux-gnueabi \
