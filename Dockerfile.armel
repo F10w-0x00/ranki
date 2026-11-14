@@ -1,0 +1,47 @@
+FROM debian:buster-slim
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Configure apt sources for Debian Buster archive
+RUN sed -i 's/deb.debian.org/archive.debian.org/g' /etc/apt/sources.list && \
+    sed -i 's/security.debian.org/archive.debian.org/g' /etc/apt/sources.list && \
+    sed -i '/buster-updates/d' /etc/apt/sources.list && \
+    echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/99no-check-valid-until
+
+# Multiarch setup for armel
+RUN dpkg --add-architecture armel && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends \
+        build-essential \
+        gcc-arm-linux-gnueabi \
+        g++-arm-linux-gnueabi \
+        binutils-arm-linux-gnueabi \
+        pkg-config \
+        valac \
+        automake \
+        autoconf \
+        libtool \
+        protobuf-compiler \
+        libprotobuf-dev \
+        libprotobuf-c-dev:armel \
+        protobuf-c-compiler \
+        libgtk2.0-dev:armel \
+        libwebkitgtk-1.0-dev:armel \
+        libsoup2.4-dev:armel \
+        libarchive-dev:armel \
+        libsqlite3-dev:armel \
+        ca-certificates \
+        curl \
+        git \
+        python3 \
+        patch \
+        file && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install Rust & armel target
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
+ENV PATH="/root/.cargo/bin:${PATH}"
+RUN rustup target add arm-unknown-linux-gnueabi
+
+WORKDIR /workspace
+CMD ["/bin/bash", "/workspace/tools/ci_build_armel.sh"]

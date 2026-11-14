@@ -1,0 +1,3 @@
+ARM Attributes (.ARM.attributes):
+  Size: 55 bytes
+  Flags: 0x5000202 (Version 5 EABI, soft-float ABI, Tag_ABI_VFP_args=0)

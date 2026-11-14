@@ -1,0 +1,121 @@
+#!/bin/bash
+set -euo pipefail
+
+echo "=========================================================="
+echo " Starting RAnki ARMEL Cross-Compilation Pipeline (M0)"
+echo " Target Architecture: armel (ARMv7 softfp / EABI5)"
+echo " GLIBC Ceiling Gate:  <= GLIBC_2.20"
+echo "=========================================================="
+
+cd /workspace
+
+# 1. Environment & Cross pkg-config
+export PKG_CONFIG_PATH=/usr/lib/arm-linux-gnueabi/pkgconfig:/usr/share/pkgconfig
+export PKG_CONFIG_LIBDIR=/usr/lib/arm-linux-gnueabi
+export CC_arm_unknown_linux_gnueabi=arm-linux-gnueabi-gcc
+export CXX_arm_unknown_linux_gnueabi=arm-linux-gnueabi-g++
+export AR_arm_unknown_linux_gnueabi=arm-linux-gnueabi-ar
+export CARGO_TARGET_ARM_UNKNOWN_LINUX_GNUEABI_LINKER=arm-linux-gnueabi-gcc
+
+# 2. Build host protoc-gen-vala plugin
+echo "[1/6] Building protoc-gen-vala plugin on host..."
+if [ ! -f protobuf-vala/src/protoc-gen-vala ]; then
+    cd protobuf-vala
+    autoreconf -fi
+    ./configure
+    make -j$(nproc)
+    cd ..
+fi
+
+# 3. Generate Vala protobuf bindings from anki/proto
+echo "[2/6] Generating Vala bindings from Anki Protobufs..."
+mkdir -p build/proto
+protoc --plugin=protoc-gen-vala=./protobuf-vala/src/protoc-gen-vala \
+       --vala_out=build/proto \
+       -Ianki/proto \
+       anki/proto/anki/*.proto
+
+# 4. Patch and Compile Rust rslib backend
+echo "[3/6] Compiling Rust rslib for arm-unknown-linux-gnueabi..."
+cd anki
+if git apply --reverse --check ../cargo-toml.patch >/dev/null 2>&1; then
+    echo "  cargo-toml.patch already applied."
+else
+    patch -p1 < ../cargo-toml.patch
+fi
+
+if git apply --reverse --check ../rslib-cargo-toml.patch >/dev/null 2>&1; then
+    echo "  rslib-cargo-toml.patch already applied."
+else
+    patch -p1 < ../rslib-cargo-toml.patch
+fi
+
+if git apply --reverse --check ../rslib-src-lib-rs.patch >/dev/null 2>&1; then
+    echo "  rslib-src-lib-rs.patch already applied."
+else
+    patch -p1 < ../rslib-src-lib-rs.patch
+fi
+
+cargo build --release --target arm-unknown-linux-gnueabi -p rslib
+cd ..
+
+# 5. Build liblipc stub for linker resolution
+echo "[4/6] Creating liblipc.so.1 stub for linking..."
+mkdir -p build/libs
+arm-linux-gnueabi-gcc -shared -fPIC -Wl,-soname,liblipc.so.1 tools/liblipc_stub.c -o build/libs/liblipc.so.1
+ln -sf liblipc.so.1 build/libs/liblipc.so
+
+# 6. Translate Vala to C code
+echo "[5/6] Translating Vala application to C..."
+mkdir -p build/src_c
+valac -C \
+    --pkg gtk+-2.0 \
+    --pkg webkit-1.0 \
+    --pkg libsoup-2.4 \
+    --pkg libarchive \
+    --pkg posix \
+    protobuf-vala/src/protobuf-vala.vala \
+    build/proto/*.vala \
+    spices.vala \
+    lipstick.vala \
+    backend.vala \
+    views/base.vala \
+    views/decktree.vala \
+    views/review.vala \
+    views/settings.vala \
+    main.vala \
+    -d build/src_c
+
+# 7. Compile C and link final ranki-armel binary
+echo "[6/6] Linking ranki-armel binary..."
+PKG_CFLAGS=$(pkg-config --cflags gtk+-2.0 webkit-1.0 libsoup-2.4 libarchive)
+PKG_LIBS=$(pkg-config --libs gtk+-2.0 webkit-1.0 libsoup-2.4 libarchive)
+
+arm-linux-gnueabi-gcc \
+    -O2 \
+    build/src_c/*.c \
+    -I. -I/usr/include \
+    ${PKG_CFLAGS} \
+    ${PKG_LIBS} \
+    -Lbuild/libs -llipc \
+    anki/target/arm-unknown-linux-gnueabi/release/librslib.a \
+    -lpthread -ldl -lm -lrt \
+    -Wl,--as-needed \
+    -o build/ranki-armel
+
+arm-linux-gnueabi-strip build/ranki-armel
+
+echo "=========================================================="
+echo " Build Completed Successfully! Binary Information:"
+echo "=========================================================="
+file build/ranki-armel
+sha256sum build/ranki-armel
+ls -lh build/ranki-armel
+
+echo "=========================================================="
+echo " Running Automated Verification Gates (M0.5 & M0.6)"
+echo "=========================================================="
+python3 tools/check_symbols.py build/ranki-armel
+python3 tools/check_dt_needed.py build/ranki-armel
+
+echo "All verification gates passed with 0 errors!"

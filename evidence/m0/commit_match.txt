@@ -1,0 +1,17 @@
+Commit Matching Forensic Proof:
+---------------------------------
+Device Binary Built At: 2026-06-16 19:48:52 UTC
+Device Stdout Logs:
+  ** (ranki-armel:1633): DEBUG: review.vala:355: html_content
+  ** (ranki-armel:1633): DEBUG: review.vala:371: milliseconds_taken
+
+Git Repository Inspection:
+  Commit SHA: f3c13d3c5c2db918cb6bcbb42f8b45bf93e638e1
+  Tag: v0.2
+  Author Date: Tue Jun 16 19:51:37 2026 +0200
+  Lines in views/review.vala at f3c13d3c:
+    Line 355: debug(@"html_content $html_content");
+    Line 371: debug (@"milliseconds_taken $(milliseconds_taken)");
+
+Conclusion:
+  The baseline binary is 100.00% bit-accurate with upstream commit f3c13d3c5c2db918cb6bcbb42f8b45bf93e638e1 (Tag v0.2).

@@ -1,0 +1,50 @@
+Dynamic section (.dynamic):
+  DT_NEEDED           : 1 libgtk-x11-2.0.so.0
+  DT_NEEDED           : 5453 libgdk-x11-2.0.so.0
+  DT_NEEDED           : 5484 libgdk_pixbuf-2.0.so.0
+  DT_NEEDED           : 5507 libpangocairo-1.0.so.0
+  DT_NEEDED           : 5530 libatk-1.0.so.0
+  DT_NEEDED           : 5641 libcairo.so.2
+  DT_NEEDED           : 5655 libpangoft2-1.0.so.0
+  DT_NEEDED           : 5676 libpango-1.0.so.0
+  DT_NEEDED           : 5715 libfreetype.so.6
+  DT_NEEDED           : 5732 libfontconfig.so.1
+  DT_NEEDED           : 5751 libgmodule-2.0.so.0
+  DT_NEEDED           : 5821 libsoup-2.4.so.1
+  DT_NEEDED           : 7749 libgio-2.0.so.0
+  DT_NEEDED           : 8009 libgobject-2.0.so.0
+  DT_NEEDED           : 8168 libgthread-2.0.so.0
+  DT_NEEDED           : 8188 libglib-2.0.so.0
+  DT_NEEDED           : 8416 libwebkitgtk-1.0.so
+  DT_NEEDED           : 8591 libz.so.1
+  DT_NEEDED           : 8607 liblipc.so.1
+  DT_NEEDED           : 8822 libcurl.so.4
+  DT_NEEDED           : 8940 libm.so.6
+  DT_NEEDED           : 9017 libdl.so.2
+  DT_NEEDED           : 9057 libgcc_s.so.1
+  DT_NEEDED           : 9454 libpthread.so.0
+  DT_NEEDED           : 10183 libc.so.6
+  DT_NEEDED           : 11963 ld-linux.so.3
+  DT_INIT             : 1681996 
+  DT_FINI             : 20771136 
+  DT_INIT_ARRAY       : 25087360 
+  DT_INIT_ARRAYSZ     : 8 
+  DT_FINI_ARRAY       : 25087368 
+  DT_FINI_ARRAYSZ     : 4 
+  DT_GNU_HASH         : 65964 
+  DT_STRTAB           : 402744 
+  DT_SYMTAB           : 172648 
+  DT_STRSZ            : 1243889 
+  DT_SYMENT           : 16 
+  DT_DEBUG            : 0 
+  DT_PLTGOT           : 25811744 
+  DT_PLTRELSZ         : 5688 
+  DT_PLTREL           : 17 
+  DT_JMPREL           : 1676308 
+  DT_REL              : 1675796 
+  DT_RELSZ            : 512 
+  DT_RELENT           : 8 
+  DT_VERNEED          : 1675396 
+  DT_VERNEEDNUM       : 6 
+  DT_VERSYM           : 1646634 
+  DT_NULL             : 0 

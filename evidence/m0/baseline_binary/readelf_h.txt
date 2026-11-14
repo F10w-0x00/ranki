@@ -1,0 +1,15 @@
+ELF Header:
+  e_ident             : Container({'EI_MAG': [127, 69, 76, 70], 'EI_CLASS': 'ELFCLASS32', 'EI_DATA': 'ELFDATA2LSB', 'EI_VERSION': 'EV_CURRENT', 'EI_OSABI': 'ELFOSABI_SYSV', 'EI_ABIVERSION': 0})
+  e_type              : ET_EXEC
+  e_machine           : EM_ARM
+  e_version           : EV_CURRENT
+  e_entry             : 2270736
+  e_phoff             : 52
+  e_shoff             : 27348124
+  e_flags             : 83886594
+  e_ehsize            : 52
+  e_phentsize         : 32
+  e_phnum             : 9
+  e_shentsize         : 40
+  e_shnum             : 32
+  e_shstrndx          : 31
