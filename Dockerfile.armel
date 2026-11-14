@@ -1,17 +1,17 @@
-FROM debian:stretch-slim
+FROM debian:buster-slim
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Point apt to archive.debian.org for Debian Stretch and disable validity checks
-RUN echo 'deb http://archive.debian.org/debian stretch main' > /etc/apt/sources.list && \
-    echo 'deb http://archive.debian.org/debian-security stretch/updates main' >> /etc/apt/sources.list && \
-    echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/99no-check-valid-until && \
-    echo 'Acquire::AllowInsecureRepositories "true";' >> /etc/apt/apt.conf.d/99no-check-valid-until
+# Configure apt sources for Debian Buster archive
+RUN sed -i 's/deb.debian.org/archive.debian.org/g' /etc/apt/sources.list && \
+    sed -i 's/security.debian.org/archive.debian.org/g' /etc/apt/sources.list && \
+    sed -i '/buster-updates/d' /etc/apt/sources.list && \
+    echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/99no-check-valid-until
 
-# Multiarch setup for armel and install cross toolchain + ARMEL libraries
+# Multiarch setup for armel and install cross-toolchain and development packages
 RUN dpkg --add-architecture armel && \
-    apt-get -o Acquire::AllowInsecureRepositories=true -o Acquire::AllowDowngradeToInsecureRepositories=true update && \
-    apt-get install -y --allow-unauthenticated --no-install-recommends \
+    apt-get update && \
+    apt-get install -y --no-install-recommends \
         build-essential \
         gcc-arm-linux-gnueabi \
         g++-arm-linux-gnueabi \
@@ -23,7 +23,6 @@ RUN dpkg --add-architecture armel && \
         libtool \
         protobuf-compiler \
         libgtk2.0-dev:armel \
-        libwebkitgtk-dev:armel \
         libsoup2.4-dev:armel \
         libarchive-dev:armel \
         libsqlite3-dev:armel \
@@ -35,9 +34,17 @@ RUN dpkg --add-architecture armel && \
         file && \
     rm -rf /var/lib/apt/lists/*
 
-# Fix expired DST Root CA X3 certificate in Debian Stretch ca-certificates
-RUN sed -i 's/mozilla\/DST_Root_CA_X3.crt/!mozilla\/DST_Root_CA_X3.crt/' /etc/ca-certificates.conf && \
-    update-ca-certificates -f
+# Extract WebKitGTK 1.0 armel development headers and libraries from Debian Stretch archive
+RUN mkdir -p /tmp/webkit && cd /tmp/webkit && \
+    curl -fsSL -O http://archive.debian.org/debian/pool/main/w/webkitgtk/libjavascriptcoregtk-1.0-0_2.4.11-3_armel.deb && \
+    curl -fsSL -O http://archive.debian.org/debian/pool/main/w/webkitgtk/libjavascriptcoregtk-1.0-dev_2.4.11-3_armel.deb && \
+    curl -fsSL -O http://archive.debian.org/debian/pool/main/w/webkitgtk/libwebkitgtk-1.0-0_2.4.11-3_armel.deb && \
+    curl -fsSL -O http://archive.debian.org/debian/pool/main/w/webkitgtk/libwebkitgtk-dev_2.4.11-3_armel.deb && \
+    dpkg -x libjavascriptcoregtk-1.0-0_2.4.11-3_armel.deb / && \
+    dpkg -x libjavascriptcoregtk-1.0-dev_2.4.11-3_armel.deb / && \
+    dpkg -x libwebkitgtk-1.0-0_2.4.11-3_armel.deb / && \
+    dpkg -x libwebkitgtk-dev_2.4.11-3_armel.deb / && \
+    cd / && rm -rf /tmp/webkit
 
 # Install Rust & armel target (minimal profile for fast CI build)
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable --profile minimal
