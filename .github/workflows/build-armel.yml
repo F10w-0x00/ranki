@@ -39,7 +39,14 @@ jobs:
           docker run --rm \
             -v "${{ github.workspace }}:/workspace" \
             ranki-armel-builder \
-            /bin/bash /workspace/tools/ci_build_armel.sh
+            /bin/bash /workspace/tools/ci_build_armel.sh 2>&1 | tee build.log
+
+      - name: Upload Build Failure Telemetry
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-failure-log
+          path: build.log
 
       - name: Record Build Evidence & Telemetry (M0.5)
         run: |

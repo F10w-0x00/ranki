@@ -73,8 +73,6 @@ arm-linux-gnueabi-gcc \
     -I. -Ibuild/src_c -Ibuild/proto \
     ${PKG_CFLAGS} \
     ${WRAP_FLAGS} \
-    -Wl,--version-script=tools/ranki.version \
-    -Wl,--exclude-libs,ALL \
     -Wl,--allow-shlib-undefined \
     -Wl,--as-needed \
     -Lbuild/libs -llipc \
