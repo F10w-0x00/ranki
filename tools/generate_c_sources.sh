@@ -7,14 +7,14 @@ echo "=========================================================="
 
 cd "$(dirname "$0")/.."
 
-# 1. Build host protoc-gen-vala plugin
+# 1. Compile host protoc-gen-vala plugin directly with valac
 if [ ! -f protobuf-vala/src/protoc-gen-vala ]; then
-    echo "[1/2] Building protoc-gen-vala plugin on host..."
-    cd protobuf-vala
-    autoreconf -fi
-    ./configure
-    make -j$(nproc)
-    cd ..
+    echo "[1/2] Compiling protoc-gen-vala plugin with valac..."
+    valac --pkg posix -o protobuf-vala/src/protoc-gen-vala \
+        protobuf-vala/src/protobuf-vala.vala \
+        protobuf-vala/src/descriptor.pb.vala \
+        protobuf-vala/src/plugin.pb.vala \
+        protobuf-vala/src/protoc-gen-vala.vala
 fi
 
 # 2. Generate Vala protobuf bindings from anki/proto
