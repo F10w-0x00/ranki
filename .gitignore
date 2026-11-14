@@ -1,4 +1,5 @@
 *.c
+!tools/*.c
 
 # Ignore large binary baselines
 evidence/m0/baseline_binary/*.stable
