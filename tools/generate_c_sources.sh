@@ -26,7 +26,11 @@ protoc --experimental_allow_proto3_optional \
        -Ianki/proto \
        anki/proto/anki/*.proto
 
-# 3. Translate Vala application to C
+# 3. Find all generated protobuf vala files
+PROTO_VALA=$(find build/proto -name "*.vala")
+echo "Discovered generated protobuf Vala files: $(echo "$PROTO_VALA" | wc -w)"
+
+# 4. Translate Vala application to C
 valac -C \
     --vapidir=vapi \
     --pkg gtk+-2.0 \
@@ -35,7 +39,7 @@ valac -C \
     --pkg libarchive \
     --pkg posix \
     protobuf-vala/src/protobuf-vala.vala \
-    build/proto/*.vala \
+    ${PROTO_VALA} \
     spices.vala \
     lipstick.vala \
     backend.vala \
