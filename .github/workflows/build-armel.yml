@@ -21,6 +21,13 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
+      - name: Generate C Sources from Vala & Protobuf
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valac automake autoconf libtool protobuf-compiler libglib2.0-dev libgtk2.0-dev libsoup2.4-dev libarchive-dev
+          chmod +x tools/generate_c_sources.sh
+          ./tools/generate_c_sources.sh
+
       - name: Build Builder Docker Image
         run: |
           echo "Building docker image from Dockerfile.armel..."
