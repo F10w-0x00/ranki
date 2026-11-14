@@ -56,7 +56,7 @@ else
     patch -p1 < ../rslib-src-lib-rs.patch
 fi
 
-cargo build --release --target arm-unknown-linux-gnueabi -p rslib
+cargo build --release --target arm-unknown-linux-gnueabi -p anki
 cd ..
 
 # 5. Build liblipc stub for linker resolution
@@ -65,7 +65,7 @@ mkdir -p build/libs
 arm-linux-gnueabi-gcc -shared -fPIC -Wl,-soname,liblipc.so.1 tools/liblipc_stub.c -o build/libs/liblipc.so.1
 ln -sf liblipc.so.1 build/libs/liblipc.so
 
-# 6. Translate Vala to C code
+# 6. Translate Vala application to C code
 echo "[5/6] Translating Vala application to C..."
 mkdir -p build/src_c
 valac -C \
@@ -94,13 +94,12 @@ PKG_LIBS=$(pkg-config --libs gtk+-2.0 webkit-1.0 libsoup-2.4 libarchive)
 arm-linux-gnueabi-gcc \
     -O2 \
     build/src_c/*.c \
-    -I. -I/usr/include \
+    -I. \
     ${PKG_CFLAGS} \
-    ${PKG_LIBS} \
     -Lbuild/libs -llipc \
     anki/target/arm-unknown-linux-gnueabi/release/librslib.a \
+    ${PKG_LIBS} \
     -lpthread -ldl -lm -lrt \
-    -Wl,--as-needed \
     -o build/ranki-armel
 
 arm-linux-gnueabi-strip build/ranki-armel

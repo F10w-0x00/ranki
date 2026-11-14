@@ -1,8 +1,19 @@
 diff --git a/rslib/Cargo.toml b/rslib/Cargo.toml
-index 9be9e8d87..4d067275b 100644
+index 9be9e8d87..d90b68671 100644
 --- a/rslib/Cargo.toml
 +++ b/rslib/Cargo.toml
-@@ -83,7 +83,7 @@ pulldown-cmark.workspace = true
+@@ -9,6 +9,10 @@ rust-version.workspace = true
+ workspace = ".."
+ description = "Anki's Rust library code"
+ 
++[lib]
++name = "rslib"
++crate-type = ["staticlib", "rlib"]
++
+ [features]
+ bench = ["criterion"]
+ rustls = ["reqwest/rustls-tls", "reqwest/rustls-tls-native-roots"]
+@@ -83,7 +87,7 @@ pulldown-cmark.workspace = true
  rand.workspace = true
  rayon.workspace = true
  regex.workspace = true

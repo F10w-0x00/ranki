@@ -34,7 +34,7 @@ DEVICE_WHITELIST = {
 }
 
 def check_dt_needed(binary_path):
-    print(f"=== Checking DT_NEEDED Whitelist for {binary_path} ===")
+    print("=== Checking DT_NEEDED Whitelist for {} ===".format(binary_path))
     
     needed = []
     try:
@@ -47,25 +47,26 @@ def check_dt_needed(binary_path):
                     if tag.entry.d_tag == 'DT_NEEDED':
                         needed.append(tag.needed)
     except ImportError:
-        res = subprocess.run(["readelf", "-d", binary_path], capture_output=True, text=True)
-        if res.returncode != 0:
-            print(f"Error running readelf: {res.stderr}")
+        p = subprocess.Popen(["readelf", "-d", binary_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+        out, err = p.communicate()
+        if p.returncode != 0:
+            print("Error running readelf: {}".format(err))
             return False
-        for line in res.stdout.splitlines():
+        for line in out.splitlines():
             m = re.search(r'\(NEEDED\)\s+Shared library:\s+\[(.*?)\]', line)
             if m:
                 needed.append(m.group(1))
 
-    print(f"Discovered DT_NEEDED libraries ({len(needed)}):")
+    print("Discovered DT_NEEDED libraries ({}):".format(len(needed)))
     for lib in needed:
-        print(f"  {lib}")
+        print("  {}".format(lib))
         
     invalid = [lib for lib in needed if lib not in DEVICE_WHITELIST]
     if invalid:
-        print(f"\n[FAIL] Foreign libraries not available on Kindle OS detected: {invalid}")
+        print("\n[FAIL] Foreign libraries not available on Kindle OS detected: {}".format(invalid))
         return False
     else:
-        print(f"\n[PASS] All {len(needed)} DT_NEEDED libraries are present in Kindle OS whitelist!")
+        print("\n[PASS] All {} DT_NEEDED libraries are present in Kindle OS whitelist!".format(len(needed)))
         return True
 
 if __name__ == "__main__":
