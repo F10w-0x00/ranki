@@ -1,26 +1,20 @@
-FROM debian:buster-20220912-slim
+FROM debian:buster-slim
 
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Configure apt sources strictly for Debian Buster 10.13 archive main
-# (Omit debian-security and buster-updates to keep multiarch libc versions in exact lockstep)
 RUN echo 'deb http://archive.debian.org/debian buster main' > /etc/apt/sources.list && \
     echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/99no-check-valid-until
 
-# Multiarch setup for armel and install cross-toolchain and ARMEL development libraries
-RUN dpkg --add-architecture armel && \
-    apt-get update && \
-    apt-get install -y --no-install-recommends --allow-downgrades \
+# 1. Install host cross-compilation tools & python utilities
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
         make \
         gcc-arm-linux-gnueabi \
         g++-arm-linux-gnueabi \
         binutils-arm-linux-gnueabi \
         binutils \
         pkg-config \
-        libgtk2.0-dev:armel \
-        libsoup2.4-dev:armel \
-        libarchive-dev:armel \
-        libsqlite3-dev:armel \
         ca-certificates \
         curl \
         git \
@@ -30,7 +24,54 @@ RUN dpkg --add-architecture armel && \
         file && \
     rm -rf /var/lib/apt/lists/*
 
-# Extract WebKitGTK 1.0 and json-glib armel development headers and libraries
+# 2. Extract ARMEL development sysroot headers and libraries via dpkg -x
+# (Completely bypasses apt foreign-architecture multiarch dependency conflicts)
+RUN dpkg --add-architecture armel && \
+    apt-get update && \
+    mkdir -p /tmp/armel-sysroot && cd /tmp/armel-sysroot && \
+    apt-get download \
+        libgtk2.0-dev:armel libgtk2.0-0:armel libgtk2.0-common \
+        libglib2.0-dev:armel libglib2.0-0:armel \
+        libpango1.0-dev:armel libpango-1.0-0:armel libpangocairo-1.0-0:armel libpangoft2-1.0-0:armel \
+        libcairo2-dev:armel libcairo2:armel \
+        libatk1.0-dev:armel libatk1.0-0:armel \
+        libgdk-pixbuf2.0-dev:armel libgdk-pixbuf2.0-0:armel \
+        libsoup2.4-dev:armel libsoup2.4-1:armel \
+        libarchive-dev:armel libarchive13:armel \
+        libsqlite3-dev:armel libsqlite3-0:armel \
+        libfontconfig1-dev:armel libfontconfig1:armel \
+        libfreetype6-dev:armel libfreetype6:armel \
+        libfribidi-dev:armel libfribidi0:armel \
+        libharfbuzz-dev:armel libharfbuzz0b:armel \
+        libpixman-1-dev:armel libpixman-1-0:armel \
+        libpng-dev:armel libpng16-16:armel \
+        libx11-dev:armel libx11-6:armel \
+        libxcb1-dev:armel libxcb1:armel \
+        libxau-dev:armel libxau6:armel \
+        libxdmcp-dev:armel libxdmcp6:armel \
+        libxext-dev:armel libxext6:armel \
+        libxrender-dev:armel libxrender1:armel \
+        libxinerama-dev:armel libxinerama1:armel \
+        libxi-dev:armel libxi6:armel \
+        libxrandr-dev:armel libxrandr2:armel \
+        libxcursor-dev:armel libxcursor1:armel \
+        libxfixes-dev:armel libxfixes3:armel \
+        libxcomposite-dev:armel libxcomposite1:armel \
+        libxdamage-dev:armel libxdamage1:armel \
+        libxml2-dev:armel libxml2:armel \
+        libffi-dev:armel libffi6:armel \
+        libpcre3-dev:armel libpcre3:armel \
+        libexpat1-dev:armel libexpat1:armel \
+        libbz2-dev:armel libbz2-1.0:armel \
+        liblzma-dev:armel liblzma5:armel \
+        zlib1g-dev:armel zlib1g:armel \
+        libc6-dev:armel libc6:armel linux-libc-dev:armel \
+        x11proto-core-dev x11proto-input-dev x11proto-kb-dev xtrans-dev && \
+    for f in *.deb; do dpkg -x "$f" /; done && \
+    cd / && rm -rf /tmp/armel-sysroot && \
+    rm -rf /var/lib/apt/lists/*
+
+# 3. Extract WebKitGTK 1.0 and json-glib armel development headers and libraries
 RUN mkdir -p /tmp/extract && cd /tmp/extract && \
     curl -fsSL -O http://archive.debian.org/debian/pool/main/w/webkitgtk/libjavascriptcoregtk-1.0-0_2.4.11-3_armel.deb && \
     curl -fsSL -O http://archive.debian.org/debian/pool/main/w/webkitgtk/libjavascriptcoregtk-1.0-dev_2.4.11-3_armel.deb && \
@@ -46,7 +87,7 @@ RUN mkdir -p /tmp/extract && cd /tmp/extract && \
     dpkg -x libjson-glib-dev_1.4.4-2_armel.deb / && \
     cd / && rm -rf /tmp/extract
 
-# Install Rust & armel target (minimal profile for fast CI build)
+# 4. Install Rust & armel target (minimal profile for fast CI build)
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable --profile minimal
 ENV PATH="/root/.cargo/bin:${PATH}"
 RUN rustup target add arm-unknown-linux-gnueabi

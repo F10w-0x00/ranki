@@ -58,6 +58,7 @@ arm-linux-gnueabi-gcc \
     -I. \
     ${PKG_CFLAGS} \
     -Lbuild/libs -llipc \
+    -L/usr/lib/arm-linux-gnueabi -L/lib/arm-linux-gnueabi \
     anki/target/arm-unknown-linux-gnueabi/release/librslib.a \
     /usr/lib/arm-linux-gnueabi/libjson-glib-1.0.a \
     ${PKG_LIBS} \
