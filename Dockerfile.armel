@@ -20,6 +20,7 @@ RUN apt-get update && \
         binutils-arm-linux-gnueabi \
         binutils \
         pkg-config \
+        protobuf-compiler \
         ca-certificates \
         curl \
         git \
