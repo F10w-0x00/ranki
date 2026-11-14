@@ -42,6 +42,7 @@ valac -C \
     ${PROTO_VALA} \
     spices.vala \
     lipstick.vala \
+    ink_components.vala \
     backend.vala \
     views/base.vala \
     views/decktree.vala \
