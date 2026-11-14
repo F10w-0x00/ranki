@@ -5,6 +5,7 @@ import urllib.request
 import tarfile
 import lzma
 import io
+import shutil
 
 DEST_A = '/usr/lib/arm-linux-gnueabi/libjson-glib-1.0.a'
 if os.path.exists(DEST_A):
@@ -26,6 +27,24 @@ with tarfile.open(fileobj=io.BytesIO(tar_bytes)) as tar:
 src_dir = os.path.join(build_dir, 'json-glib-1.4.4', 'json-glib')
 with open(os.path.join(src_dir, 'config.h'), 'w') as f:
     f.write('#pragma once\n#define HAVE_UNISTD_H 1\n#define GETTEXT_PACKAGE "json-glib-1.0"\n')
+
+version_h = """#ifndef __JSON_VERSION_H__
+#define __JSON_VERSION_H__
+#define JSON_MAJOR_VERSION (1)
+#define JSON_MINOR_VERSION (4)
+#define JSON_MICRO_VERSION (4)
+#define JSON_VERSION (1.4.4)
+#define JSON_VERSION_S "1.4.4"
+#define JSON_ENCODE_VERSION(major,minor,micro) ((major) << 24 | (minor) << 16 | (micro) << 8)
+#define JSON_VERSION_HEX (JSON_ENCODE_VERSION (JSON_MAJOR_VERSION, JSON_MINOR_VERSION, JSON_MICRO_VERSION))
+#define JSON_CHECK_VERSION(major,minor,micro) (JSON_MAJOR_VERSION > (major) || (JSON_MAJOR_VERSION == (major) && JSON_MINOR_VERSION > (minor)) || (JSON_MAJOR_VERSION == (major) && JSON_MINOR_VERSION == (minor) && JSON_MICRO_VERSION >= (micro)))
+#endif
+"""
+with open(os.path.join(src_dir, 'json-version.h'), 'w') as f:
+    f.write(version_h)
+
+if os.path.exists('/usr/include/json-glib-1.0/json-glib/json-enum-types.h'):
+    shutil.copy('/usr/include/json-glib-1.0/json-glib/json-enum-types.h', os.path.join(src_dir, 'json-enum-types.h'))
 
 enum_c = """#ifndef JSON_COMPILATION
 #define JSON_COMPILATION
