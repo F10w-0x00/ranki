@@ -20,7 +20,8 @@ fi
 # 2. Generate Vala protobuf bindings from anki/proto
 echo "[2/2] Generating Vala bindings and translating to C..."
 mkdir -p build/proto build/src_c
-protoc --plugin=protoc-gen-vala=./protobuf-vala/src/protoc-gen-vala \
+protoc --experimental_allow_proto3_optional \
+       --plugin=protoc-gen-vala=./protobuf-vala/src/protoc-gen-vala \
        --vala_out=build/proto \
        -Ianki/proto \
        anki/proto/anki/*.proto
