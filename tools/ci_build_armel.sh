@@ -55,6 +55,7 @@ echo "[3/4] Linking ranki-armel binary..."
 if [ ! -f /usr/lib/arm-linux-gnueabi/libjson-glib-1.0.a ]; then
     python3 tools/build_json_glib_static.py
 fi
+python3 tools/build_libarchive_static.py
 
 C_SOURCES=$(find build/src_c -name "*.c")
 echo "Discovered C sources to compile: $(echo "$C_SOURCES" | wc -w)"
@@ -68,6 +69,7 @@ arm-linux-gnueabi-gcc \
     ${C_SOURCES} \
     -I. -Ibuild/src_c -Ibuild/proto \
     ${PKG_CFLAGS} \
+    -Wl,--allow-shlib-undefined \
     -Wl,--as-needed \
     -Lbuild/libs -llipc \
     -L/usr/lib/arm-linux-gnueabi -L/lib/arm-linux-gnueabi \
