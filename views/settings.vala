@@ -365,7 +365,7 @@ public class SettingsView : AppView {
                             return;
                         }
 
-                        Idle.add (() => {
+                        GLib.Idle.add (() => {
                             download_mathjax_button.label = "Downloading... %s".printf( format_size_for_display( (int64) now ) );
                             return false;
                         });
@@ -389,7 +389,7 @@ public class SettingsView : AppView {
                             return;
                         }
 
-                        Idle.add (() => {
+                        GLib.Idle.add (() => {
                             download_mathjax_button.label = "Extracting... %.0f%%".printf( (now / total) * 100.0 );
                             return false;
                         });
