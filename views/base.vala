@@ -29,7 +29,7 @@ public abstract class AppView : Gtk.EventBox { // Gtk.Bin ?
     public Gtk.Builder builder;
     public Array<Cancellable> cancellables = new Array<Cancellable>();
 
-    public AppView() throws Error {
+    protected AppView() throws Error {
 
         builder = new Gtk.Builder ();
         builder.add_from_string (get_template(), -1);
