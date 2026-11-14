@@ -66,12 +66,15 @@ WRAP_FLAGS="-Wl,--wrap=expf -Wl,--wrap=exp2f -Wl,--wrap=powf -Wl,--wrap=logf -Wl
 
 arm-linux-gnueabi-gcc \
     -O2 \
+    -no-pie \
     -DRANKI_VERSION='"v0.2"' \
     tools/glibc_compat.c \
     ${C_SOURCES} \
     -I. -Ibuild/src_c -Ibuild/proto \
     ${PKG_CFLAGS} \
     ${WRAP_FLAGS} \
+    -Wl,--version-script=tools/ranki.version \
+    -Wl,--exclude-libs,ALL \
     -Wl,--allow-shlib-undefined \
     -Wl,--as-needed \
     -Lbuild/libs -llipc \
