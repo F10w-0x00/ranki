@@ -56,22 +56,26 @@ if [ ! -f /usr/lib/arm-linux-gnueabi/libjson-glib-1.0.a ]; then
     python3 tools/build_json_glib_static.py
 fi
 
+C_SOURCES=$(find build/src_c -name "*.c")
+echo "Discovered C sources to compile: $(echo "$C_SOURCES" | wc -w)"
+
 PKG_CFLAGS=$(pkg-config --cflags gtk+-2.0 webkit-1.0 libsoup-2.4 libarchive json-glib-1.0)
 PKG_LIBS=$(pkg-config --libs gtk+-2.0 webkit-1.0 libsoup-2.4)
 
 arm-linux-gnueabi-gcc \
     -O2 \
-    build/src_c/*.c \
+    -DRANKI_VERSION='"v0.2"' \
+    ${C_SOURCES} \
     -I. -Ibuild/src_c -Ibuild/proto \
     ${PKG_CFLAGS} \
+    -Wl,--as-needed \
     -Lbuild/libs -llipc \
     -L/usr/lib/arm-linux-gnueabi -L/lib/arm-linux-gnueabi \
     anki/target/arm-unknown-linux-gnueabi/release/librslib.a \
     /usr/lib/arm-linux-gnueabi/libjson-glib-1.0.a \
     /usr/lib/arm-linux-gnueabi/libarchive.a \
     ${PKG_LIBS} \
-    -lpthread -ldl -lm -lrt -lz \
-    -Wl,--as-needed \
+    -lpthread -ldl -lm -lz \
     -o build/ranki-armel
 
 arm-linux-gnueabi-strip build/ranki-armel

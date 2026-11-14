@@ -52,4 +52,4 @@ valac -C \
     main.vala \
     -d build/src_c
 
-echo "C sources generated successfully in build/src_c/ ($(ls -1 build/src_c/*.c | wc -l) files)!"
+echo "C sources generated successfully in build/src_c/ ($(find build/src_c -name "*.c" | wc -l) files)!"
