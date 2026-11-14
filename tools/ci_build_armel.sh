@@ -62,6 +62,7 @@ echo "Discovered C sources to compile: $(echo "$C_SOURCES" | wc -w)"
 
 PKG_CFLAGS=$(pkg-config --cflags gtk+-2.0 webkit-1.0 libsoup-2.4 libarchive json-glib-1.0)
 PKG_LIBS=$(pkg-config --libs gtk+-2.0 webkit-1.0 libsoup-2.4)
+WRAP_FLAGS="-Wl,--wrap=expf -Wl,--wrap=exp2f -Wl,--wrap=powf -Wl,--wrap=logf -Wl,--wrap=fcntl -Wl,--wrap=fcntl64 -Wl,--wrap=copy_file_range"
 
 arm-linux-gnueabi-gcc \
     -O2 \
@@ -70,6 +71,7 @@ arm-linux-gnueabi-gcc \
     ${C_SOURCES} \
     -I. -Ibuild/src_c -Ibuild/proto \
     ${PKG_CFLAGS} \
+    ${WRAP_FLAGS} \
     -Wl,--allow-shlib-undefined \
     -Wl,--as-needed \
     -Lbuild/libs -llipc \

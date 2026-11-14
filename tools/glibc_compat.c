@@ -4,26 +4,62 @@
 #include <errno.h>
 #include <stddef.h>
 #include <sys/types.h>
+#include <sys/syscall.h>
+#include <stdarg.h>
 
-// 1. Force libm math functions to bind to GLIBC_2.4 instead of GLIBC_2.27
-__asm__(".symver expf, expf@GLIBC_2.4");
-__asm__(".symver logf, logf@GLIBC_2.4");
-__asm__(".symver powf, powf@GLIBC_2.4");
-__asm__(".symver exp, exp@GLIBC_2.4");
-__asm__(".symver log, log@GLIBC_2.4");
-__asm__(".symver pow, pow@GLIBC_2.4");
-__asm__(".symver log2f, log2f@GLIBC_2.4");
-__asm__(".symver log2, log2@GLIBC_2.4");
-__asm__(".symver exp2f, exp2f@GLIBC_2.4");
-__asm__(".symver exp2, exp2@GLIBC_2.4");
+// 1. Math functions wrapped to use double-precision GLIBC_2.4 routines in libm
+double exp(double);
+double log(double);
+double pow(double, double);
+double exp2(double);
 
-// 2. Force common libc functions with GLIBC 2.27/2.28 revisions to bind to GLIBC_2.4
-__asm__(".symver glob, glob@GLIBC_2.4");
-__asm__(".symver glob64, glob64@GLIBC_2.4");
-__asm__(".symver fcntl64, fcntl64@GLIBC_2.4");
-__asm__(".symver fstatat64, fstatat64@GLIBC_2.4");
+float __wrap_expf(float x) {
+    return (float)exp((double)x);
+}
 
-// 3. Provide local getrandom & getentropy implementation
+float __wrap_logf(float x) {
+    return (float)log((double)x);
+}
+
+float __wrap_powf(float x, float y) {
+    return (float)pow((double)x, (double)y);
+}
+
+float __wrap_exp2f(float x) {
+    return (float)exp2((double)x);
+}
+
+// 2. Wrap fcntl and fcntl64 to use direct kernel syscalls
+// avoiding glibc 2.28 symbol version bump
+int __wrap_fcntl(int fd, int cmd, ...) {
+    va_list va;
+    va_start(va, cmd);
+    void *arg = va_arg(va, void*);
+    va_end(va);
+    return syscall(__NR_fcntl, fd, cmd, arg);
+}
+
+int __wrap_fcntl64(int fd, int cmd, ...) {
+    va_list va;
+    va_start(va, cmd);
+    void *arg = va_arg(va, void*);
+    va_end(va);
+#ifdef __NR_fcntl64
+    return syscall(__NR_fcntl64, fd, cmd, arg);
+#else
+    return syscall(__NR_fcntl, fd, cmd, arg);
+#endif
+}
+
+// 3. Wrap copy_file_range (introduced in GLIBC 2.27, kernel 4.5)
+// Kindle OS 5.14 kernel 3.0.35 does not support this syscall.
+// Returning ENOSYS prompts Rust std::io::copy to fall back to regular read/write loop.
+loff_t __wrap_copy_file_range(int fd_in, loff_t *off_in, int fd_out, loff_t *off_out, size_t len, unsigned int flags) {
+    errno = ENOSYS;
+    return -1;
+}
+
+// 4. Provide local getrandom & getentropy implementation
 // Kindle OS 5.14 kernel is Linux 3.0.35, which lacks SYS_getrandom syscall.
 // Reading directly from /dev/urandom ensures 100% reliable entropy on device.
 ssize_t getrandom(void *buf, size_t buflen, unsigned int flags) {
@@ -53,7 +89,7 @@ int getentropy(void *buffer, size_t length) {
     return getrandom(buffer, length, 0) == (ssize_t)length ? 0 : -1;
 }
 
-// 4. Fallback stubs for kernel 4.x+ syscalls not present in Linux 3.0.35
+// 5. Fallback stubs for kernel 4.x+ syscalls not present in Linux 3.0.35
 int statx(int dirfd, const char *pathname, int flags, unsigned int mask, void *statxbuf) {
     errno = ENOSYS;
     return -1;
