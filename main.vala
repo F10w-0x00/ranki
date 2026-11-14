@@ -40,8 +40,8 @@ public class AnkiReviewer : Window {
 
     private Lipstick lipstick;
 
-    private Debouncer save_settings_debouncer;
-    private Debouncer show_keyboard_debouncer;
+    private Debouncer<void*> save_settings_debouncer;
+    private Debouncer<bool> show_keyboard_debouncer;
 
     public string app_id = "ranki.ranki.ranki";
 

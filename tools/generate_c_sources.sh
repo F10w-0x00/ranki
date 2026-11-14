@@ -37,6 +37,7 @@ valac -C \
     --pkg webkit-1.0 \
     --pkg libsoup-2.4 \
     --pkg libarchive \
+    --pkg json-glib-1.0 \
     --pkg posix \
     protobuf-vala/src/protobuf-vala.vala \
     ${PROTO_VALA} \

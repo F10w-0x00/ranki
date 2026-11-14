@@ -6,7 +6,6 @@ public class InkButton : Gtk.Button {
     public int ink_border { get; set; default = 1; }
 
     public InkButton () {
-        base ();
     }
 
     public override bool expose_event (Gdk.EventExpose event) {
@@ -24,25 +23,21 @@ public class InkButton : Gtk.Button {
 
 public class InkEntry : Gtk.Entry {
     public InkEntry () {
-        base ();
     }
 }
 
 public class InkHScale : Gtk.HScale {
     public InkHScale () {
-        base ();
     }
 }
 
 public class InkRadioButton : Gtk.RadioButton {
     public InkRadioButton () {
-        base ();
     }
 }
 
 public class InkToggleButton : Gtk.ToggleButton {
     public InkToggleButton () {
-        base ();
     }
 }
 
@@ -51,7 +46,6 @@ public class InkScrolledWindow : Gtk.ScrolledWindow {
     public bool expand { get; set; default = false; }
 
     public InkScrolledWindow () {
-        base (null, null);
     }
 }
 
@@ -60,7 +54,6 @@ public class InkTreeView : Gtk.TreeView {
     public signal void path_selected (Gtk.TreePath path);
 
     public InkTreeView () {
-        base ();
         this.cursor_changed.connect (() => {
             Gtk.TreePath path;
             Gtk.TreeViewColumn col;
@@ -114,7 +107,8 @@ public class InkRowToggleButton : Gtk.HBox {
     public signal void toggled ();
 
     public InkRowToggleButton () {
-        base (false, 10);
+        this.spacing = 10;
+        this.homogeneous = false;
 
         var vbox = new Gtk.VBox (false, 2);
         title_label = new Gtk.Label ("");
@@ -199,7 +193,8 @@ public class InkRowHScale : Gtk.VBox {
     public signal void value_changed ();
 
     public InkRowHScale () {
-        base (false, 4);
+        this.spacing = 4;
+        this.homogeneous = false;
 
         title_label = new Gtk.Label ("");
         title_label.xalign = 0.0f;

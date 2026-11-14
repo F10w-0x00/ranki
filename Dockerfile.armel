@@ -21,6 +21,7 @@ RUN dpkg --add-architecture armel && \
         libsoup2.4-dev:armel \
         libarchive-dev:armel \
         libsqlite3-dev:armel \
+        libjson-glib-dev:armel \
         ca-certificates \
         curl \
         git \

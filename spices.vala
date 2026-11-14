@@ -11,7 +11,8 @@ namespace CrazySpices {
 
     public static async T? run_thread<T> ( WorkFunc<T> callback = null ) throws Error {
 
-        T? thread_output = null; Error? thread_error = null;
+        T? thread_output = null;
+        Error? thread_error = null;
 
         ThreadFunc<void*> thread_fn = () => {
             try {
@@ -27,7 +28,11 @@ namespace CrazySpices {
 
         yield;
 
-        return thread_error ?? thread_output;
+        if (thread_error != null) {
+            throw thread_error;
+        }
+
+        return thread_output;
     }
 
     public delegate void DebounceFunc<T> (T val);
@@ -108,7 +113,8 @@ namespace CrazySpices {
         }
 
         public string mime_for (string path) {
-            var ext = path.rfind (".") != -1 ? path.substring (path.rfind (".") + 1).down () : "";
+            int idx = path.last_index_of_char ('.');
+            string ext = (idx != -1) ? path.substring (idx + 1).down () : "";
             switch (ext) {
                 case "html": return "text/html; charset=utf-8";
                 case "css": return "text/css; charset=utf-8";
@@ -127,7 +133,7 @@ namespace CrazySpices {
     }
 
     public class Downloader : GLib.Object {
-        public delegate void ProgressCallback (double progress);
+        public delegate void ProgressCallback (double now, double total);
 
         public static string fetch (string url) throws Error {
             var session = new Soup.SessionSync ();
@@ -140,30 +146,27 @@ namespace CrazySpices {
             return (string) message.response_body.data;
         }
 
-        public static void download (string url, string dest_path, ProgressCallback? progress = null) throws Error {
+        public static void download (string url, FileStream file, ProgressCallback? progress = null, Cancellable? cancellable = null) throws Error {
             var session = new Soup.SessionSync ();
             var message = new Soup.Message ("GET", url);
             message.request_headers.append ("User-Agent", "curl/7.54");
-
-            var file = File.new_for_path (dest_path);
-            var parent = file.get_parent ();
-            if (parent != null && !parent.query_exists ()) {
-                parent.make_directory_with_parents ();
-            }
-            var os = file.replace (null, false, FileCreateFlags.NONE);
 
             session.send_message (message);
             if (message.status_code != 200) {
                 throw new IOError.FAILED ("Request failed (status " + message.status_code.to_string () + ")");
             }
-            os.write_all (message.response_body.data, null);
+            if (message.response_body.data != null && message.response_body.length > 0) {
+                file.write (message.response_body.data, (size_t) message.response_body.length);
+            }
             debug ("File saved.");
         }
     }
 
-    public delegate void ExtractProgressCallback (double progress);
+    public delegate void ExtractProgressCallback (double now, double total);
 
-    public static void extract_zip (string zip_path, string dest_dir, ExtractProgressCallback? progress = null) throws Error {
+    public static void extract_zip (FileStream file, string dest_dir, ExtractProgressCallback? progress = null, Cancellable? cancellable = null) throws Error {
+        file.seek (0, FileSeek.SET);
+        int fd = file.fileno ();
         var a = new Archive.Read ();
         a.support_format_zip ();
         a.support_filter_all ();
@@ -172,7 +175,7 @@ namespace CrazySpices {
         ext.set_options (Archive.ExtractFlags.TIME | Archive.ExtractFlags.PERM | Archive.ExtractFlags.ACL | Archive.ExtractFlags.FFLAGS);
         ext.set_standard_lookup ();
 
-        int r = a.open_filename (zip_path, 10240);
+        int r = a.open_fd (fd, 10240);
         if (r != Archive.Result.OK) {
             throw new IOError.FAILED ("Failed to open zip: " + a.error_string ());
         }
@@ -183,11 +186,10 @@ namespace CrazySpices {
             entry.set_pathname (current_file);
             r = ext.write_header (entry);
             if (r == Archive.Result.OK && entry.size () > 0) {
-                size_t size;
-                int64 offset;
-                void* buff;
-                while (a.read_data_block (out buff, out size, out offset) == Archive.Result.OK) {
-                    ext.write_data_block (buff, size, offset);
+                unowned uint8[] buff;
+                Archive.int64_t offset;
+                while (a.read_data_block (out buff, out offset) == Archive.Result.OK) {
+                    ext.write_data_block (buff, offset);
                 }
             }
             ext.finish_entry ();
@@ -202,7 +204,7 @@ namespace CrazySpices {
         FileInfo info;
         while ((info = enumerator.next_file ()) != null) {
             var child = dir.get_child (info.get_name ());
-            if (info.get_file_type () == FileType.DIRECTORY) {
+            if (info.get_file_type () == GLib.FileType.DIRECTORY) {
                 delete_tree (child);
             } else {
                 child.delete ();
