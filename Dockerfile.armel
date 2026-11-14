@@ -21,7 +21,6 @@ RUN dpkg --add-architecture armel && \
         libsoup2.4-dev:armel \
         libarchive-dev:armel \
         libsqlite3-dev:armel \
-        libjson-glib-dev:armel \
         ca-certificates \
         curl \
         git \
@@ -30,17 +29,21 @@ RUN dpkg --add-architecture armel && \
         file && \
     rm -rf /var/lib/apt/lists/*
 
-# Extract WebKitGTK 1.0 armel development headers and libraries from Debian Stretch archive
-RUN mkdir -p /tmp/webkit && cd /tmp/webkit && \
+# Extract WebKitGTK 1.0 and json-glib armel development headers and libraries
+RUN mkdir -p /tmp/extract && cd /tmp/extract && \
     curl -fsSL -O http://archive.debian.org/debian/pool/main/w/webkitgtk/libjavascriptcoregtk-1.0-0_2.4.11-3_armel.deb && \
     curl -fsSL -O http://archive.debian.org/debian/pool/main/w/webkitgtk/libjavascriptcoregtk-1.0-dev_2.4.11-3_armel.deb && \
     curl -fsSL -O http://archive.debian.org/debian/pool/main/w/webkitgtk/libwebkitgtk-1.0-0_2.4.11-3_armel.deb && \
     curl -fsSL -O http://archive.debian.org/debian/pool/main/w/webkitgtk/libwebkitgtk-dev_2.4.11-3_armel.deb && \
+    curl -fsSL -O http://archive.debian.org/debian/pool/main/j/json-glib/libjson-glib-1.0-0_1.4.4-2_armel.deb && \
+    curl -fsSL -O http://archive.debian.org/debian/pool/main/j/json-glib/libjson-glib-dev_1.4.4-2_armel.deb && \
     dpkg -x libjavascriptcoregtk-1.0-0_2.4.11-3_armel.deb / && \
     dpkg -x libjavascriptcoregtk-1.0-dev_2.4.11-3_armel.deb / && \
     dpkg -x libwebkitgtk-1.0-0_2.4.11-3_armel.deb / && \
     dpkg -x libwebkitgtk-dev_2.4.11-3_armel.deb / && \
-    cd / && rm -rf /tmp/webkit
+    dpkg -x libjson-glib-1.0-0_1.4.4-2_armel.deb / && \
+    dpkg -x libjson-glib-dev_1.4.4-2_armel.deb / && \
+    cd / && rm -rf /tmp/extract
 
 # Install Rust & armel target (minimal profile for fast CI build)
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable --profile minimal
