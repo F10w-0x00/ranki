@@ -6,12 +6,15 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN echo 'deb http://archive.debian.org/debian buster main' > /etc/apt/sources.list && \
     echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/99no-check-valid-until
 
-# 1. Install host build-essential, cross-compilation tools & python utilities
+# 1. Install host compiler, cross-compilation tools & python utilities
 RUN apt-get update && \
     apt-get install -y --no-install-recommends --allow-downgrades \
         libc6=2.28-10+deb10u1 \
         libc-bin=2.28-10+deb10u1 \
-        build-essential \
+        libc-dev-bin=2.28-10+deb10u1 \
+        libc6-dev=2.28-10+deb10u1 \
+        gcc \
+        make \
         gcc-arm-linux-gnueabi \
         g++-arm-linux-gnueabi \
         binutils-arm-linux-gnueabi \
