@@ -58,6 +58,8 @@ RUN dpkg --add-architecture armel && \
         libpng-dev:armel libpng16-16:armel \
         libx11-dev:armel libx11-6:armel \
         libxcb1-dev:armel libxcb1:armel \
+        libxcb-shm0-dev:armel libxcb-shm0:armel \
+        libxcb-render0-dev:armel libxcb-render0:armel \
         libxau-dev:armel libxau6:armel \
         libxdmcp-dev:armel libxdmcp6:armel \
         libxext-dev:armel libxext6:armel \
