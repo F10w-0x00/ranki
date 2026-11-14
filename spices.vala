@@ -220,13 +220,13 @@ namespace CrazySpices {
             if (typeof (T) == typeof (string)) {
                 var val = kf.get_string (section, key);
                 obj.set (prop, val);
-            } else if (typeof (T) == typeof (double)) {
+            } else if (typeof (T) == typeof (double) || typeof (T) == typeof (double?)) {
                 var val = kf.get_double (section, key);
                 obj.set (prop, val);
-            } else if (typeof (T) == typeof (bool)) {
+            } else if (typeof (T) == typeof (bool) || typeof (T) == typeof (bool?)) {
                 var val = kf.get_boolean (section, key);
                 obj.set (prop, val);
-            } else if (typeof (T) == typeof (int)) {
+            } else if (typeof (T) == typeof (int) || typeof (T) == typeof (int?)) {
                 var val = kf.get_integer (section, key);
                 obj.set (prop, val);
             }
@@ -240,11 +240,11 @@ namespace CrazySpices {
                 obj.get_property (prop, ref val);
                 if (typeof (T) == typeof (string)) {
                     kf.set_string (section, key, val.get_string ());
-                } else if (typeof (T) == typeof (double)) {
+                } else if (typeof (T) == typeof (double) || typeof (T) == typeof (double?)) {
                     kf.set_double (section, key, val.get_double ());
-                } else if (typeof (T) == typeof (bool)) {
+                } else if (typeof (T) == typeof (bool) || typeof (T) == typeof (bool?)) {
                     kf.set_boolean (section, key, val.get_boolean ());
-                } else if (typeof (T) == typeof (int)) {
+                } else if (typeof (T) == typeof (int) || typeof (T) == typeof (int?)) {
                     kf.set_integer (section, key, val.get_int ());
                 }
             } catch (Error e) {

@@ -295,7 +295,7 @@ public class SettingsView : AppView {
             do_action(AnkiReviewer.AppViewActions.SAVE_SETTINGS);
         });        
 
-        bind_settings<double> (keyfile, "General", "scale", content_scale, "value", () => { 
+        bind_settings<double?> (keyfile, "General", "scale", content_scale, "value", () => { 
             do_action(AnkiReviewer.AppViewActions.SAVE_SETTINGS);
         });
 
