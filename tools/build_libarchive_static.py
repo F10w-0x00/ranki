@@ -74,9 +74,21 @@ nproc = os.cpu_count() or 2
 print(f"Compiling libarchive with make -j{nproc}...")
 subprocess.check_call(['make', f'-j{nproc}'], cwd=src_dir, env=env)
 
-src_a = os.path.join(src_dir, 'libarchive', '.libs', 'libarchive.a')
-if not os.path.exists(src_a):
-    src_a = os.path.join(src_dir, 'libarchive', 'libarchive.a')
+src_a = None
+for root, dirs, files in os.walk(src_dir):
+    if 'libarchive.a' in files:
+        src_a = os.path.join(root, 'libarchive.a')
+        print(f"Found built archive at: {src_a}")
+        break
+
+if not src_a:
+    # Print all files for diagnosis
+    all_files = []
+    for root, dirs, files in os.walk(src_dir):
+        for f in files:
+            if f.endswith('.a') or f.endswith('.la'):
+                all_files.append(os.path.join(root, f))
+    raise RuntimeError(f"libarchive.a not found! Discovered archives: {all_files}")
 
 shutil.copy(src_a, DEST_A)
 size = os.path.getsize(DEST_A)
