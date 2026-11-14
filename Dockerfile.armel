@@ -20,7 +20,7 @@ RUN apt-get update && \
         binutils-arm-linux-gnueabi \
         binutils \
         pkg-config \
-        protobuf-compiler \
+        unzip \
         ca-certificates \
         curl \
         git \
@@ -29,6 +29,11 @@ RUN apt-get update && \
         patch \
         file && \
     rm -rf /var/lib/apt/lists/*
+
+# Install modern static protoc with native proto3 optional support
+RUN curl -fsSL -O https://github.com/protocolbuffers/protobuf/releases/download/v25.1/protoc-25.1-linux-x86_64.zip && \
+    unzip -o protoc-25.1-linux-x86_64.zip -d /usr/local && \
+    rm -f protoc-25.1-linux-x86_64.zip
 
 # 2. Extract ARMEL development sysroot headers and libraries via dpkg -x
 # (Completely bypasses apt foreign-architecture multiarch dependency conflicts)

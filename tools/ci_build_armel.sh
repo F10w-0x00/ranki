@@ -16,8 +16,8 @@ export CC_arm_unknown_linux_gnueabi=arm-linux-gnueabi-gcc
 export CXX_arm_unknown_linux_gnueabi=arm-linux-gnueabi-g++
 export AR_arm_unknown_linux_gnueabi=arm-linux-gnueabi-ar
 export CARGO_TARGET_ARM_UNKNOWN_LINUX_GNUEABI_LINKER=arm-linux-gnueabi-gcc
-export PROTOC=/usr/bin/protoc
-export PROTOC_INCLUDE=/usr/include
+export PROTOC=/usr/local/bin/protoc
+export PROTOC_INCLUDE=/usr/local/include
 
 # 2. Patch and Compile Rust rslib backend
 echo "[1/4] Compiling Rust rslib for arm-unknown-linux-gnueabi..."
