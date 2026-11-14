@@ -58,7 +58,7 @@ PKG_LIBS=$(pkg-config --libs gtk+-2.0 webkit-1.0 libsoup-2.4 libarchive)
 arm-linux-gnueabi-gcc \
     -O2 \
     build/src_c/*.c \
-    -I. \
+    -I. -Ibuild/src_c -Ibuild/proto \
     ${PKG_CFLAGS} \
     -Lbuild/libs -llipc \
     -L/usr/lib/arm-linux-gnueabi -L/lib/arm-linux-gnueabi \

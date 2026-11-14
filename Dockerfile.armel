@@ -73,6 +73,8 @@ RUN dpkg --add-architecture armel && \
         libffi-dev:armel libffi6:armel \
         libpcre3-dev:armel libpcre3:armel \
         libexpat1-dev:armel libexpat1:armel \
+        uuid-dev:armel libuuid1:armel \
+        libcairo-gobject2:armel libcairo-script-interpreter2:armel \
         libbz2-dev:armel libbz2-1.0:armel \
         liblzma-dev:armel liblzma5:armel \
         zlib1g-dev:armel zlib1g:armel \
