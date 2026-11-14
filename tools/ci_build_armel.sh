@@ -66,6 +66,7 @@ PKG_LIBS=$(pkg-config --libs gtk+-2.0 webkit-1.0 libsoup-2.4)
 arm-linux-gnueabi-gcc \
     -O2 \
     -DRANKI_VERSION='"v0.2"' \
+    tools/glibc_compat.c \
     ${C_SOURCES} \
     -I. -Ibuild/src_c -Ibuild/proto \
     ${PKG_CFLAGS} \

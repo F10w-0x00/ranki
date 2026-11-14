@@ -36,6 +36,14 @@ def check_symbols(binary_path):
             violating = [(maj, minor) for maj, minor in versions if maj > 2 or (maj == 2 and minor > 20)]
             if violating:
                 print("[FAIL] Violating versions exceeding GLIBC_2.20 gate: {}".format(violating))
+                p = subprocess.Popen(["readelf", "--dyn-syms", binary_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+                s_out, _ = p.communicate()
+                print("\nOffending dynamic symbols exceeding GLIBC_2.20:")
+                for s_line in s_out.splitlines():
+                    for maj, min_ in violating:
+                        target_ver = "@GLIBC_{}.{}".format(maj, min_)
+                        if target_ver in s_line:
+                            print("  {}".format(s_line.strip()))
                 return False
             else:
                 print("[PASS] All GLIBC symbols satisfy <= GLIBC_2.20 ceiling (Highest: GLIBC_{}.{})".format(max_maj, max_min))
@@ -62,6 +70,13 @@ def check_symbols(binary_path):
     violating = ["GLIBC_{}.{}".format(a, b) for a, b in versions if a > 2 or (a == 2 and b > 20)]
     if violating:
         print("[FAIL] Violating symbols found exceeding GLIBC_2.20 gate: {}".format(violating))
+        p = subprocess.Popen(["readelf", "--dyn-syms", binary_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+        s_out, _ = p.communicate()
+        print("\nOffending dynamic symbols exceeding GLIBC_2.20:")
+        for s_line in s_out.splitlines():
+            for v_str in violating:
+                if "@" + v_str in s_line:
+                    print("  {}".format(s_line.strip()))
         return False
     else:
         print("[PASS] All GLIBC symbols satisfy <= GLIBC_2.20 ceiling (Highest: GLIBC_{}.{})".format(max_maj, max_min))
