@@ -169,10 +169,10 @@ namespace CrazySpices {
         int fd = file.fileno ();
         var a = new Archive.Read ();
         a.support_format_zip ();
-        a.support_filter_all ();
+        a.support_filter_none ();
 
         var ext = new Archive.WriteDisk ();
-        ext.set_options (Archive.ExtractFlags.TIME | Archive.ExtractFlags.PERM | Archive.ExtractFlags.ACL | Archive.ExtractFlags.FFLAGS);
+        ext.set_options (Archive.ExtractFlags.TIME | Archive.ExtractFlags.PERM);
         ext.set_standard_lookup ();
 
         int r = a.open_fd (fd, 10240);

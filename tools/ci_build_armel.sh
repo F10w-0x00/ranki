@@ -52,8 +52,12 @@ ln -sf liblipc.so.1 build/libs/liblipc.so
 
 # 4. Compile C and link final ranki-armel binary
 echo "[3/4] Linking ranki-armel binary..."
+if [ ! -f /usr/lib/arm-linux-gnueabi/libjson-glib-1.0.a ]; then
+    python3 tools/build_json_glib_static.py
+fi
+
 PKG_CFLAGS=$(pkg-config --cflags gtk+-2.0 webkit-1.0 libsoup-2.4 libarchive json-glib-1.0)
-PKG_LIBS=$(pkg-config --libs gtk+-2.0 webkit-1.0 libsoup-2.4 libarchive)
+PKG_LIBS=$(pkg-config --libs gtk+-2.0 webkit-1.0 libsoup-2.4)
 
 arm-linux-gnueabi-gcc \
     -O2 \
@@ -64,8 +68,10 @@ arm-linux-gnueabi-gcc \
     -L/usr/lib/arm-linux-gnueabi -L/lib/arm-linux-gnueabi \
     anki/target/arm-unknown-linux-gnueabi/release/librslib.a \
     /usr/lib/arm-linux-gnueabi/libjson-glib-1.0.a \
+    /usr/lib/arm-linux-gnueabi/libarchive.a \
     ${PKG_LIBS} \
-    -lpthread -ldl -lm -lrt \
+    -lpthread -ldl -lm -lrt -lz \
+    -Wl,--as-needed \
     -o build/ranki-armel
 
 arm-linux-gnueabi-strip build/ranki-armel

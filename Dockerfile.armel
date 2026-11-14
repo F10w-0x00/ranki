@@ -60,6 +60,7 @@ RUN dpkg --add-architecture armel && \
         libxcb1-dev:armel libxcb1:armel \
         libxcb-shm0-dev:armel libxcb-shm0:armel \
         libxcb-render0-dev:armel libxcb-render0:armel \
+        libpthread-stubs0-dev:armel \
         libxau-dev:armel libxau6:armel \
         libxdmcp-dev:armel libxdmcp6:armel \
         libxext-dev:armel libxext6:armel \
@@ -71,18 +72,22 @@ RUN dpkg --add-architecture armel && \
         libxfixes-dev:armel libxfixes3:armel \
         libxcomposite-dev:armel libxcomposite1:armel \
         libxdamage-dev:armel libxdamage1:armel \
+        libxft-dev:armel libxft2:armel \
         libxml2-dev:armel libxml2:armel \
         libffi-dev:armel libffi6:armel \
         libpcre3-dev:armel libpcre3:armel \
         libexpat1-dev:armel libexpat1:armel \
         uuid-dev:armel libuuid1:armel \
+        libgraphite2-dev:armel libgraphite2-3:armel \
+        shared-mime-info:armel \
         libcairo-gobject2:armel libcairo-script-interpreter2:armel \
         libbz2-dev:armel libbz2-1.0:armel \
         liblzma-dev:armel liblzma5:armel \
         zlib1g-dev:armel zlib1g:armel \
         libc6-dev:armel libc6:armel linux-libc-dev:armel \
-        x11proto-core-dev x11proto-input-dev x11proto-kb-dev xtrans-dev && \
+        x11proto-dev x11proto-core-dev x11proto-input-dev x11proto-kb-dev xtrans-dev && \
     for f in *.deb; do dpkg -x "$f" /; done && \
+    rm -f /usr/lib/arm-linux-gnueabi/libarchive.so* && \
     cd / && rm -rf /tmp/armel-sysroot && \
     rm -rf /var/lib/apt/lists/*
 
@@ -100,6 +105,7 @@ RUN mkdir -p /tmp/extract && cd /tmp/extract && \
     dpkg -x libwebkitgtk-dev_2.4.11-3_armel.deb / && \
     dpkg -x libjson-glib-1.0-0_1.4.4-2_armel.deb / && \
     dpkg -x libjson-glib-dev_1.4.4-2_armel.deb / && \
+    rm -f /usr/lib/arm-linux-gnueabi/libjson-glib-1.0.so* && \
     cd / && rm -rf /tmp/extract
 
 # 4. Install Rust & armel target (pinned to 1.89.0 matching anki/rust-toolchain.toml)
