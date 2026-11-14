@@ -80,6 +80,10 @@ RUN dpkg --add-architecture armel && \
         uuid-dev:armel libuuid1:armel \
         libgraphite2-dev:armel libgraphite2-3:armel \
         shared-mime-info:armel \
+        libmount-dev:armel libmount1:armel \
+        libblkid-dev:armel libblkid1:armel \
+        libselinux1-dev:armel libselinux1:armel \
+        libsepol1-dev:armel libsepol1:armel \
         libcairo-gobject2:armel libcairo-script-interpreter2:armel \
         libbz2-dev:armel libbz2-1.0:armel \
         liblzma-dev:armel liblzma5:armel \
