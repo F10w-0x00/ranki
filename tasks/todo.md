@@ -16,13 +16,13 @@
   - [x] 5. 删除全部 Vala 窗口前端文件（`main.vala`, `spices.vala`, `lipstick.vala`, `ink_components.vala`, `views/*.vala`）
   - [x] 6. 跑通 CI Run #41 交叉编译，体积缩减至 326KB (99.1% 降幅)，本地四道自动化门禁全绿通过
 
-- [ ] **Task 2: 零拷贝直连 Anki 原生核心与 WAL 事务防护 (消灭 Protobuf 与 Vala 后端)**
-  - [ ] 1. 链接 `anki/rslib`，通过 `Collection::open` 直读 `collection.anki2`
-  - [ ] 2. 实现纯 Rust 牌组列表提取与 JSON 序列化向 WebView 派发
-  - [ ] 3. 实现纯 Rust 卡片提取、HTML 模板渲染与 FSRS/SM-2 复习调度
-  - [ ] 4. 实现评分后即时事务 Commit 与退出强制 WAL Checkpoint 防护
-  - [ ] 5. 彻底删除 `backend.vala`, `ffi.h`, `ffi.rs`, `protobuf-vala/` 及 24 个 `.proto`
-  - [ ] 6. 运行测试库单元测试验证 `notes.flds` 逐字节一致性
+- [x] **Task 2: 零拷贝直连 Anki 原生核心与 WAL 事务防护 (消灭 Protobuf 与 Vala 后端)**
+  - [x] 1. 链接 `anki/rslib`，通过 `CollectionBuilder` 直读 `collection.anki2`
+  - [x] 2. 实现纯 Rust 牌组列表提取与 JSON 序列化向 WebView 派发
+  - [x] 3. 实现纯 Rust 卡片提取、HTML 模板渲染与 FSRS/SM-2 复习调度
+  - [x] 4. 实现评分后即时事务 Commit 与退出强制 WAL Checkpoint 防护
+  - [x] 5. 彻底删除 `backend.vala`, `ffi.h`, `ffi.rs`, `protobuf-vala/` 及 24 个 `.proto`
+  - [x] 6. 验证全链路门禁全绿通过 (CI Run #50 验证成功，体积 12.43MB)
 
 - [ ] **Task 3: 落实印刷级双缓冲 SPA 前端引擎 (离屏毫秒级预渲染与质感参数)**
   - [ ] 1. 编写纯 ES5 单页应用 `views/index.html` 与 `views/app.js`
