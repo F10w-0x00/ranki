@@ -1,12 +1,12 @@
 # RAnki Refactor Tasks (tasks/todo.md)
 
-- [ ] **Task 0: 闭环当前 M0 基线 (Run #38 验证与动态符号隔离门禁)**
-  - [ ] 1. 编辑 `tools/ci_build_armel.sh`，在链接命令中追加 `-Wl,--exclude-libs,librslib.a`
-  - [ ] 2. 在 `tools/ci_build_armel.sh` 门禁执行阶段挂载 `python3 tools/check_dynsym.py build/ranki-armel`
-  - [ ] 3. 跟踪 `tools/check_dynsym.py`，确保其在仓库内已暂存且具备可执行权限
-  - [ ] 4. Commit 并 Push 到 `refactor/m0-baseline` 触发 GitHub Actions Run #38
-  - [ ] 5. 下载 CI 构建产物 `ranki-armel`，在本地运行三道自动化门禁断言
-  - [ ] 6. 拷贝至 Kindle `D:\extensions\ranki-dev\ranki-armel`，真机运行 `RAnki Dev (M0)` 翻动 5 卡冒烟闭环
+- [ ] **Task 0: 闭环当前 M0 基线 (Run #39 验证与动态符号隔离门禁)**
+  - [x] 1. 编辑 `tools/ci_build_armel.sh`，使用 `objcopy --redefine-syms` 前缀化 `librslib.a` 内部 sqlite 符号并追加 `-Wl,--exclude-libs`
+  - [x] 2. 在 `tools/ci_build_armel.sh` 门禁执行阶段挂载 `python3 tools/check_dynsym.py build/ranki-armel`
+  - [x] 3. 跟踪 `tools/check_dynsym.py`，确保其在仓库内已暂存且具备可执行权限
+  - [x] 4. Commit 并 Push 到 `refactor/m0-baseline` 触发 GitHub Actions Run #39（全绿通过）
+  - [x] 5. 下载 CI 构建产物 `ranki-armel`，在本地运行三道自动化门禁断言（GATE 1/2/3 全部 PASS）
+  - [ ] 6. 待 Kindle 挂载后拷贝至 `D:\extensions\ranki-dev\ranki-armel`，真机运行 `RAnki Dev (M0)` 翻动 5 卡冒烟闭环
 
 - [ ] **Task 1: 建立统一 Web-SPA 纯 Rust 宿主骨架 (消灭 Vala 窗口与 TreeView)**
   - [ ] 1. 创建纯 Rust 顶层工作区 `Cargo.toml` 与 `src/main.rs`
