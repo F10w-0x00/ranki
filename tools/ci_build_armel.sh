@@ -44,6 +44,23 @@ rustup target add arm-unknown-linux-gnueabi
 cargo build --release --target arm-unknown-linux-gnueabi -p anki
 cd ..
 
+# 2.5 Redefine sqlite3 symbols in librslib.a to eliminate DSO collision
+echo "Redefining sqlite3 symbols in librslib.a to prevent collision with Kindle OS libsoup..."
+python3 -c "
+import subprocess
+nm_out = subprocess.check_output(['arm-linux-gnueabi-nm', '-g', '--defined-only', 'anki/target/arm-unknown-linux-gnueabi/release/librslib.a']).decode('utf-8')
+syms = set()
+for line in nm_out.splitlines():
+    parts = line.strip().split()
+    if len(parts) >= 3 and parts[1] in ('T', 'D', 'B', 'R', 'C') and parts[2].startswith('sqlite3_'):
+        syms.add(parts[2])
+with open('/tmp/redefine_syms.txt', 'w') as f:
+    for s in sorted(syms):
+        f.write(f'{s} anki_{s}\n')
+print(f'Found {len(syms)} sqlite3 symbols to redefine.')
+"
+arm-linux-gnueabi-objcopy --redefine-syms=/tmp/redefine_syms.txt anki/target/arm-unknown-linux-gnueabi/release/librslib.a
+
 # 3. Build liblipc stub for linker resolution
 echo "[2/4] Creating liblipc.so.1 stub for linking..."
 mkdir -p build/libs
