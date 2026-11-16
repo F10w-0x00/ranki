@@ -2,7 +2,7 @@
 set -euo pipefail
 
 echo "=========================================================="
-echo " Starting RAnki ARMEL Cross-Compilation Pipeline (M0)"
+echo " Starting RAnki Pure Rust ARMEL Build Pipeline (Task 1)"
 echo " Target Architecture: armel (ARMv7 softfp / EABI5)"
 echo " GLIBC Ceiling Gate:  <= GLIBC_2.20"
 echo "=========================================================="
@@ -16,94 +16,16 @@ export CC_arm_unknown_linux_gnueabi=arm-linux-gnueabi-gcc
 export CXX_arm_unknown_linux_gnueabi=arm-linux-gnueabi-g++
 export AR_arm_unknown_linux_gnueabi=arm-linux-gnueabi-ar
 export CARGO_TARGET_ARM_UNKNOWN_LINUX_GNUEABI_LINKER=arm-linux-gnueabi-gcc
-export PROTOC=/usr/local/bin/protoc
-export PROTOC_INCLUDE=/usr/local/include
 
-# 2. Patch and Compile Rust rslib backend
-echo "[1/4] Compiling Rust rslib for arm-unknown-linux-gnueabi..."
-cd anki
-if git apply --reverse --check ../cargo-toml.patch >/dev/null 2>&1; then
-    echo "  cargo-toml.patch already applied."
-else
-    patch -p1 < ../cargo-toml.patch
-fi
-
-if git apply --reverse --check ../rslib-cargo-toml.patch >/dev/null 2>&1; then
-    echo "  rslib-cargo-toml.patch already applied."
-else
-    patch -p1 < ../rslib-cargo-toml.patch
-fi
-
-if git apply --reverse --check ../rslib-src-lib-rs.patch >/dev/null 2>&1; then
-    echo "  rslib-src-lib-rs.patch already applied."
-else
-    patch -p1 < ../rslib-src-lib-rs.patch
-fi
-
+# 2. Build Pure Rust Host Binary for Kindle armel
+echo "[1/3] Building Pure Rust Host Binary (ranki)..."
 rustup target add arm-unknown-linux-gnueabi
-cargo build --release --target arm-unknown-linux-gnueabi -p anki
-cd ..
+cargo build --release --target arm-unknown-linux-gnueabi
 
-# 2.5 Redefine sqlite3 symbols in librslib.a to eliminate DSO collision
-echo "Redefining sqlite3 symbols in librslib.a to prevent collision with Kindle OS libsoup..."
-python3 -c "
-import subprocess
-nm_out = subprocess.check_output(['arm-linux-gnueabi-nm', '-g', '--defined-only', 'anki/target/arm-unknown-linux-gnueabi/release/librslib.a']).decode('utf-8')
-syms = set()
-for line in nm_out.splitlines():
-    parts = line.strip().split()
-    if len(parts) >= 3 and parts[1] in ('T', 'D', 'B', 'R', 'C') and parts[2].startswith('sqlite3_'):
-        syms.add(parts[2])
-with open('/tmp/redefine_syms.txt', 'w') as f:
-    for s in sorted(syms):
-        f.write(f'{s} anki_{s}\n')
-print(f'Found {len(syms)} sqlite3 symbols to redefine.')
-"
-arm-linux-gnueabi-objcopy --redefine-syms=/tmp/redefine_syms.txt anki/target/arm-unknown-linux-gnueabi/release/librslib.a
-
-# 3. Build liblipc stub for linker resolution
-echo "[2/4] Creating liblipc.so.1 stub for linking..."
-mkdir -p build/libs
-arm-linux-gnueabi-gcc -shared -fPIC -Wl,-soname,liblipc.so.1 tools/liblipc_stub.c -o build/libs/liblipc.so.1
-ln -sf liblipc.so.1 build/libs/liblipc.so
-
-# 4. Compile C and link final ranki-armel binary
-echo "[3/4] Linking ranki-armel binary..."
-if [ ! -f /usr/lib/arm-linux-gnueabi/libjson-glib-1.0.a ]; then
-    python3 tools/build_json_glib_static.py
-fi
-python3 tools/build_libarchive_static.py
-
-C_SOURCES=$(find build/src_c -name "*.c")
-echo "Discovered C sources to compile: $(echo "$C_SOURCES" | wc -w)"
-
-PKG_CFLAGS=$(pkg-config --cflags gtk+-2.0 webkit-1.0 libsoup-2.4 libarchive json-glib-1.0)
-PKG_LIBS=$(pkg-config --libs gtk+-2.0 webkit-1.0 libsoup-2.4)
-WRAP_FLAGS="-Wl,--wrap=expf -Wl,--wrap=exp2f -Wl,--wrap=powf -Wl,--wrap=logf -Wl,--wrap=fcntl -Wl,--wrap=fcntl64 -Wl,--wrap=copy_file_range"
-
-arm-linux-gnueabi-gcc \
-    -O2 \
-    -no-pie \
-    -DRANKI_VERSION='"v0.2"' \
-    tools/glibc_compat.c \
-    ${C_SOURCES} \
-    -I. -Ibuild/src_c -Ibuild/proto \
-    ${PKG_CFLAGS} \
-    ${WRAP_FLAGS} \
-    -Wl,--allow-shlib-undefined \
-    -Wl,--as-needed \
-    -Wl,--exclude-libs,librslib.a \
-    -Wl,--exclude-libs,libarchive.a \
-    -Wl,--exclude-libs,libjson-glib-1.0.a \
-    -Lbuild/libs -llipc \
-    -L/usr/lib/arm-linux-gnueabi -L/lib/arm-linux-gnueabi \
-    anki/target/arm-unknown-linux-gnueabi/release/librslib.a \
-    /usr/lib/arm-linux-gnueabi/libjson-glib-1.0.a \
-    /usr/lib/arm-linux-gnueabi/libarchive.a \
-    ${PKG_LIBS} \
-    -lpthread -ldl -lm -lz \
-    -o build/ranki-armel
-
+# 3. Strip and prepare artifact
+echo "[2/3] Preparing binary artifact..."
+mkdir -p build
+cp target/arm-unknown-linux-gnueabi/release/ranki build/ranki-armel
 arm-linux-gnueabi-strip build/ranki-armel
 
 echo "=========================================================="
@@ -113,8 +35,8 @@ file build/ranki-armel
 sha256sum build/ranki-armel
 ls -lh build/ranki-armel
 
-# 5. Automated Verification Gates
-echo "[4/4] Running Automated Verification Gates (M0.5 & M0.6)..."
+# 4. Automated Verification Gates
+echo "[3/3] Running Automated Verification Gates (Task 1)..."
 python3 tools/check_symbols.py build/ranki-armel
 python3 tools/check_dt_needed.py build/ranki-armel
 python3 tools/check_dynsym.py build/ranki-armel

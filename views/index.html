@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>RAnki</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Top 56px Lean Header -->
+    <div class="header-bar">
+        <button id="btn-back" class="header-btn">返回</button>
+        <span id="deck-title">RAnki 极速墨水屏</span>
+        <button id="btn-exit" class="header-btn">退出</button>
+    </div>
+
+    <!-- View 1: Deck Selection SPA View -->
+    <div id="deck-view">
+        <h2 style="margin-bottom: 16px; font-size: 26px;">选择复习牌组</h2>
+        <div id="deck-list">
+            <!-- Populated dynamically via IPC -->
+            <div class="empty-msg">正在加载牌组...</div>
+        </div>
+    </div>
+
+    <!-- View 2: Card Review SPA View -->
+    <div id="review-view" style="display: none;">
+        <!-- Card Content Core Area -->
+        <div class="card-area">
+            <!-- Active Front/Back Slot -->
+            <div id="card-active">
+                <div style="text-align: center; margin-top: 100px;">
+                    <h2>RAnki 纯 Rust 核心启动就绪</h2>
+                    <p style="margin-top: 20px;">双缓冲离屏秒开与印刷级排版引擎已加载</p>
+                </div>
+            </div>
+
+            <!-- Offscreen Pre-rendering Buffer Slot -->
+            <div id="card-buffer"></div>
+        </div>
+
+        <!-- Bottom 120px Touch Operation Bar -->
+        <div class="action-bar">
+            <!-- State 1: Unflipped (Show Answer) -->
+            <div id="bar-unflipped">
+                <button id="btn-show-answer" class="btn-full">点 击 显 示 答 案</button>
+            </div>
+
+            <!-- State 2: Flipped (Ratings) -->
+            <div id="bar-flipped" style="display: none;">
+                <div class="btn-group">
+                    <button id="btn-again" class="rate-btn">
+                        <span class="label">重来 (Again)</span>
+                        <span class="interval">&lt; 1 分钟</span>
+                    </button>
+                    <button id="btn-hard" class="rate-btn">
+                        <span class="label">困难 (Hard)</span>
+                        <span class="interval">10 分钟</span>
+                    </button>
+                    <button id="btn-good" class="rate-btn">
+                        <span class="label">良好 (Good)</span>
+                        <span class="interval">1 天</span>
+                    </button>
+                    <button id="btn-easy" class="rate-btn">
+                        <span class="label">简单 (Easy)</span>
+                        <span class="interval">4 天</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="app.js"></script>
+</body>
+</html>

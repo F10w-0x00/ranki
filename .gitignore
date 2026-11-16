@@ -4,3 +4,5 @@
 # Ignore large binary baselines
 evidence/m0/baseline_binary/*.stable
 build/
+target/
+node_modules/
