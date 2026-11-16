@@ -1,10 +1,11 @@
 //! Direct Zero-Copy Anki rslib Integration & Collection Service
 use std::path::{Path, PathBuf};
 use std::time::Instant;
+use anki::card::CardId;
 use anki::collection::{Collection, CollectionBuilder};
 use anki::decks::DeckId;
-use anki::card::CardId;
-use anki::scheduler::answering::{CardAnswer, Rating, SchedulingStates};
+use anki::scheduler::answering::{CardAnswer, Rating};
+use anki::scheduler::states::SchedulingStates;
 use anki::timestamp::TimestampMillis;
 use serde::{Deserialize, Serialize};
 
@@ -70,7 +71,7 @@ impl AnkiService {
         for child in tree.children {
             let due = child.new_count + child.learn_count + child.review_count;
             list.push(DeckItem {
-                id: child.deck_id.0,
+                id: child.deck_id,
                 name: child.name,
                 due_count: due,
             });
@@ -92,19 +93,18 @@ impl AnkiService {
             .get_queued_cards(1, false)
             .map_err(|e| format!("Failed to fetch queued cards: {:?}", e))?;
 
-        if queued.entries.is_empty() {
+        if queued.cards.is_empty() {
             self.current_card_id = None;
             self.current_states = None;
             return Ok(None);
         }
 
-        let cid = queued.entries[0].card.id;
+        let queued_card = &queued.cards[0];
+        let cid = queued_card.card.id;
+        let states = queued_card.states.clone();
         self.current_card_id = Some(cid);
         self.card_shown_at = Some(Instant::now());
 
-        let states = col
-            .get_scheduling_states(cid)
-            .map_err(|e| format!("Failed to get scheduling states: {:?}", e))?;
         let intervals = col
             .describe_next_states(&states)
             .unwrap_or_else(|_| vec!["<1m".into(), "10m".into(), "1d".into(), "4d".into()]);
@@ -115,8 +115,8 @@ impl AnkiService {
             .map_err(|e| format!("Failed to render card {}: {:?}", cid, e))?;
 
         let media_uri_prefix = format!("file://{}/", self.media_dir.display());
-        let question_html = rewrite_media_urls(&rendered.qfmt, &media_uri_prefix);
-        let answer_html = rewrite_media_urls(&rendered.afmt, &media_uri_prefix);
+        let question_html = rewrite_media_urls(&rendered.question(), &media_uri_prefix);
+        let answer_html = rewrite_media_urls(&rendered.answer(), &media_uri_prefix);
 
         Ok(Some(CardPayload {
             card_id: cid.0,
@@ -174,7 +174,7 @@ impl AnkiService {
     pub fn wal_checkpoint(&mut self) -> Result<(), String> {
         if let Some(col) = self.col.as_mut() {
             col.storage
-                .db
+                .db()
                 .execute_batch("PRAGMA wal_checkpoint(TRUNCATE);")
                 .map_err(|e| format!("WAL checkpoint failed: {:?}", e))?;
             println!("[ANKI] WAL checkpoint completed.");
