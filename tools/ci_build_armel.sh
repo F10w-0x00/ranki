@@ -75,6 +75,9 @@ arm-linux-gnueabi-gcc \
     ${WRAP_FLAGS} \
     -Wl,--allow-shlib-undefined \
     -Wl,--as-needed \
+    -Wl,--exclude-libs,librslib.a \
+    -Wl,--exclude-libs,libarchive.a \
+    -Wl,--exclude-libs,libjson-glib-1.0.a \
     -Lbuild/libs -llipc \
     -L/usr/lib/arm-linux-gnueabi -L/lib/arm-linux-gnueabi \
     anki/target/arm-unknown-linux-gnueabi/release/librslib.a \
@@ -97,5 +100,6 @@ ls -lh build/ranki-armel
 echo "[4/4] Running Automated Verification Gates (M0.5 & M0.6)..."
 python3 tools/check_symbols.py build/ranki-armel
 python3 tools/check_dt_needed.py build/ranki-armel
+python3 tools/check_dynsym.py build/ranki-armel
 
 echo "All verification gates passed with 0 errors!"
