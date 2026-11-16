@@ -15,7 +15,8 @@ export PKG_CONFIG_LIBDIR=/usr/lib/arm-linux-gnueabi
 export CC_arm_unknown_linux_gnueabi=arm-linux-gnueabi-gcc
 export CXX_arm_unknown_linux_gnueabi=arm-linux-gnueabi-g++
 export AR_arm_unknown_linux_gnueabi=arm-linux-gnueabi-ar
-export CARGO_TARGET_ARM_UNKNOWN_LINUX_GNUEABI_LINKER=arm-linux-gnueabi-gcc
+chmod +x tools/arm_linker_wrapper.sh
+export CARGO_TARGET_ARM_UNKNOWN_LINUX_GNUEABI_LINKER=/workspace/tools/arm_linker_wrapper.sh
 
 # 2. Build Pure Rust Host Binary for Kindle armel
 echo "[1/3] Building Pure Rust Host Binary (ranki)..."
