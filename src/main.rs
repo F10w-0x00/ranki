@@ -1,10 +1,12 @@
+mod anki;
 mod ffi;
 mod ipc;
 
 use std::ffi::CString;
+use std::path::Path;
 use std::ptr;
 use ffi::*;
-use ipc::{on_webview_title_notify, on_window_destroy};
+use ipc::{on_webview_title_notify, on_window_destroy, ANKI_SERVICE};
 
 fn main() {
     println!("====================================================");
@@ -12,11 +14,35 @@ fn main() {
     println!(" Target: Kindle Paperwhite 3 (1072x1448)");
     println!("====================================================");
 
+    // 1. Initialize Anki Collection (strictly target anki_data_test, NEVER anki_data)
+    let kindle_col = Path::new("/mnt/us/anki_data_test/collection.anki2");
+    let kindle_media = Path::new("/mnt/us/anki_data_test/collection.media");
+    let kindle_media_db = Path::new("/mnt/us/anki_data_test/collection.media.db2");
+
+    let win_col = Path::new("D:/anki_data_test/collection.anki2");
+    let win_media = Path::new("D:/anki_data_test/collection.media");
+    let win_media_db = Path::new("D:/anki_data_test/collection.media.db2");
+
+    let (col_path, media_path, media_db_path) = if kindle_col.exists() {
+        (kindle_col, kindle_media, kindle_media_db)
+    } else {
+        (win_col, win_media, win_media_db)
+    };
+
+    if col_path.exists() {
+        let mut svc = ANKI_SERVICE.lock().unwrap();
+        if let Err(e) = svc.open_collection(col_path, media_path, media_db_path) {
+            eprintln!("[ANKI] Warning: Could not open collection at {:?}: {}", col_path, e);
+        }
+    } else {
+        println!("[ANKI] Note: Test collection not found at {:?}. Running in demo/mock mode.", col_path);
+    }
+
     unsafe {
-        // 1. Initialize GTK
+        // 2. Initialize GTK
         gtk_init(&mut 0, ptr::null_mut());
 
-        // 2. Create Top-level Window
+        // 3. Create Top-level Window
         let window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
         // Kindle OS Lab126 Window Manager Protocol:
@@ -36,11 +62,11 @@ fn main() {
             0,
         );
 
-        // 3. Create WebKitWebView
+        // 4. Create WebKitWebView
         let webview = webkit_web_view_new();
         gtk_container_add(window, webview);
 
-        // 4. Connect notify::title for Bidirectional IPC
+        // 5. Connect notify::title for Bidirectional IPC
         let title_notify_sig = CString::new("notify::title").unwrap();
         g_signal_connect_data(
             webview as gpointer,
@@ -51,9 +77,7 @@ fn main() {
             0,
         );
 
-        // 5. Determine URI to load
-        // On device: file:///mnt/us/extensions/ranki-dev/views/index.html
-        // Local fallback: views/index.html in current working directory
+        // 6. Determine URI to load
         let device_path = "/mnt/us/extensions/ranki-dev/views/index.html";
         let uri = if std::path::Path::new(device_path).exists() {
             format!("file://{}", device_path)
@@ -67,7 +91,7 @@ fn main() {
         let c_uri = CString::new(uri).unwrap();
         webkit_web_view_load_uri(webview, c_uri.as_ptr());
 
-        // 6. Show all widgets and enter GTK event loop
+        // 7. Show all widgets and enter GTK event loop
         gtk_widget_show_all(window);
         gtk_main();
     }

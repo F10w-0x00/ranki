@@ -1,8 +1,11 @@
 //! Bidirectional IPC protocol between Rust Host and WebKit Single Page App
 use std::ffi::{CStr, CString};
 use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::{LazyLock, Mutex};
+use crate::anki::AnkiService;
 use crate::ffi::*;
 
+pub static ANKI_SERVICE: LazyLock<Mutex<AnkiService>> = LazyLock::new(|| Mutex::new(AnkiService::new()));
 static LAST_TOKEN: AtomicU64 = AtomicU64::new(0);
 
 /// Parse and handle document.title changes from WebKit
@@ -40,11 +43,75 @@ pub fn handle_title_change(web_view: *mut GtkWidget, title: &str) {
 
     match action {
         "ready" => {
-            println!("[IPC] WebKit SPA ready. Acknowledging handshake...");
+            println!("[IPC] WebKit SPA ready. Loading deck tree...");
+            let mut svc = ANKI_SERVICE.lock().unwrap();
+            if svc.is_open() {
+                if let Ok(decks) = svc.get_deck_list() {
+                    if let Ok(json) = serde_json::to_string(&serde_json::json!({ "decks": decks })) {
+                        dispatch_to_webview(web_view, "LOAD_DECK_LIST", &json);
+                        return;
+                    }
+                }
+            }
             dispatch_to_webview(web_view, "HOST_ACK", "{\"status\":\"ready\"}");
         }
+        "SELECT_DECK" => {
+            if let Ok(v) = serde_json::from_str::<serde_json::Value>(payload) {
+                if let Some(did) = v["deck_id"].as_i64() {
+                    let mut svc = ANKI_SERVICE.lock().unwrap();
+                    let _ = svc.select_deck(did);
+                    match svc.get_next_card() {
+                        Ok(Some(card)) => {
+                            if let Ok(json) = serde_json::to_string(&card) {
+                                dispatch_to_webview(web_view, "SHOW_CARD", &json);
+                            }
+                        }
+                        _ => {
+                            if let Ok(decks) = svc.get_deck_list() {
+                                if let Ok(json) = serde_json::to_string(&serde_json::json!({ "decks": decks })) {
+                                    dispatch_to_webview(web_view, "LOAD_DECK_LIST", &json);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        "RATE_CARD" => {
+            if let Ok(v) = serde_json::from_str::<serde_json::Value>(payload) {
+                if let Some(rating) = v["rating"].as_str() {
+                    let mut svc = ANKI_SERVICE.lock().unwrap();
+                    let _ = svc.rate_card(rating);
+                    match svc.get_next_card() {
+                        Ok(Some(card)) => {
+                            if let Ok(json) = serde_json::to_string(&card) {
+                                dispatch_to_webview(web_view, "SHOW_CARD", &json);
+                            }
+                        }
+                        _ => {
+                            if let Ok(decks) = svc.get_deck_list() {
+                                if let Ok(json) = serde_json::to_string(&serde_json::json!({ "decks": decks })) {
+                                    dispatch_to_webview(web_view, "LOAD_DECK_LIST", &json);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        "EXIT_DECK" => {
+            let mut svc = ANKI_SERVICE.lock().unwrap();
+            let _ = svc.wal_checkpoint();
+            if let Ok(decks) = svc.get_deck_list() {
+                if let Ok(json) = serde_json::to_string(&serde_json::json!({ "decks": decks })) {
+                    dispatch_to_webview(web_view, "LOAD_DECK_LIST", &json);
+                }
+            }
+        }
         "exit" => {
-            println!("[IPC] Exit requested from Web SPA. Quitting GTK loop...");
+            println!("[IPC] Exit requested from Web SPA. Checkpointing WAL & quitting GTK loop...");
+            let mut svc = ANKI_SERVICE.lock().unwrap();
+            let _ = svc.wal_checkpoint();
             unsafe {
                 gtk_main_quit();
             }
@@ -89,5 +156,7 @@ pub unsafe extern "C" fn on_window_destroy(
     _window: *mut GtkWidget,
     _user_data: gpointer,
 ) {
+    let mut svc = ANKI_SERVICE.lock().unwrap();
+    let _ = svc.wal_checkpoint();
     gtk_main_quit();
 }
