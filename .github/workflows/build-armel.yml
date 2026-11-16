@@ -28,6 +28,7 @@ jobs:
 
       - name: Execute Containerized ARMEL Build Pipeline
         run: |
+          set -o pipefail
           chmod +x tools/ci_build_armel.sh
           docker run --rm \
             -v "${{ github.workspace }}:/workspace" \
