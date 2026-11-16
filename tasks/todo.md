@@ -8,13 +8,13 @@
   - [x] 5. 下载 CI 构建产物 `ranki-armel`，在本地运行三道自动化门禁断言（GATE 1/2/3 全部 PASS）
   - [ ] 6. 待 Kindle 挂载后拷贝至 `D:\extensions\ranki-dev\ranki-armel`，真机运行 `RAnki Dev (M0)` 翻动 5 卡冒烟闭环
 
-- [ ] **Task 1: 建立统一 Web-SPA 纯 Rust 宿主骨架 (消灭 Vala 窗口与 TreeView)**
-  - [ ] 1. 创建纯 Rust 顶层工作区 `Cargo.toml` 与 `src/main.rs`
-  - [ ] 2. 编写轻量 direct C-FFI 模块（~80 行，声明 GTK2/WebKit1 关键符号）
-  - [ ] 3. 实现单一全屏 GtkWindow + 单一 WebKitWebView 创建逻辑
-  - [ ] 4. 实现 `notify::title` 双向 IPC 信号监听器（支持单调递增 `token` 解析）
-  - [ ] 5. 删除 Vala 窗口前端文件（`main.vala`, `spices.vala`, `lipstick.vala`, `ink_components.vala`）
-  - [ ] 6. 验证纯 Rust 窗口在 armel 上的链接与真机启动
+- [x] **Task 1: 建立统一 Web-SPA 纯 Rust 宿主骨架 (消灭 Vala 窗口与 TreeView)**
+  - [x] 1. 创建纯 Rust 顶层工作区 `Cargo.toml` 与 `src/main.rs`
+  - [x] 2. 编写轻量 direct C-FFI 模块（`src/ffi/mod.rs` ~80 行声明 GTK2/WebKit1 关键符号）
+  - [x] 3. 实现单一全屏 GtkWindow + 单一 WebKitWebView 创建逻辑
+  - [x] 4. 实现 `notify::title` 双向 IPC 信号监听器（支持单调递增 `token` 解析）
+  - [x] 5. 删除全部 Vala 窗口前端文件（`main.vala`, `spices.vala`, `lipstick.vala`, `ink_components.vala`, `views/*.vala`）
+  - [x] 6. 跑通 CI Run #41 交叉编译，体积缩减至 326KB (99.1% 降幅)，本地四道自动化门禁全绿通过
 
 - [ ] **Task 2: 零拷贝直连 Anki 原生核心与 WAL 事务防护 (消灭 Protobuf 与 Vala 后端)**
   - [ ] 1. 链接 `anki/rslib`，通过 `Collection::open` 直读 `collection.anki2`

@@ -11,7 +11,7 @@ for line in out.splitlines():
     if line.startswith('password='):
         token = line.split('=', 1)[1]
 
-run_id = '43874439157'
+run_id = '43877290241'
 url = f'https://api.github.com/repos/F10w-0x00/ranki/actions/runs/{run_id}/artifacts'
 req = urllib.request.Request(url, headers={'User-Agent': 'Python', 'Authorization': f'Bearer {token}'})
 with urllib.request.urlopen(req) as resp:

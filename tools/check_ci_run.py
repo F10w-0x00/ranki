@@ -2,7 +2,7 @@ import urllib.request
 import json
 import sys
 
-run_id = sys.argv[1] if len(sys.argv) > 1 else '43874439157'
+run_id = sys.argv[1] if len(sys.argv) > 1 else '43877290241'
 url = f'https://api.github.com/repos/F10w-0x00/ranki/actions/runs/{run_id}/jobs'
 req = urllib.request.Request(url, headers={'User-Agent': 'Python'})
 try:
