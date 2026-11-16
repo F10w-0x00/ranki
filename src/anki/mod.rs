@@ -100,7 +100,7 @@ impl AnkiService {
         }
 
         let queued_card = &queued.cards[0];
-        let cid = queued_card.card.id;
+        let cid = queued_card.card.id();
         let states = queued_card.states.clone();
         self.current_card_id = Some(cid);
         self.card_shown_at = Some(Instant::now());
