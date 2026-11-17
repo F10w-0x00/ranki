@@ -212,9 +212,9 @@ impl AnkiService {
             current: current_payload,
             next: next_payload,
             deck_name: current_deck_name,
-            new_count: queued.new_count,
-            learn_count: queued.learn_count,
-            review_count: queued.review_count,
+            new_count: queued.new_count as u32,
+            learn_count: queued.learning_count as u32,
+            review_count: queued.review_count as u32,
         }))
     }
 
