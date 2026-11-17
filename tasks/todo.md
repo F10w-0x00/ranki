@@ -33,9 +33,9 @@
   - [x] 1. 弃用 WebKit 1.0 不支持的现代弹性盒多级换行，采用高可靠 `table-layout: fixed` 布局
   - [x] 2. 评分按键内清晰分两行独立排版：上行 20px 预估时间（`<10分`、`1天`），下行 30px 加粗评级（`重来`、`良好`）
   - [x] 3. 正文字号精准标定为 34px（黄金阅读四号字），消除 44px 巨大标题效应，行高 1.55
-- [ ] **Task 4: CI 构建、门禁验证、Kindle 部署与真机实测**
-  - [ ] 1. 提交至 Git 分支 `refactor/m0-baseline` 并触发 GitHub Actions CI
-  - [ ] 2. 本地执行 4 道自动化门禁（GLIBC 2.18、DT_NEEDED、0 dynsym leak、ES5）
-  - [ ] 3. 使用 `tools/deploy_to_kindle.py` 部署至 `D:\extensions\ranki-dev\`
-  - [ ] 4. 生产数据库 `D:\anki_data\` 0 字节改动红线防护
+- [x] **Task 4: CI 构建、门禁验证、Kindle 部署与真机实测**
+  - [x] 1. 提交至 Git 分支 `refactor/m0-baseline` 并触发 GitHub Actions CI（Run ID: 44057975886 10/10 全绿通过）
+  - [x] 2. 本地执行 4 道自动化门禁（GLIBC 2.18、DT_NEEDED、0 dynsym leak、ES5 全绿通过）
+  - [x] 3. 使用 `tools/deploy_to_kindle.py` 部署至 `D:\extensions\ranki-dev\`（部署成功）
+  - [x] 4. 生产数据库 `D:\anki_data\` 0 字节改动红线防护（指纹 `de6efa895198` 保持 100% 完整）
   - [ ] 5. Kindle PW3 真机实测云同步、登录设置、现代牌组列表与卡片复习
