@@ -13,6 +13,7 @@
     var activeEl = null;
     var bufferEl = null;
     var styleEl = null;
+    var cardAreaEl = null;
 
     // Send up-channel command to Rust Host
     function sendHost(action, payload) {
@@ -45,7 +46,7 @@
 
         var decks = (data && data.decks) || [];
         if (decks.length === 0) {
-            listEl.innerHTML = '<div class="empty-msg">没有可复习的牌组</div>';
+            listEl.innerHTML = '<div class="empty-msg" style="padding: 24px; font-size: 30px;">没有可复习的牌组</div>';
             return;
         }
 
@@ -67,6 +68,30 @@
 
             listEl.appendChild(item);
         }
+    }
+
+    // Preprocess card HTML for chemistry and math syntax
+    function preprocessCardHtml(html) {
+        if (!html) return '';
+
+        // 1. Temporarily protect existing math blocks: $...$, $$...$$, \(...\), \[...\]
+        var mathBlocks = [];
+        var protectedHtml = html.replace(/(\$\$[\s\S]*?\$\$|\\\[[\s\S]*?\\\]|\$[\s\S]*?\$|\\\([\s\S]*?\\\))/g, function (match) {
+            mathBlocks.push(match);
+            return '___MATH_BLOCK_' + (mathBlocks.length - 1) + '___';
+        });
+
+        // 2. Wrap standalone \ce{...} that were not wrapped in math delimiters
+        protectedHtml = protectedHtml.replace(/(\\ce\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\})/g, function (match) {
+            return '\\(' + match + '\\)';
+        });
+
+        // 3. Restore protected math blocks
+        var restoredHtml = protectedHtml.replace(/___MATH_BLOCK_(\d+)___/g, function (match, idx) {
+            return mathBlocks[parseInt(idx, 10)];
+        });
+
+        return restoredHtml;
     }
 
     // Queue Lock: Flip card when user taps 'Show Answer'
@@ -104,6 +129,11 @@
         document.getElementById('bar-unflipped').style.display = 'none';
         document.getElementById('bar-flipped').style.display = 'block';
 
+        // Reset scroll position on answer reveal
+        if (cardAreaEl) {
+            cardAreaEl.scrollTop = 0;
+        }
+
         sendHost('CARD_FLIPPED', {});
     }
 
@@ -115,6 +145,11 @@
         isFlipped = false;
         pendingFlip = false;
         isTypesettingDone = false;
+
+        // Reset scroll to top for new card
+        if (cardAreaEl) {
+            cardAreaEl.scrollTop = 0;
+        }
 
         // Inject card template CSS
         if (styleEl && data.css) {
@@ -136,11 +171,11 @@
             if (easyEl) easyEl.textContent = data.intervals[3];
         }
 
-        // Front question goes to active visible slot
-        activeEl.innerHTML = data.question_html || '';
+        // Preprocess and inject Front question
+        activeEl.innerHTML = preprocessCardHtml(data.question_html || '');
 
-        // Back answer goes to offscreen buffer slot (left: -9999px)
-        bufferEl.innerHTML = data.answer_html || '';
+        // Preprocess and inject Back answer into offscreen buffer slot
+        bufferEl.innerHTML = preprocessCardHtml(data.answer_html || '');
 
         document.getElementById('bar-unflipped').style.display = 'block';
         document.getElementById('bar-flipped').style.display = 'none';
@@ -174,11 +209,58 @@
         sendHost('EXIT_DECK', {});
     }
 
-    // Attach click events to DOM elements
+    // Attach click events & touch drag scrolling
     window.onload = function () {
         activeEl = document.getElementById('card-active');
         bufferEl = document.getElementById('card-buffer');
         styleEl = document.getElementById('card-dynamic-style');
+        cardAreaEl = document.querySelector('.card-area');
+
+        // Touch & Mouse Drag Scrolling for Kindle WebKit 1.0
+        if (cardAreaEl) {
+            var touchStartY = 0;
+            var touchStartScrollTop = 0;
+            var isTouching = false;
+
+            cardAreaEl.addEventListener('touchstart', function (e) {
+                if (e.touches && e.touches.length > 0) {
+                    isTouching = true;
+                    touchStartY = e.touches[0].pageY;
+                    touchStartScrollTop = cardAreaEl.scrollTop;
+                }
+            }, false);
+
+            cardAreaEl.addEventListener('touchmove', function (e) {
+                if (!isTouching || !e.touches || e.touches.length === 0) return;
+                var deltaY = e.touches[0].pageY - touchStartY;
+                cardAreaEl.scrollTop = touchStartScrollTop - deltaY;
+            }, false);
+
+            cardAreaEl.addEventListener('touchend', function () {
+                isTouching = false;
+            }, false);
+
+            // Mouse drag fallback for X11 pointer events
+            var isMouseDown = false;
+            var mouseStartY = 0;
+            var mouseStartScrollTop = 0;
+
+            cardAreaEl.addEventListener('mousedown', function (e) {
+                isMouseDown = true;
+                mouseStartY = e.pageY;
+                mouseStartScrollTop = cardAreaEl.scrollTop;
+            }, false);
+
+            window.addEventListener('mousemove', function (e) {
+                if (!isMouseDown) return;
+                var deltaY = e.pageY - mouseStartY;
+                cardAreaEl.scrollTop = mouseStartScrollTop - deltaY;
+            }, false);
+
+            window.addEventListener('mouseup', function () {
+                isMouseDown = false;
+            }, false);
+        }
 
         var btnShowAnswer = document.getElementById('btn-show-answer');
         if (btnShowAnswer) {

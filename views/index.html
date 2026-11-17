@@ -20,11 +20,22 @@
           processEscapes: true
         },
         TeX: {
-          extensions: ["AMSmath.js", "AMSsymbols.js", "noErrors.js", "noUndefined.js"],
+          extensions: [
+            "AMSmath.js",
+            "AMSsymbols.js",
+            "mhchem.js",
+            "extpfeil.js",
+            "color.js",
+            "bbox.js",
+            "newcommand.js",
+            "noErrors.js",
+            "noUndefined.js"
+          ],
           noErrors: { disabled: false },
           noUndefined: { disabled: false }
         },
         "HTML-CSS": {
+          scale: 125,
           availableFonts: ["TeX"],
           preferredFont: "TeX",
           webFont: "TeX",
