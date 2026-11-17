@@ -30,11 +30,6 @@ RUN apt-get update && \
         file && \
     rm -rf /var/lib/apt/lists/*
 
-# Install modern static protoc with native proto3 optional support
-RUN curl -fsSL -O https://github.com/protocolbuffers/protobuf/releases/download/v25.1/protoc-25.1-linux-x86_64.zip && \
-    unzip -o protoc-25.1-linux-x86_64.zip -d /usr/local && \
-    rm -f protoc-25.1-linux-x86_64.zip
-
 # 2. Extract ARMEL development sysroot headers and libraries via dpkg -x
 # (Completely bypasses apt foreign-architecture multiarch dependency conflicts)
 RUN dpkg --add-architecture armel && \
@@ -95,21 +90,16 @@ RUN dpkg --add-architecture armel && \
     cd / && rm -rf /tmp/armel-sysroot && \
     rm -rf /var/lib/apt/lists/*
 
-# 3. Extract WebKitGTK 1.0 and json-glib armel development headers and libraries
+# 3. Extract WebKitGTK 1.0 armel development headers and libraries
 RUN mkdir -p /tmp/extract && cd /tmp/extract && \
     curl -fsSL -O http://archive.debian.org/debian/pool/main/w/webkitgtk/libjavascriptcoregtk-1.0-0_2.4.11-3_armel.deb && \
     curl -fsSL -O http://archive.debian.org/debian/pool/main/w/webkitgtk/libjavascriptcoregtk-1.0-dev_2.4.11-3_armel.deb && \
     curl -fsSL -O http://archive.debian.org/debian/pool/main/w/webkitgtk/libwebkitgtk-1.0-0_2.4.11-3_armel.deb && \
     curl -fsSL -O http://archive.debian.org/debian/pool/main/w/webkitgtk/libwebkitgtk-dev_2.4.11-3_armel.deb && \
-    curl -fsSL -O http://archive.debian.org/debian/pool/main/j/json-glib/libjson-glib-1.0-0_1.4.4-2_armel.deb && \
-    curl -fsSL -O http://archive.debian.org/debian/pool/main/j/json-glib/libjson-glib-dev_1.4.4-2_armel.deb && \
     dpkg -x libjavascriptcoregtk-1.0-0_2.4.11-3_armel.deb / && \
     dpkg -x libjavascriptcoregtk-1.0-dev_2.4.11-3_armel.deb / && \
     dpkg -x libwebkitgtk-1.0-0_2.4.11-3_armel.deb / && \
     dpkg -x libwebkitgtk-dev_2.4.11-3_armel.deb / && \
-    dpkg -x libjson-glib-1.0-0_1.4.4-2_armel.deb / && \
-    dpkg -x libjson-glib-dev_1.4.4-2_armel.deb / && \
-    rm -f /usr/lib/arm-linux-gnueabi/libjson-glib-1.0.so* && \
     cd / && rm -rf /tmp/extract
 
 # 4. Install Rust & armel target (pinned to 1.89.0 matching anki/rust-toolchain.toml)
