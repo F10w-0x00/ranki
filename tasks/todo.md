@@ -35,7 +35,7 @@
 
 - [ ] **Task 4: CI/CD 现代化与物理机 100 张卡片全量压测交付**
   - [x] 1. 重构 `.github/workflows/build-armel.yml` 与 `Dockerfile.armel`，剥离 Vala/Protobuf 构建链与旧脚手架，实现纯 Cargo CI + ES5/Task 3 自动门禁
-  - [ ] 2. 部署最终纯 Rust 二进制至 Kindle PW3 (一键脚本 `tools/deploy_to_kindle.py`)
+  - [x] 2. 部署最终纯 Rust 二进制至 Kindle PW3 (一键脚本 `tools/deploy_to_kindle.py`，已安全部署到 `D:\extensions\ranki-dev`)
   - [ ] 3. 连续翻阅 100 张复合公式卡片，核验感知时延 $\le 5\text{ms}$
   - [ ] 4. 采集 `/proc/<pid>/status` 核验 VmRSS 增长 $\le 5\text{MB}$
   - [ ] 5. 核验空闲 CPU 占用率 0.0%，单二进制体积 $\le 20\text{MB}$
