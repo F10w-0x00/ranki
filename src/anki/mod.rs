@@ -13,6 +13,11 @@ use serde::{Deserialize, Serialize};
 pub struct DeckItem {
     pub id: i64,
     pub name: String,
+    pub full_name: String,
+    pub depth: usize,
+    pub new_count: u32,
+    pub learn_count: u32,
+    pub review_count: u32,
     pub due_count: u32,
 }
 
@@ -23,6 +28,16 @@ pub struct CardPayload {
     pub answer_html: String,
     pub css: String,
     pub intervals: Vec<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct CardPipelinePayload {
+    pub current: CardPayload,
+    pub next: Option<CardPayload>,
+    pub deck_name: String,
+    pub new_count: u32,
+    pub learn_count: u32,
+    pub review_count: u32,
 }
 
 pub struct AnkiService {
@@ -68,14 +83,7 @@ impl AnkiService {
         let tree = col.deck_tree(None).map_err(|e| format!("Failed to get deck tree: {:?}", e))?;
 
         let mut list = Vec::new();
-        for child in tree.children {
-            let due = child.new_count + child.learn_count + child.review_count;
-            list.push(DeckItem {
-                id: child.deck_id,
-                name: child.name,
-                due_count: due,
-            });
-        }
+        flatten_deck_tree(&tree.children, 0, "", &mut list);
         Ok(list)
     }
 
@@ -107,7 +115,7 @@ impl AnkiService {
 
         let intervals = col
             .describe_next_states(&states)
-            .unwrap_or_else(|_| vec!["<1m".into(), "10m".into(), "1d".into(), "4d".into()]);
+            .unwrap_or_else(|_| vec!["<10分".into(), "1天".into(), "3天".into(), "5天".into()]);
         self.current_states = Some(states);
 
         let rendered = col
@@ -125,6 +133,121 @@ impl AnkiService {
             css: rendered.css,
             intervals,
         }))
+    }
+
+    pub fn get_pipeline_cards(&mut self) -> Result<Option<CardPipelinePayload>, String> {
+        let col = self.col.as_mut().ok_or("Collection not open")?;
+        let queued = col
+            .get_queued_cards(2, false)
+            .map_err(|e| format!("Failed to fetch queued cards: {:?}", e))?;
+
+        if queued.cards.is_empty() {
+            self.current_card_id = None;
+            self.current_states = None;
+            return Ok(None);
+        }
+
+        let queued_card = &queued.cards[0];
+        let cid = queued_card.card.id();
+        let states = queued_card.states.clone();
+        self.current_card_id = Some(cid);
+        self.card_shown_at = Some(Instant::now());
+
+        let intervals = col
+            .describe_next_states(&states)
+            .unwrap_or_else(|_| vec!["<10分".into(), "1天".into(), "3天".into(), "5天".into()]);
+        self.current_states = Some(states);
+
+        let rendered = col
+            .render_existing_card(cid, false, false)
+            .map_err(|e| format!("Failed to render card {}: {:?}", cid, e))?;
+
+        let media_uri_prefix = format!("file://{}/", self.media_dir.display());
+        let current = CardPayload {
+            card_id: cid.0,
+            question_html: rewrite_media_urls(&rendered.question(), &media_uri_prefix),
+            answer_html: rewrite_media_urls(&rendered.answer(), &media_uri_prefix),
+            css: rendered.css,
+            intervals,
+        };
+
+        let next = if queued.cards.len() > 1 {
+            let next_card = &queued.cards[1];
+            let next_cid = next_card.card.id();
+            let next_intervals = col
+                .describe_next_states(&next_card.states)
+                .unwrap_or_else(|_| vec!["<10分".into(), "1天".into(), "3天".into(), "5天".into()]);
+            if let Ok(next_rendered) = col.render_existing_card(next_cid, false, false) {
+                Some(CardPayload {
+                    card_id: next_cid.0,
+                    question_html: rewrite_media_urls(&next_rendered.question(), &media_uri_prefix),
+                    answer_html: rewrite_media_urls(&next_rendered.answer(), &media_uri_prefix),
+                    css: next_rendered.css,
+                    intervals: next_intervals,
+                })
+            } else {
+                None
+            }
+        } else {
+            None
+        };
+
+        let deck_name = col.get_current_deck().map(|d| d.name.clone()).unwrap_or_else(|_| "复习".into());
+        let counts = col.current_deck_tree()
+            .ok()
+            .flatten()
+            .map(|t| (t.new_count, t.learn_count, t.review_count))
+            .unwrap_or((0, 0, 0));
+
+        Ok(Some(CardPipelinePayload {
+            current,
+            next,
+            deck_name,
+            new_count: counts.0,
+            learn_count: counts.1,
+            review_count: counts.2,
+        }))
+    }
+
+    pub fn rate_and_fetch_next(&mut self, rating_str: &str) -> Result<Option<CardPayload>, String> {
+        self.rate_card(rating_str)?;
+
+        let col = self.col.as_mut().ok_or("Collection not open")?;
+        let queued = col
+            .get_queued_cards(2, false)
+            .map_err(|e| format!("Failed to fetch queued cards: {:?}", e))?;
+
+        if queued.cards.is_empty() {
+            self.current_card_id = None;
+            self.current_states = None;
+            return Ok(None);
+        }
+
+        let current_card = &queued.cards[0];
+        let cid = current_card.card.id();
+        self.current_card_id = Some(cid);
+        self.current_states = Some(current_card.states.clone());
+        self.card_shown_at = Some(Instant::now());
+
+        if queued.cards.len() > 1 {
+            let next_card = &queued.cards[1];
+            let next_cid = next_card.card.id();
+            let next_intervals = col
+                .describe_next_states(&next_card.states)
+                .unwrap_or_else(|_| vec!["<10分".into(), "1天".into(), "3天".into(), "5天".into()]);
+            if let Ok(next_rendered) = col.render_existing_card(next_cid, false, false) {
+                let media_uri_prefix = format!("file://{}/", self.media_dir.display());
+                return Ok(Some(CardPayload {
+                    card_id: next_cid.0,
+                    question_html: rewrite_media_urls(&next_rendered.question(), &media_uri_prefix),
+                    answer_html: rewrite_media_urls(&next_rendered.answer(), &media_uri_prefix),
+                    css: next_rendered.css,
+                    intervals: next_intervals,
+                }));
+            }
+        }
+
+        Ok(None)
     }
 
     pub fn rate_card(&mut self, rating_str: &str) -> Result<(), String> {
@@ -180,6 +303,33 @@ impl AnkiService {
             println!("[ANKI] WAL checkpoint completed.");
         }
         Ok(())
+    }
+}
+
+fn flatten_deck_tree(
+    nodes: &[anki_proto::decks::DeckTreeNode],
+    depth: usize,
+    prefix: &str,
+    list: &mut Vec<DeckItem>,
+) {
+    for child in nodes {
+        let due = child.new_count + child.learn_count + child.review_count;
+        let full_name = if prefix.is_empty() {
+            child.name.clone()
+        } else {
+            format!("{}::{}", prefix, child.name)
+        };
+        list.push(DeckItem {
+            id: child.deck_id,
+            name: child.name.clone(),
+            full_name: full_name.clone(),
+            depth,
+            new_count: child.new_count,
+            learn_count: child.learn_count,
+            review_count: child.review_count,
+            due_count: due,
+        });
+        flatten_deck_tree(&child.children, depth + 1, &full_name, list);
     }
 }
 

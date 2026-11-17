@@ -60,10 +60,10 @@ pub fn handle_title_change(web_view: *mut GtkWidget, title: &str) {
                 if let Some(did) = v["deck_id"].as_i64() {
                     let mut svc = ANKI_SERVICE.lock().unwrap();
                     let _ = svc.select_deck(did);
-                    match svc.get_next_card() {
-                        Ok(Some(card)) => {
-                            if let Ok(json) = serde_json::to_string(&card) {
-                                dispatch_to_webview(web_view, "SHOW_CARD", &json);
+                    match svc.get_pipeline_cards() {
+                        Ok(Some(pipeline)) => {
+                            if let Ok(json) = serde_json::to_string(&pipeline) {
+                                dispatch_to_webview(web_view, "SHOW_CARD_PIPELINE", &json);
                             }
                         }
                         _ => {
@@ -77,15 +77,44 @@ pub fn handle_title_change(web_view: *mut GtkWidget, title: &str) {
                 }
             }
         }
+        "RATE_AND_FETCH_NEXT" => {
+            if let Ok(v) = serde_json::from_str::<serde_json::Value>(payload) {
+                if let Some(rating) = v["rating"].as_str() {
+                    let mut svc = ANKI_SERVICE.lock().unwrap();
+                    match svc.rate_and_fetch_next(rating) {
+                        Ok(Some(next_card)) => {
+                            if let Ok(json) = serde_json::to_string(&serde_json::json!({
+                                "next_card": next_card,
+                                "has_next": true
+                            })) {
+                                dispatch_to_webview(web_view, "PREPARE_NEXT_CARD", &json);
+                            }
+                        }
+                        Ok(None) => {
+                            dispatch_to_webview(web_view, "PREPARE_NEXT_CARD", "{\"has_next\":false}");
+                        }
+                        Err(e) => {
+                            eprintln!("[ANKI] rate_and_fetch_next error: {}", e);
+                            if let Ok(decks) = svc.get_deck_list() {
+                                if let Ok(json) = serde_json::to_string(&serde_json::json!({ "decks": decks })) {
+                                    dispatch_to_webview(web_view, "LOAD_DECK_LIST", &json);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
         "RATE_CARD" => {
+            // Backward-compatible fallback
             if let Ok(v) = serde_json::from_str::<serde_json::Value>(payload) {
                 if let Some(rating) = v["rating"].as_str() {
                     let mut svc = ANKI_SERVICE.lock().unwrap();
                     let _ = svc.rate_card(rating);
-                    match svc.get_next_card() {
-                        Ok(Some(card)) => {
-                            if let Ok(json) = serde_json::to_string(&card) {
-                                dispatch_to_webview(web_view, "SHOW_CARD", &json);
+                    match svc.get_pipeline_cards() {
+                        Ok(Some(pipeline)) => {
+                            if let Ok(json) = serde_json::to_string(&pipeline) {
+                                dispatch_to_webview(web_view, "SHOW_CARD_PIPELINE", &json);
                             }
                         }
                         _ => {
@@ -98,6 +127,9 @@ pub fn handle_title_change(web_view: *mut GtkWidget, title: &str) {
                     }
                 }
             }
+        }
+        "CARD_FLIPPED" => {
+            // Silently absorb CARD_FLIPPED event
         }
         "EXIT_DECK" => {
             let mut svc = ANKI_SERVICE.lock().unwrap();

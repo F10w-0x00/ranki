@@ -35,7 +35,7 @@
           noUndefined: { disabled: false }
         },
         "HTML-CSS": {
-          scale: 125,
+          scale: 115,
           availableFonts: ["TeX"],
           preferredFont: "TeX",
           webFont: "TeX",
@@ -48,62 +48,79 @@
     <script src="mathjax/MathJax.js?config=TeX-AMS_HTML"></script>
 </head>
 <body>
-    <!-- Top 56px Lean Header -->
+    <!-- Top 64px Minimal Header -->
     <div class="header-bar">
-        <button id="btn-back" class="header-btn">返回</button>
-        <span id="deck-title">RAnki 极速墨水屏</span>
-        <button id="btn-exit" class="header-btn">退出</button>
-    </div>
-
-    <!-- View 1: Deck Selection SPA View -->
-    <div id="deck-view">
-        <h2 style="margin-bottom: 16px; font-size: 26px;">选择复习牌组</h2>
-        <div id="deck-list">
-            <div class="empty-msg">正在加载牌组...</div>
+        <button id="btn-back" class="header-btn">&lt; 返回</button>
+        <span id="deck-title">RAnki 牌组大厅</span>
+        <div id="header-badges" class="review-badges">
+            <span class="badge-item" id="badge-due">0</span>
         </div>
     </div>
 
-    <!-- View 2: Card Review SPA View -->
+    <!-- View 1: Anki-Authentic Centered Deck Browser -->
+    <div id="deck-view">
+        <div class="deck-container">
+            <div class="deck-header-row">
+                <span class="col-deck-name">牌组</span>
+                <span class="col-count-header">新卡</span>
+                <span class="col-count-header">学习</span>
+                <span class="col-count-header">复习</span>
+            </div>
+            <div id="deck-list" class="deck-list-body">
+                <div class="empty-msg" style="padding: 40px; text-align: center; font-size: 28px;">正在读取卡片数据库...</div>
+            </div>
+            <div class="deck-footer">
+                <div id="deck-summary" class="deck-summary-text"></div>
+                <button id="btn-exit" class="btn-exit-app">退出 RAnki</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- View 2: Card Review Core Area (Quad-Slot Architecture) -->
     <div id="review-view" style="display: none;">
         <!-- Card Content Core Area -->
         <div class="card-area">
-            <!-- Active Slot -->
-            <div id="card-active" class="card-box">
-                <div style="text-align: center; margin-top: 100px;">
-                    <h2>RAnki 纯 Rust 核心启动就绪</h2>
-                    <p style="margin-top: 20px;">双缓冲离屏秒开与印刷级排版引擎已加载</p>
-                </div>
-            </div>
+            <!-- Group A: Card N -->
+            <div id="slot-a-front" class="card-box"></div>
+            <div id="slot-a-back"  class="card-box offscreen"></div>
 
-            <!-- Offscreen Pre-rendering Buffer Slot -->
-            <div id="card-buffer" class="card-box offscreen"></div>
+            <!-- Group B: Card N+1 (Offscreen Pre-rendering Pipeline) -->
+            <div id="slot-b-front" class="card-box offscreen"></div>
+            <div id="slot-b-back"  class="card-box offscreen"></div>
+
+            <!-- Panel: Deck Finished Celebration -->
+            <div id="panel-finished" class="celebration-panel" style="display: none;">
+                <h2>🎉 今日复习完成</h2>
+                <p id="finished-stats">今日复习已告一段落，目前没有更多待复习卡片。</p>
+                <button id="btn-finished-back" class="celebration-btn">返回牌组大厅</button>
+            </div>
         </div>
 
-        <!-- Bottom 120px Touch Operation Bar -->
+        <!-- Bottom 110px Pinned Touch Action Bar (Option A Two-Line Layout) -->
         <div class="action-bar">
             <!-- State 1: Unflipped (Show Answer) -->
             <div id="bar-unflipped">
                 <button id="btn-show-answer" class="btn-full">点 击 显 示 答 案</button>
             </div>
 
-            <!-- State 2: Flipped (Ratings) -->
+            <!-- State 2: Flipped (Option A Dual-Tier Ratings) -->
             <div id="bar-flipped" style="display: none;">
                 <div class="btn-group">
                     <button id="btn-again" class="rate-btn">
-                        <span class="label">重来 (Again)</span>
-                        <span class="interval" id="interval-again">&lt; 1 分钟</span>
+                        <span class="interval" id="interval-again">&lt; 10分</span>
+                        <span class="label">重来</span>
                     </button>
                     <button id="btn-hard" class="rate-btn">
-                        <span class="label">困难 (Hard)</span>
-                        <span class="interval" id="interval-hard">10 分钟</span>
+                        <span class="interval" id="interval-hard">1天</span>
+                        <span class="label">困难</span>
                     </button>
                     <button id="btn-good" class="rate-btn">
-                        <span class="label">良好 (Good)</span>
-                        <span class="interval" id="interval-good">1 天</span>
+                        <span class="interval" id="interval-good">3天</span>
+                        <span class="label">良好</span>
                     </button>
                     <button id="btn-easy" class="rate-btn">
-                        <span class="label">简单 (Easy)</span>
-                        <span class="interval" id="interval-easy">4 天</span>
+                        <span class="interval" id="interval-easy">5天</span>
+                        <span class="label">简单</span>
                     </button>
                 </div>
             </div>

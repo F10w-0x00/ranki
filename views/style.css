@@ -1,7 +1,33 @@
 /* RAnki Print-Grade Typography & Lean UI CSS (views/style.css)
- * Optimized for Kindle Paperwhite 3 (1072x1448 @ 300 PPI)
+ * Optimized for Kindle Paperwhite 3 (Model DP75SDI, 1072x1448 @ 300 PPI)
  */
 
+/* 1. Pure Font Asset Declarations (Anthropic Sans + SonyReader Ming) */
+@font-face {
+    font-family: "Anthropic Sans Web";
+    src: url("fonts/anthropic/AnthropicSans-Regular.woff") format("woff"),
+         url("fonts/anthropic/AnthropicSans-Regular.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Anthropic Sans Web";
+    src: url("fonts/anthropic/AnthropicSans-Italic.woff") format("woff"),
+         url("fonts/anthropic/AnthropicSans-Italic.ttf") format("truetype");
+    font-weight: normal;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: "SonyReader Ming";
+    src: local("SonyReader Ming"),
+         url("file:///mnt/us/fonts/SonyReader%20Ming.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* 2. Global Resets & E-ink Ink Distribution Rules */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -14,43 +40,42 @@
 body {
     background-color: #ffffff;
     color: #000000 !important;
-    font-family: "Bookerly", "Georgia", "Songti SC", serif;
-    font-size: 34px;
-    line-height: 1.55;
+    font-family: "Anthropic Sans Web", "SonyReader Ming", serif;
+    font-size: 44px;
+    line-height: 1.6;
     width: 1072px;
     height: 1448px;
     overflow: hidden;
     position: relative;
 }
 
-/* Top 72px Status & Navigation Header */
+/* 3. Top 64px Minimal Header (Lean Anki Bar) */
 .header-bar {
     position: absolute;
     top: 0;
     left: 0;
     width: 1072px;
-    height: 72px;
-    line-height: 72px;
-    border-bottom: 3px solid #000000;
-    padding: 0 20px;
+    height: 64px;
+    line-height: 64px;
+    border-bottom: 1.5px solid #000000;
+    padding: 0 24px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-weight: bold;
-    font-size: 28px;
     background: #ffffff;
     z-index: 100;
 }
 
 .header-btn {
-    min-width: 96px;
-    height: 56px;
-    line-height: 50px;
+    min-width: 80px;
+    height: 48px;
+    line-height: 44px;
     text-align: center;
-    border: 3px solid #000000;
+    border: 1.5px solid #000000;
+    border-radius: 8px;
     background: #ffffff;
     color: #000000;
-    font-size: 26px;
+    font-size: 24px;
     font-weight: bold;
     cursor: pointer;
     padding: 0 16px;
@@ -59,87 +84,186 @@ body {
 #deck-title {
     font-size: 28px;
     font-weight: bold;
+    max-width: 560px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    text-align: center;
 }
 
-/* View 1: Deck Selection */
+.review-badges {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.badge-item {
+    padding: 2px 10px;
+    border: 1.5px solid #000000;
+    border-radius: 6px;
+    font-size: 22px;
+    line-height: 1.2;
+}
+
+/* 4. View 1: Anki-Authentic Centered Deck Browser */
 #deck-view {
     position: absolute;
-    top: 72px;
+    top: 64px;
     bottom: 0;
     left: 0;
     width: 1072px;
-    padding: 24px;
     overflow-y: scroll;
     -webkit-overflow-scrolling: touch;
+    padding-bottom: 60px;
 }
 
-.deck-item {
-    min-height: 88px;
-    border-bottom: 2px solid #000000;
+.deck-container {
+    width: 940px;
+    margin: 36px auto 0 auto;
+}
+
+.deck-header-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 16px 20px;
+    padding: 12px 16px;
+    border-bottom: 1.5px solid #000000;
+    font-size: 24px;
+    font-weight: bold;
+    color: #000000;
+}
+
+.col-deck-name {
+    flex: 1;
+    text-align: left;
+}
+
+.col-count-header {
+    width: 96px;
+    text-align: right;
+    font-size: 22px;
+}
+
+.deck-list-body {
+    width: 100%;
+}
+
+.deck-item {
+    min-height: 76px;
+    border-bottom: 1px solid #d0d0d0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 16px;
     cursor: pointer;
+    background: #ffffff;
 }
 
 .deck-item:active {
-    background-color: #000000;
+    background-color: #000000 !important;
+    color: #ffffff !important;
+}
+
+.deck-item:active .deck-name,
+.deck-item:active .deck-count {
     color: #ffffff !important;
 }
 
 .deck-name {
+    flex: 1;
     font-size: 32px;
+    color: #000000;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.deck-name.has-subdecks {
     font-weight: bold;
 }
 
-.count-due {
-    display: inline-block;
-    padding: 6px 16px;
-    border: 3px solid #000000;
-    font-weight: bold;
+.deck-counts-group {
+    display: flex;
+    gap: 0;
+}
+
+.deck-count {
+    width: 96px;
+    text-align: right;
     font-size: 26px;
+    font-weight: bold;
+    color: #000000;
 }
 
-/* View 2: Card Review Core Area */
+.deck-count.zero {
+    font-weight: normal;
+    color: #666666;
+}
+
+.deck-footer {
+    width: 940px;
+    margin: 48px auto 0 auto;
+    text-align: center;
+}
+
+.deck-summary-text {
+    font-size: 26px;
+    margin-bottom: 24px;
+    color: #000000;
+}
+
+.btn-exit-app {
+    display: inline-block;
+    padding: 12px 48px;
+    border: 1.5px solid #000000;
+    border-radius: 8px;
+    font-size: 26px;
+    font-weight: bold;
+    background: #ffffff;
+    color: #000000;
+    cursor: pointer;
+}
+
+/* 5. View 2: Card Review Core Area */
 #review-view {
     position: absolute;
-    top: 72px;
+    top: 64px;
     bottom: 0;
     left: 0;
     width: 1072px;
 }
 
-/* Scrollable Card Content Box (top: 0, bottom: 130px) */
+/* Scrollable Card Content Box (top: 0, bottom: 110px) */
 .card-area {
     position: absolute;
     top: 0;
-    bottom: 130px;
+    bottom: 110px;
     left: 0;
     width: 1072px;
     overflow-y: scroll;
     -webkit-overflow-scrolling: touch;
-    font-size: 34px;
+    font-size: 44px;
     color: #000000 !important;
-    line-height: 1.55;
+    line-height: 1.6;
 }
 
 /* High-Contrast E-ink Scrollbar */
 .card-area::-webkit-scrollbar {
-    width: 16px;
+    width: 10px;
 }
 
 .card-area::-webkit-scrollbar-thumb {
     background-color: #000000;
-    border: 3px solid #ffffff;
+    border-radius: 5px;
 }
 
 .card-area::-webkit-scrollbar-track {
     background-color: #f2f2f2;
-    border-left: 2px solid #000000;
 }
 
-/* Front & Back Dual Buffer Slots */
+/* Front & Back Buffer Slots (Group A & Group B) */
 .card-box {
     width: 100%;
     min-height: 100%;
@@ -147,14 +271,21 @@ body {
     box-sizing: border-box;
     display: block;
     word-wrap: break-word;
-    font-size: 34px;
-    line-height: 1.55;
+    font-size: 44px;
+    line-height: 1.6;
     color: #000000 !important;
 }
 
+.card-box h1, .card-box h2, .card-box h3 {
+    font-size: 52px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    line-height: 1.4;
+}
+
 .card-box p, .card-box div, .card-box span, .card-box li {
-    font-size: 34px;
-    line-height: 1.55;
+    font-size: 44px;
+    line-height: 1.6;
 }
 
 .card-box.offscreen {
@@ -169,6 +300,15 @@ body {
 .card-box img {
     max-width: 100% !important;
     height: auto !important;
+}
+
+/* Anki Standard Answer Divider */
+hr#answer {
+    border: 0;
+    border-top: 1.5px solid #000000;
+    margin: 36px 0;
+    width: 100%;
+    display: block;
 }
 
 /* Anki Cloze Deletion Styling for E-ink */
@@ -192,27 +332,28 @@ body {
     display: none !important;
 }
 
-/* Bottom 130px Pinned Touch Action Bar */
+/* 6. Bottom 110px Pinned Touch Action Bar (Option A Two-Line Layout) */
 .action-bar {
     position: absolute;
     bottom: 0;
     left: 0;
     width: 1072px;
-    height: 130px;
-    border-top: 3px solid #000000;
-    padding: 16px 20px;
+    height: 110px;
+    border-top: 1.5px solid #000000;
+    padding: 12px 20px;
     background-color: #ffffff;
     z-index: 100;
 }
 
 .btn-full {
     width: 100%;
-    height: 96px;
-    line-height: 90px;
+    height: 86px;
+    line-height: 82px;
     text-align: center;
     font-size: 32px;
     font-weight: bold;
-    border: 3px solid #000000;
+    border: 1.5px solid #000000;
+    border-radius: 8px;
     background: #ffffff;
     color: #000000;
     cursor: pointer;
@@ -221,14 +362,15 @@ body {
 .btn-group {
     display: flex;
     justify-content: space-between;
-    gap: 14px;
-    height: 96px;
+    gap: 12px;
+    height: 86px;
 }
 
 .rate-btn {
     flex: 1;
-    height: 96px;
-    border: 3px solid #000000;
+    height: 86px;
+    border: 1.5px solid #000000;
+    border-radius: 8px;
     background: #ffffff;
     color: #000000;
     cursor: pointer;
@@ -236,19 +378,68 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-}
-
-.rate-btn .label {
-    font-size: 26px;
-    font-weight: bold;
+    padding: 4px 0;
 }
 
 .rate-btn .interval {
-    font-size: 18px;
-    margin-top: 4px;
+    font-size: 24px;
+    line-height: 1.2;
+    color: #000000;
 }
 
-.rate-btn:active, .btn-full:active, .header-btn:active {
-    background: #000000;
+.rate-btn .label {
+    font-size: 32px;
+    font-weight: bold;
+    line-height: 1.3;
+    margin-top: 2px;
+    color: #000000;
+}
+
+/* Tactile Active Feedback for E-ink */
+.rate-btn:active, .btn-full:active, .header-btn:active, .btn-exit-app:active {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+}
+
+.rate-btn:active *, .btn-full:active *, .header-btn:active * {
+    color: #ffffff !important;
+}
+
+/* 7. Deck Finished Celebration Panel */
+.celebration-panel {
+    width: 880px;
+    margin: 120px auto 0 auto;
+    text-align: center;
+    padding: 60px 40px;
+    border: 1.5px solid #000000;
+    border-radius: 12px;
+}
+
+.celebration-panel h2 {
+    font-size: 48px;
+    font-weight: bold;
+    margin-bottom: 24px;
+}
+
+.celebration-panel p {
+    font-size: 32px;
+    line-height: 1.6;
+    margin-bottom: 40px;
+}
+
+.celebration-btn {
+    display: inline-block;
+    padding: 16px 54px;
+    border: 1.5px solid #000000;
+    border-radius: 8px;
+    font-size: 30px;
+    font-weight: bold;
+    background: #ffffff;
+    color: #000000;
+    cursor: pointer;
+}
+
+.celebration-btn:active {
+    background: #000000 !important;
     color: #ffffff !important;
 }
