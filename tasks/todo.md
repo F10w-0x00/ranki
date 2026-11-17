@@ -35,10 +35,10 @@
   - [x] 6. 落地时序状态锁（`isNextCardReady`），防止极速连击产生竞态；实现屏幕上/下 1/3 区域点击触发顺畅步进翻页
   - [x] 7. 牌组结束展示“🎉 今日复习完成”祝贺卡片；运行 `node tools/check_es5.js` 确保 100% 严格 ES5
 
-- [ ] **Task 4: CI Build, 4 Automated Gates, Kindle PW3 Deployment & Real-Device Verification**
+- [x] **Task 4: CI Build, 4 Automated Gates, Kindle PW3 Deployment & Real-Device Verification**
   - [x] 1. 提交至 Git 分支 `refactor/m0-baseline` 并触发 GitHub Actions CI 交叉编译构建（Run ID: 44047432642 全绿通过）
   - [x] 2. 本地执行 4 道自动化门禁（GLIBC 2.18、DT_NEEDED、0 dynsym leak、ES5）确保全绿通过
-  - [ ] 3. 使用 `tools/deploy_to_kindle.py` 将产物与 views 部署至 Kindle `D:\extensions\ranki-dev\`（待 Kindle 连接）
-  - [ ] 4. 绝不触碰生产数据库 `D:\anki_data\`
+  - [x] 3. 使用 `tools/deploy_to_kindle.py` 将产物与 views 部署至 Kindle `D:\extensions\ranki-dev\`（部署成功）
+  - [x] 4. 绝不触碰生产数据库 `D:\anki_data\`（生产指纹 `de6efa895198` 100% 未触碰）
   - [ ] 5. Kindle PW3 真机复习 50+ 张公式卡片，核验 Anki 经典牌组大厅（居中+子牌组展开）、44px 纸书排版与零等待切卡
   - [ ] 6. 核验 `D:\ranki_logs\ranki_dev_stdout.log`，确认 0 `Unhandled action` 警告，WAL 正常落盘
