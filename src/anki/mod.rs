@@ -192,7 +192,7 @@ impl AnkiService {
             None
         };
 
-        let deck_name = col.get_current_deck().map(|d| d.name.clone()).unwrap_or_else(|_| "复习".into());
+        let deck_name = col.get_current_deck().map(|d| d.name.to_string()).unwrap_or_else(|_| "复习".to_string());
         let counts = col.current_deck_tree()
             .ok()
             .flatten()
