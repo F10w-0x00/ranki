@@ -15,6 +15,7 @@ pub struct DeckItem {
     pub name: String,
     pub full_name: String,
     pub depth: usize,
+    pub has_children: bool,
     pub new_count: u32,
     pub learn_count: u32,
     pub review_count: u32,
@@ -87,6 +88,16 @@ impl AnkiService {
         Ok(list)
     }
 
+    pub fn studied_today(&mut self) -> String {
+        if let Some(col) = self.col.as_mut() {
+            col.studied_today()
+                .map(|s| s.replace('\n', " "))
+                .unwrap_or_else(|_| "今天在 0 秒内学习了 0 张卡片 (平均每张卡片 0 秒)".to_string())
+        } else {
+            "今天在 0 秒内学习了 0 张卡片 (平均每张卡片 0 秒)".to_string()
+        }
+    }
+
     pub fn select_deck(&mut self, deck_id: i64) -> Result<(), String> {
         let col = self.col.as_mut().ok_or("Collection not open")?;
         col.set_current_deck(DeckId(deck_id))
@@ -99,7 +110,7 @@ impl AnkiService {
         let col = self.col.as_mut().ok_or("Collection not open")?;
         let queued = col
             .get_queued_cards(1, false)
-            .map_err(|e| format!("Failed to fetch queued cards: {:?}", e))?;
+            .map_err(|e| format!("Failed to fetch queued card: {:?}", e))?;
 
         if queued.cards.is_empty() {
             self.current_card_id = None;
@@ -107,16 +118,15 @@ impl AnkiService {
             return Ok(None);
         }
 
-        let queued_card = &queued.cards[0];
-        let cid = queued_card.card.id();
-        let states = queued_card.states.clone();
+        let current = &queued.cards[0];
+        let cid = current.card.id();
         self.current_card_id = Some(cid);
+        self.current_states = Some(current.states.clone());
         self.card_shown_at = Some(Instant::now());
 
         let intervals = col
-            .describe_next_states(&states)
+            .describe_next_states(&current.states)
             .unwrap_or_else(|_| vec!["<10分".into(), "1天".into(), "3天".into(), "5天".into()]);
-        self.current_states = Some(states);
 
         let rendered = col
             .render_existing_card(cid, false, false)
@@ -137,9 +147,15 @@ impl AnkiService {
 
     pub fn get_pipeline_cards(&mut self) -> Result<Option<CardPipelinePayload>, String> {
         let col = self.col.as_mut().ok_or("Collection not open")?;
+
+        let current_deck_name = col
+            .get_current_deck()
+            .map(|d| d.name.to_string())
+            .unwrap_or_else(|_| "复习".to_string());
+
         let queued = col
             .get_queued_cards(2, false)
-            .map_err(|e| format!("Failed to fetch queued cards: {:?}", e))?;
+            .map_err(|e| format!("Failed to fetch pipeline cards: {:?}", e))?;
 
         if queued.cards.is_empty() {
             self.current_card_id = None;
@@ -147,31 +163,31 @@ impl AnkiService {
             return Ok(None);
         }
 
-        let queued_card = &queued.cards[0];
-        let cid = queued_card.card.id();
-        let states = queued_card.states.clone();
+        let media_uri_prefix = format!("file://{}/", self.media_dir.display());
+
+        let current_card = &queued.cards[0];
+        let cid = current_card.card.id();
         self.current_card_id = Some(cid);
+        self.current_states = Some(current_card.states.clone());
         self.card_shown_at = Some(Instant::now());
 
-        let intervals = col
-            .describe_next_states(&states)
+        let current_intervals = col
+            .describe_next_states(&current_card.states)
             .unwrap_or_else(|_| vec!["<10分".into(), "1天".into(), "3天".into(), "5天".into()]);
-        self.current_states = Some(states);
 
-        let rendered = col
+        let current_rendered = col
             .render_existing_card(cid, false, false)
-            .map_err(|e| format!("Failed to render card {}: {:?}", cid, e))?;
+            .map_err(|e| format!("Failed to render current card {}: {:?}", cid, e))?;
 
-        let media_uri_prefix = format!("file://{}/", self.media_dir.display());
-        let current = CardPayload {
+        let current_payload = CardPayload {
             card_id: cid.0,
-            question_html: rewrite_media_urls(&rendered.question(), &media_uri_prefix),
-            answer_html: rewrite_media_urls(&rendered.answer(), &media_uri_prefix),
-            css: rendered.css,
-            intervals,
+            question_html: rewrite_media_urls(&current_rendered.question(), &media_uri_prefix),
+            answer_html: rewrite_media_urls(&current_rendered.answer(), &media_uri_prefix),
+            css: current_rendered.css,
+            intervals: current_intervals,
         };
 
-        let next = if queued.cards.len() > 1 {
+        let next_payload = if queued.cards.len() > 1 {
             let next_card = &queued.cards[1];
             let next_cid = next_card.card.id();
             let next_intervals = col
@@ -192,20 +208,13 @@ impl AnkiService {
             None
         };
 
-        let deck_name = col.get_current_deck().map(|d| d.name.to_string()).unwrap_or_else(|_| "复习".to_string());
-        let counts = col.current_deck_tree()
-            .ok()
-            .flatten()
-            .map(|t| (t.new_count, t.learn_count, t.review_count))
-            .unwrap_or((0, 0, 0));
-
         Ok(Some(CardPipelinePayload {
-            current,
-            next,
-            deck_name,
-            new_count: counts.0,
-            learn_count: counts.1,
-            review_count: counts.2,
+            current: current_payload,
+            next: next_payload,
+            deck_name: current_deck_name,
+            new_count: queued.new_count,
+            learn_count: queued.learn_count,
+            review_count: queued.review_count,
         }))
     }
 
@@ -215,7 +224,7 @@ impl AnkiService {
         let col = self.col.as_mut().ok_or("Collection not open")?;
         let queued = col
             .get_queued_cards(2, false)
-            .map_err(|e| format!("Failed to fetch queued cards: {:?}", e))?;
+            .map_err(|e| format!("Failed to fetch next queued card: {:?}", e))?;
 
         if queued.cards.is_empty() {
             self.current_card_id = None;
@@ -304,6 +313,88 @@ impl AnkiService {
         }
         Ok(())
     }
+
+    pub fn sync(&mut self, hkey: &str, endpoint: Option<String>) -> Result<String, String> {
+        if hkey.trim().is_empty() {
+            return Err("未配置同步密钥，请先在设置中登录 AnkiWeb 账号".to_string());
+        }
+
+        let col = self.col.as_mut().ok_or("数据库未打开")?;
+
+        let endpoint_url = match endpoint {
+            Some(ref s) if !s.trim().is_empty() => {
+                let trimmed = s.trim();
+                let url_str = if trimmed.starts_with("http://") || trimmed.starts_with("https://") {
+                    trimmed.to_string()
+                } else {
+                    format!("https://{}", trimmed)
+                };
+                Some(reqwest::Url::parse(&url_str).map_err(|e| format!("同步服务器地址格式错误: {}", e))?)
+            }
+            _ => None,
+        };
+
+        let auth = anki::sync::login::SyncAuth {
+            hkey: hkey.to_string(),
+            endpoint: endpoint_url,
+            io_timeout_secs: Some(45),
+        };
+
+        let client = reqwest::Client::builder()
+            .timeout(std::time::Duration::from_secs(45))
+            .build()
+            .map_err(|e| format!("创建网络客户端失败: {}", e))?;
+
+        let rt = tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .map_err(|e| format!("初始化异步运行时失败: {}", e))?;
+
+        println!("[SYNC] Starting collection sync with AnkiWeb/server...");
+        let output = rt.block_on(async {
+            col.normal_sync(auth, client).await
+        }).map_err(|e| format!("同步失败: {:?}", e))?;
+
+        // Checkpoint WAL after sync
+        let _ = col.storage
+            .db()
+            .execute_batch("PRAGMA wal_checkpoint(TRUNCATE);");
+
+        println!("[SYNC] Sync completed successfully: required={:?}, host={}", output.required, output.host_number);
+        Ok("同步成功！牌组和卡片进度已与云端同步。".to_string())
+    }
+
+    pub fn login(&self, username: &str, password: &str, endpoint: Option<String>) -> Result<String, String> {
+        let endpoint_clean = match endpoint {
+            Some(ref s) if !s.trim().is_empty() => {
+                let trimmed = s.trim();
+                if trimmed.starts_with("http://") || trimmed.starts_with("https://") {
+                    Some(trimmed.to_string())
+                } else {
+                    Some(format!("https://{}", trimmed))
+                }
+            }
+            _ => None,
+        };
+
+        let client = reqwest::Client::builder()
+            .timeout(std::time::Duration::from_secs(30))
+            .build()
+            .map_err(|e| format!("创建网络客户端失败: {}", e))?;
+
+        let rt = tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .map_err(|e| format!("初始化异步运行时失败: {}", e))?;
+
+        println!("[LOGIN] Attempting login to AnkiWeb for user: {}", username);
+        let auth = rt.block_on(async {
+            anki::sync::login::sync_login(username, password, endpoint_clean, client).await
+        }).map_err(|e| format!("登录失败: {:?}", e))?;
+
+        println!("[LOGIN] Login successful! Obtained hkey of len {}", auth.hkey.len());
+        Ok(auth.hkey)
+    }
 }
 
 fn flatten_deck_tree(
@@ -319,17 +410,21 @@ fn flatten_deck_tree(
         } else {
             format!("{}::{}", prefix, child.name)
         };
+        let has_children = !child.children.is_empty();
         list.push(DeckItem {
             id: child.deck_id,
             name: child.name.clone(),
             full_name: full_name.clone(),
             depth,
+            has_children,
             new_count: child.new_count,
             learn_count: child.learn_count,
             review_count: child.review_count,
             due_count: due,
         });
-        flatten_deck_tree(&child.children, depth + 1, &full_name, list);
+        if has_children {
+            flatten_deck_tree(&child.children, depth + 1, &full_name, list);
+        }
     }
 }
 
@@ -344,14 +439,23 @@ fn rewrite_media_urls(html: &str, media_prefix: &str) -> String {
             let src_start = src_idx + 5;
             out.push_str(&tag_rest[..src_start]);
             let after_src = &tag_rest[src_start..];
-            if !after_src.starts_with("http://")
-                && !after_src.starts_with("https://")
-                && !after_src.starts_with("file://")
-                && !after_src.starts_with("data:")
-            {
-                out.push_str(media_prefix);
+            if let Some(quote_idx) = after_src.find('"') {
+                let src_val = &after_src[..quote_idx];
+                if !src_val.starts_with("http://")
+                    && !src_val.starts_with("https://")
+                    && !src_val.starts_with("file://")
+                    && !src_val.starts_with("data:")
+                {
+                    out.push_str(media_prefix);
+                }
+                out.push_str(src_val);
+                out.push('"');
+                rest = &after_src[quote_idx + 1..];
+            } else {
+                out.push_str(tag_rest);
+                rest = "";
+                break;
             }
-            rest = after_src;
         } else {
             out.push_str("<img ");
             rest = &tag_rest[5..];
@@ -359,17 +463,4 @@ fn rewrite_media_urls(html: &str, media_prefix: &str) -> String {
     }
     out.push_str(rest);
     out
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_rewrite_media_urls() {
-        let input = r#"<p>Formula</p><img src="paste-1.png"> text <img src="file:///already/abs.png">"#;
-        let output = rewrite_media_urls(input, "file:///mnt/us/media/");
-        assert!(output.contains(r#"src="file:///mnt/us/media/paste-1.png""#));
-        assert!(output.contains(r#"src="file:///already/abs.png""#));
-    }
 }

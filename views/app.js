@@ -1,6 +1,6 @@
 /* RAnki Unified Web-SPA Frontend Engine (views/app.js)
  * Strict ES5 syntax for WebKit 1.0 (JavaScriptCore 2012)
- * Quad-Slot Ping-Pong Pre-Rendering Pipeline & Anki-Authentic Deck Browser
+ * Authentic AnkiDroid UI, Subdeck Folding, Cloud Sync, & Quad-Slot Ping-Pong Pre-Rendering
  */
 
 (function () {
@@ -16,6 +16,7 @@
     var styleEl = null;
     var cardAreaEl = null;
     var panelFinished = null;
+    var toastTimer = null;
 
     // Pipeline State Machine
     var currentGroup = 'A';       // 'A' or 'B'
@@ -31,11 +32,29 @@
     var currentCardData = null;
     var nextCardData = null;
 
+    // Decks state & subdeck collapsing
+    var cachedDecks = [];
+    var collapsedDecks = {}; // full_name -> boolean
+
     // Send up-channel command to Rust Host
     function sendHost(action, payload) {
         var token = tokenCounter++;
         var payloadStr = typeof payload === 'string' ? payload : JSON.stringify(payload || {});
         document.title = "RA:" + action + ":" + token + ":" + payloadStr;
+    }
+
+    // Toast notification display
+    function showToast(msg) {
+        var toastEl = document.getElementById('toast');
+        if (!toastEl) return;
+        toastEl.textContent = msg;
+        toastEl.style.display = 'block';
+        if (toastTimer) {
+            clearTimeout(toastTimer);
+        }
+        toastTimer = setTimeout(function () {
+            toastEl.style.display = 'none';
+        }, 3500);
     }
 
     // Down-channel dispatcher called by Rust Host: window.RAnki.dispatch(event, payload)
@@ -46,13 +65,25 @@
                 console.log("[RAnki-SPA] Host handshake acknowledged.");
             } else if (event === 'LOAD_DECK_LIST') {
                 renderDeckList(payload);
+            } else if (event === 'DECK_EMPTY') {
+                showToast(payload.message || '🎉 该牌组今日待复习卡片已全部完成！');
+                if (payload.decks) {
+                    renderDeckList(payload);
+                }
             } else if (event === 'SHOW_CARD_PIPELINE') {
                 renderCardPipeline(payload);
             } else if (event === 'PREPARE_NEXT_CARD') {
                 handlePrepareNextCard(payload);
             } else if (event === 'SHOW_CARD') {
-                // Fallback for single card payload
                 renderCardFallback(payload);
+            } else if (event === 'CONFIG_DATA') {
+                handleConfigData(payload);
+            } else if (event === 'LOGIN_RESULT') {
+                handleLoginResult(payload);
+            } else if (event === 'SYNC_RESULT') {
+                handleSyncResult(payload);
+            } else if (event === 'SETTINGS_SAVED') {
+                showToast('✅ 设置已保存');
             }
         }
     };
@@ -90,80 +121,157 @@
         return restoredHtml;
     }
 
-    // 1. Render Anki-Authentic Centered Deck Browser
+    // 1. Render AnkiDroid-Authentic Deck Browser (No Table Grid)
     function renderDeckList(data) {
         currentView = 'deck-picker';
         document.getElementById('deck-view').style.display = 'block';
         document.getElementById('review-view').style.display = 'none';
 
-        var titleEl = document.getElementById('deck-title');
-        if (titleEl) {
-            titleEl.textContent = 'RAnki 牌组大厅';
-        }
-        var badgesEl = document.getElementById('header-badges');
-        if (badgesEl) {
-            badgesEl.style.display = 'none';
-        }
+        // Top Header in Deck Mode
+        var brandEl = document.getElementById('deck-header-brand');
+        if (brandEl) brandEl.style.display = 'inline-block';
+
         var backBtn = document.getElementById('btn-back');
-        if (backBtn) {
-            backBtn.style.visibility = 'hidden';
-        }
+        if (backBtn) backBtn.style.display = 'none';
+
+        var titleEl = document.getElementById('deck-title');
+        if (titleEl) titleEl.style.display = 'none';
+
+        var actionsEl = document.getElementById('deck-actions');
+        if (actionsEl) actionsEl.style.display = 'inline-block';
+
+        var badgesEl = document.getElementById('header-badges');
+        if (badgesEl) badgesEl.style.display = 'none';
 
         var listEl = document.getElementById('deck-list');
         listEl.innerHTML = '';
 
         var decks = (data && data.decks) || [];
+        cachedDecks = decks;
+
         if (decks.length === 0) {
             listEl.innerHTML = '<div class="empty-msg" style="padding: 40px; text-align: center; font-size: 28px;">没有可复习的牌组</div>';
             return;
         }
 
         var totalDue = 0;
+        for (var j = 0; j < decks.length; j++) {
+            totalDue += (decks[j].due_count || 0);
+        }
+
+        var subtitleEl = document.getElementById('deck-subtitle');
+        if (subtitleEl) {
+            subtitleEl.textContent = '待复习: ' + totalDue + ' 张';
+        }
+
+        var summaryEl = document.getElementById('deck-summary');
+        if (summaryEl) {
+            summaryEl.textContent = data.studied_today || ('今天在 0 秒内学习了 0 张卡片 (平均每张卡片 0 秒)');
+        }
+
         for (var i = 0; i < decks.length; i++) {
             var deck = decks[i];
-            totalDue += (deck.due_count || 0);
-
-            var item = document.createElement('div');
-            item.className = 'deck-item';
-            item.setAttribute('data-id', deck.id);
-
             var depth = deck.depth || 0;
-            var indentPx = depth * 32;
-            var prefix = depth > 0 ? '├─ ' : '▾ ';
+            var isParent = !!deck.has_children;
+            var indentPx = depth * 28;
 
-            var newCount = typeof deck.new_count !== 'undefined' ? deck.new_count : '-';
-            var learnCount = typeof deck.learn_count !== 'undefined' ? deck.learn_count : '-';
-            var reviewCount = typeof deck.review_count !== 'undefined' ? deck.review_count : (deck.due_count || 0);
+            var row = document.createElement('div');
+            row.className = 'deck-row';
+            row.setAttribute('data-id', deck.id);
+            row.setAttribute('data-full-name', deck.full_name);
+            row.setAttribute('data-depth', depth);
 
-            var newClass = (newCount === 0 || newCount === '-') ? 'deck-count zero' : 'deck-count';
-            var learnClass = (learnCount === 0 || learnCount === '-') ? 'deck-count zero' : 'deck-count';
-            var reviewClass = (reviewCount === 0 || reviewCount === '-') ? 'deck-count zero' : 'deck-count';
+            // Left side: chevron + deck name
+            var leftDiv = document.createElement('div');
+            leftDiv.className = 'deck-row-left ' + (isParent ? 'is-parent' : 'is-child');
+            leftDiv.style.paddingLeft = indentPx + 'px';
 
-            var nameHtml = '<span class="deck-name" style="padding-left: ' + indentPx + 'px;">' +
-                '<span style="font-family: monospace; font-size: 24px; color: #444;">' + prefix + '</span>' +
-                escapeHtml(deck.name) +
-                '</span>';
+            if (isParent) {
+                var isCollapsed = !!collapsedDecks[deck.full_name];
+                var chevron = document.createElement('span');
+                chevron.className = 'deck-chevron';
+                chevron.textContent = isCollapsed ? '▸' : '▾';
+                chevron.setAttribute('data-target-full-name', deck.full_name);
+                chevron.onclick = (function (fn, chevEl) {
+                    return function (e) {
+                        e.stopPropagation();
+                        toggleCollapse(fn, chevEl);
+                    };
+                })(deck.full_name, chevron);
+                leftDiv.appendChild(chevron);
+            }
 
-            var countsHtml = '<div class="deck-counts-group">' +
-                '<span class="' + newClass + '">' + newCount + '</span>' +
-                '<span class="' + learnClass + '">' + learnCount + '</span>' +
-                '<span class="' + reviewClass + '">' + reviewCount + '</span>' +
-                '</div>';
+            var nameSpan = document.createElement('span');
+            nameSpan.className = 'deck-name-text';
+            nameSpan.textContent = deck.name;
+            leftDiv.appendChild(nameSpan);
 
-            item.innerHTML = nameHtml + countsHtml;
+            // Right side: 3 numeric counts
+            var rightDiv = document.createElement('div');
+            rightDiv.className = 'deck-row-right';
 
-            item.onclick = (function (dId) {
+            var newC = deck.new_count || 0;
+            var learnC = deck.learn_count || 0;
+            var dueC = deck.review_count || 0;
+
+            var newSpan = document.createElement('span');
+            newSpan.className = 'deck-num deck-num-new' + (newC === 0 ? ' zero' : '');
+            newSpan.textContent = newC;
+
+            var learnSpan = document.createElement('span');
+            learnSpan.className = 'deck-num deck-num-learn' + (learnC === 0 ? ' zero' : '');
+            learnSpan.textContent = learnC;
+
+            var dueSpan = document.createElement('span');
+            dueSpan.className = 'deck-num deck-num-due' + (dueC === 0 ? ' zero' : '');
+            dueSpan.textContent = dueC;
+
+            rightDiv.appendChild(newSpan);
+            rightDiv.appendChild(learnSpan);
+            rightDiv.appendChild(dueSpan);
+
+            row.appendChild(leftDiv);
+            row.appendChild(rightDiv);
+
+            // Click deck row to select deck
+            row.onclick = (function (dId) {
                 return function () {
                     sendHost('SELECT_DECK', { deck_id: dId });
                 };
             })(deck.id);
 
-            listEl.appendChild(item);
+            listEl.appendChild(row);
         }
 
-        var summaryEl = document.getElementById('deck-summary');
-        if (summaryEl) {
-            summaryEl.textContent = '今日待复习卡片总数: ' + totalDue + ' 张';
+        // Apply collapsed state
+        applyCollapsedVisibility();
+    }
+
+    // Toggle collapse for parent deck
+    function toggleCollapse(fullName, chevronEl) {
+        collapsedDecks[fullName] = !collapsedDecks[fullName];
+        chevronEl.textContent = collapsedDecks[fullName] ? '▸' : '▾';
+        applyCollapsedVisibility();
+    }
+
+    // Apply visibility based on collapsed parent decks
+    function applyCollapsedVisibility() {
+        var rows = document.querySelectorAll('.deck-row');
+        for (var i = 0; i < rows.length; i++) {
+            var row = rows[i];
+            var fn = row.getAttribute('data-full-name') || '';
+            var shouldHide = false;
+
+            for (var pName in collapsedDecks) {
+                if (collapsedDecks.hasOwnProperty(pName) && collapsedDecks[pName]) {
+                    if (fn.indexOf(pName + '::') === 0) {
+                        shouldHide = true;
+                        break;
+                    }
+                }
+            }
+
+            row.style.display = shouldHide ? 'none' : 'block';
         }
     }
 
@@ -195,19 +303,25 @@
             panelFinished.style.display = 'none';
         }
 
+        // Top Header in Reviewer Mode
+        var brandEl = document.getElementById('deck-header-brand');
+        if (brandEl) brandEl.style.display = 'none';
+
         var backBtn = document.getElementById('btn-back');
-        if (backBtn) {
-            backBtn.style.visibility = 'visible';
-        }
+        if (backBtn) backBtn.style.display = 'inline-block';
 
         var titleEl = document.getElementById('deck-title');
-        if (titleEl && data.deck_name) {
-            titleEl.textContent = data.deck_name;
+        if (titleEl) {
+            titleEl.style.display = 'inline-block';
+            titleEl.textContent = data.deck_name || '卡片复习';
         }
+
+        var actionsEl = document.getElementById('deck-actions');
+        if (actionsEl) actionsEl.style.display = 'none';
 
         var badgesEl = document.getElementById('header-badges');
         if (badgesEl) {
-            badgesEl.style.display = 'flex';
+            badgesEl.style.display = 'inline-block';
             var total = (data.new_count || 0) + (data.learn_count || 0) + (data.review_count || 0);
             badgesEl.innerHTML = '<span class="badge-item">' + total + '</span>';
         }
@@ -300,38 +414,37 @@
     }
 
     function executeFlip() {
+        isFlipped = true;
+        pendingFlip = false;
+
         if (currentGroup === 'A') {
             slotAFront.className = 'card-box offscreen';
             slotABack.className = 'card-box';
+            slotABack.scrollTop = 0;
         } else {
             slotBFront.className = 'card-box offscreen';
             slotBBack.className = 'card-box';
+            slotBBack.scrollTop = 0;
         }
-
-        isFlipped = true;
-        pendingFlip = false;
 
         document.getElementById('bar-unflipped').style.display = 'none';
         document.getElementById('bar-flipped').style.display = 'block';
 
-        if (cardAreaEl) {
-            cardAreaEl.scrollTop = 0;
-        }
-
         sendHost('CARD_FLIPPED', {});
     }
 
-    // 4. Rate Card & Instant Next-Card Transition (<= 5ms)
-    function rateCard(rating) {
+    // 4. Rate Card & Advance Ping-Pong Buffer
+    function handleRating(rating) {
+        if (!isFlipped) return;
+
         if (!hasNextCard) {
-            // Last card completed: show celebration panel
+            // Last card or deck completed
             sendHost('RATE_CARD', { rating: rating });
-            showCelebration();
             return;
         }
 
         if (!isNextReady) {
-            console.log("[RAnki-SPA] Next card background typesetting in progress. Queue Lock engaged.");
+            console.log("[RAnki-SPA] Next card typesetting in progress. Queue lock engaged.");
             pendingNext = true;
             pendingRating = rating;
             return;
@@ -341,76 +454,63 @@
     }
 
     function executeNextSwap(rating) {
-        var r = rating || pendingRating;
+        if (!rating && pendingRating) {
+            rating = pendingRating;
+            pendingRating = '';
+        }
         pendingNext = false;
-        pendingRating = '';
 
-        // Instant DOM swap (<= 5ms)
+        // Instant DOM swap to pre-rendered card
         if (currentGroup === 'A') {
-            currentGroup = 'B';
-            slotAFront.className = 'card-box offscreen';
             slotABack.className = 'card-box offscreen';
             slotBFront.className = 'card-box';
-            slotBBack.className = 'card-box offscreen';
+            slotBFront.scrollTop = 0;
+            currentGroup = 'B';
         } else {
-            currentGroup = 'A';
-            slotBFront.className = 'card-box offscreen';
             slotBBack.className = 'card-box offscreen';
             slotAFront.className = 'card-box';
-            slotABack.className = 'card-box offscreen';
+            slotAFront.scrollTop = 0;
+            currentGroup = 'A';
         }
 
         currentCardData = nextCardData;
         nextCardData = null;
         isFlipped = false;
-        pendingFlip = false;
-        isTypesettingDone = true; // Back was already pre-typeset in offscreen buffer!
+        isTypesettingDone = true;
         isNextReady = false;
 
+        updateIntervals(currentCardData ? currentCardData.intervals : null);
         document.getElementById('bar-unflipped').style.display = 'block';
         document.getElementById('bar-flipped').style.display = 'none';
 
-        if (cardAreaEl) {
-            cardAreaEl.scrollTop = 0;
-        }
-
-        if (currentCardData) {
-            updateIntervals(currentCardData.intervals);
-            if (styleEl && currentCardData.css) {
-                styleEl.textContent = currentCardData.css;
-            }
-        }
-
-        // Notify Host to commit review & fetch Card N+2
-        sendHost('RATE_AND_FETCH_NEXT', { rating: r });
+        sendHost('RATE_AND_FETCH_NEXT', { rating: rating || 'good' });
     }
 
-    // 5. Handle PREPARE_NEXT_CARD from Host
-    function handlePrepareNextCard(payload) {
-        if (!payload || !payload.has_next || !payload.next_card) {
+    // 5. Receive next card N+2 in pipeline
+    function handlePrepareNextCard(data) {
+        if (!data || !data.has_next || !data.next_card) {
             hasNextCard = false;
             isNextReady = true;
+            console.log("[RAnki-SPA] Reached end of card queue.");
             return;
         }
 
-        nextCardData = payload.next_card;
         hasNextCard = true;
+        nextCardData = data.next_card;
+
+        var targetFront = (currentGroup === 'A') ? slotBFront : slotAFront;
+        var targetBack = (currentGroup === 'A') ? slotBBack : slotABack;
+
+        targetFront.className = 'card-box offscreen';
+        targetBack.className = 'card-box offscreen';
+        targetFront.innerHTML = preprocessCardHtml(nextCardData.question_html || '');
+        targetBack.innerHTML = preprocessCardHtml(nextCardData.answer_html || '');
+
         isNextReady = false;
 
-        // Populate the idle group
-        var idleFront = (currentGroup === 'A') ? slotBFront : slotAFront;
-        var idleBack = (currentGroup === 'A') ? slotBBack : slotABack;
-
-        idleFront.className = 'card-box offscreen';
-        idleBack.className = 'card-box offscreen';
-
-        idleFront.innerHTML = preprocessCardHtml(nextCardData.question_html || '');
-        idleBack.innerHTML = preprocessCardHtml(nextCardData.answer_html || '');
-
-        // Background MathJax typesetting
         if (window.MathJax && window.MathJax.Hub && window.MathJax.Hub.Queue) {
-            window.MathJax.Hub.Queue(["Typeset", window.MathJax.Hub, idleFront]);
-            window.MathJax.Hub.Queue(["Typeset", window.MathJax.Hub, idleBack], function () {
+            window.MathJax.Hub.Queue(["Typeset", window.MathJax.Hub, targetFront]);
+            window.MathJax.Hub.Queue(["Typeset", window.MathJax.Hub, targetBack], function () {
                 isNextReady = true;
                 if (pendingNext) {
                     executeNextSwap();
@@ -418,156 +518,201 @@
             });
         } else {
             isNextReady = true;
-            if (pendingNext) {
-                executeNextSwap();
-            }
         }
     }
 
-    // 6. Single-card Fallback
+    // Fallback for single card payload
     function renderCardFallback(data) {
         renderCardPipeline({
             current: data,
             next: null,
-            deck_name: '复习',
+            deck_name: '卡片复习',
             new_count: 0,
             learn_count: 0,
-            review_count: 0
+            review_count: 1
         });
     }
 
-    // 7. Deck Finished Celebration
-    function showCelebration() {
-        slotAFront.className = 'card-box offscreen';
-        slotABack.className = 'card-box offscreen';
-        slotBFront.className = 'card-box offscreen';
-        slotBBack.className = 'card-box offscreen';
-
-        if (panelFinished) {
-            panelFinished.style.display = 'block';
+    // 6. Settings & Sync IPC Handlers
+    function handleConfigData(payload) {
+        var badge = document.getElementById('setting-status-badge');
+        if (badge) {
+            if (payload.has_hkey) {
+                badge.textContent = '当前状态: 已配置 AnkiWeb 密钥 (可直接同步)';
+                badge.style.color = '#005500';
+            } else {
+                badge.textContent = '当前状态: 未登录 (请输入账号密码登录)';
+                badge.style.color = '#880000';
+            }
         }
-        document.getElementById('bar-unflipped').style.display = 'none';
-        document.getElementById('bar-flipped').style.display = 'none';
-
-        var titleEl = document.getElementById('deck-title');
-        if (titleEl) titleEl.textContent = '今日复习已完成';
+        var srvEl = document.getElementById('setting-server');
+        if (srvEl && payload.sync_server) {
+            srvEl.value = payload.sync_server;
+        }
     }
 
-    function exitApp() {
-        sendHost('exit', {});
+    function handleLoginResult(payload) {
+        document.getElementById('modal-sync').style.display = 'none';
+        if (payload.success) {
+            showToast('✅ ' + payload.message);
+            // Automatically trigger sync upon successful login
+            document.getElementById('modal-sync').style.display = 'block';
+            sendHost('SYNC_COLLECTION', {});
+        } else {
+            showToast('❌ ' + payload.message);
+            document.getElementById('modal-settings').style.display = 'block';
+        }
     }
 
-    function backToDecks() {
-        sendHost('EXIT_DECK', {});
+    function handleSyncResult(payload) {
+        document.getElementById('modal-sync').style.display = 'none';
+        if (payload.success) {
+            showToast('✅ ' + payload.message);
+            if (payload.decks) {
+                renderDeckList({
+                    decks: payload.decks,
+                    studied_today: payload.studied_today
+                });
+            }
+        } else {
+            showToast('❌ ' + payload.message);
+            if (payload.need_login) {
+                document.getElementById('modal-settings').style.display = 'block';
+                sendHost('GET_CONFIG', {});
+            }
+        }
     }
 
-    // Setup events, scrolling & gestures on window load
-    window.onload = function () {
+    // 7. Page Initialization
+    window.addEventListener('DOMContentLoaded', function () {
         slotAFront = document.getElementById('slot-a-front');
         slotABack = document.getElementById('slot-a-back');
         slotBFront = document.getElementById('slot-b-front');
         slotBBack = document.getElementById('slot-b-back');
-
         styleEl = document.getElementById('card-dynamic-style');
         cardAreaEl = document.querySelector('.card-area');
         panelFinished = document.getElementById('panel-finished');
 
-        // Touch & Mouse Drag Scrolling for Kindle WebKit 1.0
-        if (cardAreaEl) {
-            var touchStartY = 0;
-            var touchStartScrollTop = 0;
-            var isTouching = false;
-            var touchMoved = false;
-
-            cardAreaEl.addEventListener('touchstart', function (e) {
-                if (e.touches && e.touches.length > 0) {
-                    isTouching = true;
-                    touchMoved = false;
-                    touchStartY = e.touches[0].pageY;
-                    touchStartScrollTop = cardAreaEl.scrollTop;
-                }
-            }, false);
-
-            cardAreaEl.addEventListener('touchmove', function (e) {
-                if (!isTouching || !e.touches || e.touches.length === 0) return;
-                var deltaY = e.touches[0].pageY - touchStartY;
-                if (Math.abs(deltaY) > 10) {
-                    touchMoved = true;
-                }
-                cardAreaEl.scrollTop = touchStartScrollTop - deltaY;
-            }, false);
-
-            cardAreaEl.addEventListener('touchend', function (e) {
-                isTouching = false;
-                // If pure tap without drag, support 1/3 screen step paging
-                if (!touchMoved && e.changedTouches && e.changedTouches.length > 0) {
-                    var tapY = e.changedTouches[0].clientY;
-                    var winHeight = window.innerHeight || 1448;
-                    if (tapY < winHeight * 0.35) {
-                        // Top 35%: scroll up 240px
-                        cardAreaEl.scrollTop -= 240;
-                    } else if (tapY > winHeight * 0.55 && tapY < winHeight * 0.90) {
-                        // Bottom 55-90%: scroll down 240px
-                        cardAreaEl.scrollTop += 240;
-                    }
-                }
-            }, false);
-
-            // Mouse fallback for X11 events
-            var isMouseDown = false;
-            var mouseStartY = 0;
-            var mouseStartScrollTop = 0;
-
-            cardAreaEl.addEventListener('mousedown', function (e) {
-                isMouseDown = true;
-                mouseStartY = e.pageY;
-                mouseStartScrollTop = cardAreaEl.scrollTop;
-            }, false);
-
-            window.addEventListener('mousemove', function (e) {
-                if (!isMouseDown) return;
-                var deltaY = e.pageY - mouseStartY;
-                cardAreaEl.scrollTop = mouseStartScrollTop - deltaY;
-            }, false);
-
-            window.addEventListener('mouseup', function () {
-                isMouseDown = false;
-            }, false);
+        // Top Bar Navigation
+        var backBtn = document.getElementById('btn-back');
+        if (backBtn) {
+            backBtn.onclick = function () {
+                sendHost('EXIT_DECK', {});
+            };
         }
 
+        var exitBtn = document.getElementById('btn-exit');
+        if (exitBtn) {
+            exitBtn.onclick = function () {
+                sendHost('exit', {});
+            };
+        }
+
+        var syncBtn = document.getElementById('btn-sync');
+        if (syncBtn) {
+            syncBtn.onclick = function () {
+                document.getElementById('modal-sync').style.display = 'block';
+                sendHost('SYNC_COLLECTION', {});
+            };
+        }
+
+        var settingsBtn = document.getElementById('btn-settings');
+        if (settingsBtn) {
+            settingsBtn.onclick = function () {
+                document.getElementById('modal-settings').style.display = 'block';
+                sendHost('GET_CONFIG', {});
+            };
+        }
+
+        // Settings Modal Buttons
+        var modalCloseBtn = document.getElementById('btn-modal-close');
+        if (modalCloseBtn) {
+            modalCloseBtn.onclick = function () {
+                document.getElementById('modal-settings').style.display = 'none';
+            };
+        }
+
+        var modalSaveBtn = document.getElementById('btn-modal-save');
+        if (modalSaveBtn) {
+            modalSaveBtn.onclick = function () {
+                var srv = document.getElementById('setting-server').value || '';
+                sendHost('SAVE_SETTINGS', { sync_server: srv });
+                document.getElementById('modal-settings').style.display = 'none';
+            };
+        }
+
+        var modalLoginBtn = document.getElementById('btn-modal-login');
+        if (modalLoginBtn) {
+            modalLoginBtn.onclick = function () {
+                var u = document.getElementById('setting-user').value || '';
+                var p = document.getElementById('setting-pass').value || '';
+                var srv = document.getElementById('setting-server').value || '';
+                if (!u || !p) {
+                    showToast('⚠️ 账号和密码不能为空');
+                    return;
+                }
+                document.getElementById('modal-settings').style.display = 'none';
+                document.getElementById('modal-sync').style.display = 'block';
+                sendHost('SYNC_LOGIN', { username: u, password: p, sync_server: srv });
+            };
+        }
+
+        // Show Answer Button
         var btnShowAnswer = document.getElementById('btn-show-answer');
         if (btnShowAnswer) {
-            btnShowAnswer.onclick = flipCard;
+            btnShowAnswer.onclick = function () {
+                flipCard();
+            };
         }
 
-        var btnExit = document.getElementById('btn-exit');
-        if (btnExit) {
-            btnExit.onclick = exitApp;
+        // Rating Buttons
+        var btnAgain = document.getElementById('btn-again');
+        if (btnAgain) {
+            btnAgain.onclick = function () { handleRating('again'); };
         }
-
-        var btnBack = document.getElementById('btn-back');
-        if (btnBack) {
-            btnBack.onclick = backToDecks;
+        var btnHard = document.getElementById('btn-hard');
+        if (btnHard) {
+            btnHard.onclick = function () { handleRating('hard'); };
+        }
+        var btnGood = document.getElementById('btn-good');
+        if (btnGood) {
+            btnGood.onclick = function () { handleRating('good'); };
+        }
+        var btnEasy = document.getElementById('btn-easy');
+        if (btnEasy) {
+            btnEasy.onclick = function () { handleRating('easy'); };
         }
 
         var btnFinishedBack = document.getElementById('btn-finished-back');
         if (btnFinishedBack) {
-            btnFinishedBack.onclick = backToDecks;
+            btnFinishedBack.onclick = function () {
+                sendHost('EXIT_DECK', {});
+            };
         }
 
-        var ratings = ['again', 'hard', 'good', 'easy'];
-        for (var i = 0; i < ratings.length; i++) {
-            (function (r) {
-                var el = document.getElementById('btn-' + r);
-                if (el) {
-                    el.onclick = function () {
-                        rateCard(r);
-                    };
+        // Screen Top/Bottom 1/3 Tap Paging
+        if (cardAreaEl) {
+            cardAreaEl.onclick = function (e) {
+                if (e.target && (e.target.tagName === 'BUTTON' || e.target.closest('button'))) {
+                    return;
                 }
-            })(ratings[i]);
+                var activeBox = (currentGroup === 'A')
+                    ? (isFlipped ? slotABack : slotAFront)
+                    : (isFlipped ? slotBBack : slotBFront);
+
+                if (!activeBox) return;
+
+                var clientY = e.clientY;
+                var height = window.innerHeight || 1448;
+                if (clientY > height * 0.67) {
+                    activeBox.scrollTop += 360;
+                } else if (clientY < height * 0.33) {
+                    activeBox.scrollTop -= 360;
+                }
+            };
         }
 
-        // Notify Host that Web-SPA is loaded
+        // Handshake with Rust Host
         sendHost('ready', {});
-    };
+    });
 })();

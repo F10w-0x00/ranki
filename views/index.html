@@ -35,7 +35,7 @@
           noUndefined: { disabled: false }
         },
         "HTML-CSS": {
-          scale: 115,
+          scale: 110,
           availableFonts: ["TeX"],
           preferredFont: "TeX",
           webFont: "TeX",
@@ -48,30 +48,43 @@
     <script src="mathjax/MathJax.js?config=TeX-AMS_HTML"></script>
 </head>
 <body>
-    <!-- Top 64px Minimal Header -->
+    <!-- Top 64px Anki Header Bar -->
     <div class="header-bar">
-        <button id="btn-back" class="header-btn">&lt; 返回</button>
-        <span id="deck-title">RAnki 牌组大厅</span>
-        <div id="header-badges" class="review-badges">
-            <span class="badge-item" id="badge-due">0</span>
+        <!-- Left: Brand (Deck View) or Back Button (Review View) -->
+        <div class="header-left">
+            <div id="deck-header-brand" class="brand-group">
+                <span class="brand-title">RAnki</span>
+                <span id="deck-subtitle" class="brand-sub">待复习: 0 张</span>
+            </div>
+            <button id="btn-back" class="header-btn" style="display: none;">&lt; 牌组</button>
+        </div>
+
+        <!-- Center: Current Deck Name (Review View) -->
+        <div class="header-center">
+            <span id="deck-title" style="display: none;">牌组</span>
+        </div>
+
+        <!-- Right: Actions (Sync, Settings, Exit or Badges) -->
+        <div class="header-right">
+            <div id="deck-actions" class="deck-actions-group">
+                <button id="btn-sync" class="header-action-btn" title="同步 AnkiWeb">🔄 同步</button>
+                <button id="btn-settings" class="header-action-btn" title="账号与设置">⚙ 设置</button>
+                <button id="btn-exit" class="header-action-btn" title="退出程序">退出</button>
+            </div>
+            <div id="header-badges" class="review-badges" style="display: none;">
+                <span class="badge-item" id="badge-due">0</span>
+            </div>
         </div>
     </div>
 
-    <!-- View 1: Anki-Authentic Centered Deck Browser -->
+    <!-- View 1: Anki-Authentic Deck Browser (No 1990s Table Grid) -->
     <div id="deck-view">
         <div class="deck-container">
-            <div class="deck-header-row">
-                <span class="col-deck-name">牌组</span>
-                <span class="col-count-header">新卡</span>
-                <span class="col-count-header">学习</span>
-                <span class="col-count-header">复习</span>
-            </div>
             <div id="deck-list" class="deck-list-body">
-                <div class="empty-msg" style="padding: 40px; text-align: center; font-size: 28px;">正在读取卡片数据库...</div>
+                <div class="empty-msg">正在读取卡片数据库...</div>
             </div>
             <div class="deck-footer">
-                <div id="deck-summary" class="deck-summary-text"></div>
-                <button id="btn-exit" class="btn-exit-app">退出 RAnki</button>
+                <div id="deck-summary" class="deck-summary-text">今天在 0 秒内学习了 0 张卡片 (平均每张卡片 0 秒)</div>
             </div>
         </div>
     </div>
@@ -103,29 +116,78 @@
                 <button id="btn-show-answer" class="btn-full">点 击 显 示 答 案</button>
             </div>
 
-            <!-- State 2: Flipped (Option A Dual-Tier Ratings) -->
+            <!-- State 2: Flipped (Option A Dual-Tier Ratings via bulletproof Table Layout) -->
             <div id="bar-flipped" style="display: none;">
-                <div class="btn-group">
-                    <button id="btn-again" class="rate-btn">
-                        <span class="interval" id="interval-again">&lt; 10分</span>
-                        <span class="label">重来</span>
-                    </button>
-                    <button id="btn-hard" class="rate-btn">
-                        <span class="interval" id="interval-hard">1天</span>
-                        <span class="label">困难</span>
-                    </button>
-                    <button id="btn-good" class="rate-btn">
-                        <span class="interval" id="interval-good">3天</span>
-                        <span class="label">良好</span>
-                    </button>
-                    <button id="btn-easy" class="rate-btn">
-                        <span class="interval" id="interval-easy">5天</span>
-                        <span class="label">简单</span>
-                    </button>
-                </div>
+                <table class="btn-group-table">
+                    <tr>
+                        <td class="rate-td">
+                            <button id="btn-again" class="rate-btn">
+                                <span class="btn-interval" id="interval-again">&lt; 10分</span>
+                                <span class="btn-label">重来</span>
+                            </button>
+                        </td>
+                        <td class="rate-td">
+                            <button id="btn-hard" class="rate-btn">
+                                <span class="btn-interval" id="interval-hard">1天</span>
+                                <span class="btn-label">困难</span>
+                            </button>
+                        </td>
+                        <td class="rate-td">
+                            <button id="btn-good" class="rate-btn">
+                                <span class="btn-interval" id="interval-good">3天</span>
+                                <span class="btn-label">良好</span>
+                            </button>
+                        </td>
+                        <td class="rate-td">
+                            <button id="btn-easy" class="rate-btn">
+                                <span class="btn-interval" id="interval-easy">5天</span>
+                                <span class="btn-label">简单</span>
+                            </button>
+                        </td>
+                    </tr>
+                </table>
             </div>
         </div>
     </div>
+
+    <!-- Modal 1: Settings & AnkiWeb Login -->
+    <div id="modal-settings" class="modal-backdrop" style="display: none;">
+        <div class="modal-card">
+            <div class="modal-header">AnkiWeb 账号与同步设置</div>
+            <div class="modal-body">
+                <div id="setting-status-badge" class="setting-status">检测中...</div>
+                <div class="form-group">
+                    <label class="form-label">账号 / 邮箱 (Email):</label>
+                    <input type="text" id="setting-user" class="form-input" placeholder="输入 AnkiWeb 注册邮箱">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">密码 (Password):</label>
+                    <input type="password" id="setting-pass" class="form-input" placeholder="输入密码">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">自定义服务器 (留空使用官方 AnkiWeb):</label>
+                    <input type="text" id="setting-server" class="form-input" placeholder="https://ankiweb.net/">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="btn-modal-login" class="modal-btn modal-btn-primary">登录并同步</button>
+                <button id="btn-modal-save" class="modal-btn">保存设置</button>
+                <button id="btn-modal-close" class="modal-btn modal-btn-cancel">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 2: Sync Progress Overlay -->
+    <div id="modal-sync" class="modal-backdrop" style="display: none;">
+        <div class="modal-sync-card">
+            <div class="sync-spinner">🔄</div>
+            <div class="sync-title">正在与云端同步...</div>
+            <div class="sync-desc">正在双向同步牌组与卡片进度，请保持 Wi-Fi 连接</div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast-box" style="display: none;"></div>
 
     <!-- Scripts -->
     <script src="app.js"></script>
