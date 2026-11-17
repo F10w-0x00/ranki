@@ -30,6 +30,11 @@ RUN apt-get update && \
         file && \
     rm -rf /var/lib/apt/lists/*
 
+# Install modern static protoc with native proto3 optional support for anki_proto
+RUN curl -fsSL -O https://github.com/protocolbuffers/protobuf/releases/download/v25.1/protoc-25.1-linux-x86_64.zip && \
+    unzip -o protoc-25.1-linux-x86_64.zip -d /usr/local && \
+    rm -f protoc-25.1-linux-x86_64.zip
+
 # 2. Extract ARMEL development sysroot headers and libraries via dpkg -x
 # (Completely bypasses apt foreign-architecture multiarch dependency conflicts)
 RUN dpkg --add-architecture armel && \
