@@ -39,7 +39,13 @@ fn main() {
     }
 
     unsafe {
-        // 2. Initialize GTK
+        // 2. Ensure DISPLAY is set for Kindle OS
+        if std::env::var("DISPLAY").map(|v| v.is_empty()).unwrap_or(true) {
+            println!("[HOST] DISPLAY not set or empty, defaulting to :0");
+            std::env::set_var("DISPLAY", ":0");
+        }
+
+        // 3. Initialize GTK
         gtk_init(&mut 0, ptr::null_mut());
 
         // 3. Create Top-level Window

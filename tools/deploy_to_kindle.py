@@ -86,6 +86,34 @@ def main():
     if os.path.exists(target_views):
         shutil.rmtree(target_views)
     shutil.copytree(views_path, target_views)
+
+    # 3. Deploy launcher script ranki.sh with explicit DISPLAY=:0
+    target_sh = os.path.join(dev_ext, "ranki.sh")
+    sh_content = (
+        "#!/bin/bash\n"
+        "export DISPLAY=:0\n"
+        "export HOME=/mnt/us\n"
+        "mkdir -p /mnt/us/ranki_logs\n"
+        "cd /mnt/us/extensions/ranki-dev\n"
+        "chmod +x ranki-armel\n"
+        "exec ./ranki-armel > /mnt/us/ranki_logs/ranki_dev_stdout.log 2>&1\n"
+    )
+    with open(target_sh, "w", newline="\n", encoding="utf-8") as f:
+        f.write(sh_content)
+    print(f"Generated launcher script -> {target_sh} ...")
+
+    # 4. Deploy config.ini
+    target_ini = os.path.join(dev_ext, "config.ini")
+    ini_content = (
+        "[General]\n"
+        "collection_dir=/mnt/us/anki_data_test\n"
+        "hkey=K1248&rg]BgOCD})\n"
+        "sync_server=\n"
+        "scale=1.2\n"
+    )
+    with open(target_ini, "w", newline="\n", encoding="utf-8") as f:
+        f.write(ini_content)
+    print(f"Generated config -> {target_ini} ...")
     
     # Verify prod data intact
     if prod_hash_before:
