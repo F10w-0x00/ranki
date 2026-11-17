@@ -38,4 +38,13 @@
   - [x] 2. 本地执行 4 道自动化门禁（GLIBC 2.18、DT_NEEDED、0 dynsym leak、ES5 全绿通过）
   - [x] 3. 使用 `tools/deploy_to_kindle.py` 部署至 `D:\extensions\ranki-dev\`（部署成功）
   - [x] 4. 生产数据库 `D:\anki_data\` 0 字节改动红线防护（指纹 `de6efa895198` 保持 100% 完整）
-  - [ ] 5. Kindle PW3 真机实测云同步、登录设置、现代牌组列表与卡片复习
+  - [x] 5. Kindle PW3 真机实测云同步、登录设置、现代牌组列表与卡片复习
+
+---
+
+## V4: E-ink Experience Hardening & Real-Device Bug Triage (COMPLETED & DEPLOYED)
+- [x] **Issue A (方框乱码)**: 彻底消灭 Emoji（Kindle OS 缺少 Emoji 字形导致的 `□` 方块），全面替换为矢量内联 SVG 统一图标。
+- [x] **Issue B (严重残影)**: 拔除 `-webkit-overflow-scrolling: touch` 与连续拖拽滚动，切换为墨水屏专属**分页浏览模式**（每页固定 10 牌组，底部 `< 上一页` / `下一页 >` / `[刷新屏幕]` 清除残影按键）。
+- [x] **Issue C (无法唤起键盘)**: 在设置弹窗输入框绑定 `focus`/`blur` 事件，通过 Kindle LIPC 系统调用 `com.lab126.keyboard open/close` 唤起与关闭原生虚拟键盘。
+- [x] **Issue D (点击卡死/黑条僵死)**: 修复 `DECK_EMPTY` 中错误调用 `innerHTML=''` 摧毁触摸节点导致的 WebKitGTK 指针死锁；消除 CSS `:active` 伪类残留黑条，改由健壮的 touch 事件安全管理。
+- [x] **CI 构建与部署**: GitHub Actions Run ID `44063646713` 全绿通过，门禁验证 100% 通过，已安全部署至 `D:\extensions\ranki-dev\`。
