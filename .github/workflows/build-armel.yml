@@ -23,6 +23,7 @@ jobs:
 
       - name: Verify ES5 & Task 3 Frontend Assets
         run: |
+          npm ci
           node tools/check_es5.js views/app.js
           node tools/verify_task3.js
 
