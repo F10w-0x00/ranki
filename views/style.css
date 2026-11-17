@@ -160,6 +160,14 @@ body {
     vertical-align: middle;
 }
 
+.header-icon {
+    width: 22px;
+    height: 22px;
+    vertical-align: -3px;
+    margin-right: 6px;
+    display: inline-block;
+}
+
 .header-action-btn:active {
     background: #000000 !important;
     color: #ffffff !important;
@@ -188,9 +196,8 @@ body {
     bottom: 0;
     left: 0;
     width: 1072px;
-    overflow-y: scroll;
-    -webkit-overflow-scrolling: touch;
-    padding: 16px 0 60px 0;
+    overflow: hidden;
+    padding: 16px 0 20px 0;
 }
 
 .deck-container {
@@ -218,12 +225,12 @@ body {
     clear: both;
 }
 
-.deck-row:active {
+.deck-row.active {
     background-color: #000000 !important;
     color: #ffffff !important;
 }
 
-.deck-row:active * {
+.deck-row.active * {
     color: #ffffff !important;
 }
 
@@ -287,9 +294,57 @@ body {
     color: #888888;
 }
 
+.deck-pager {
+    width: 960px;
+    height: 64px;
+    line-height: 60px;
+    margin: 20px auto 0 auto;
+    text-align: center;
+    border-top: 1.5px solid #000000;
+    padding-top: 16px;
+}
+
+.pager-btn {
+    display: inline-block;
+    height: 52px;
+    line-height: 48px;
+    padding: 0 20px;
+    border: 1.5px solid #000000;
+    border-radius: 6px;
+    background: #ffffff;
+    color: #000000;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    margin: 0 8px;
+    vertical-align: middle;
+}
+
+.pager-btn:disabled {
+    border-color: #cccccc;
+    color: #aaaaaa;
+    cursor: default;
+    background: #f7f7f7;
+}
+
+.pager-info {
+    display: inline-block;
+    font-size: 24px;
+    font-weight: bold;
+    color: #333333;
+    min-width: 160px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.pager-refresh {
+    margin-left: 20px;
+    background: #f0f0f0;
+}
+
 .deck-footer {
     width: 960px;
-    margin: 40px auto 0 auto;
+    margin: 20px auto 0 auto;
     text-align: center;
 }
 
@@ -526,7 +581,7 @@ hr#answer {
 
 .modal-card {
     position: absolute;
-    top: 180px;
+    top: 80px;
     left: 136px;
     width: 800px;
     background: #ffffff;

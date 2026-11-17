@@ -267,6 +267,24 @@ pub fn handle_title_change(web_view: *mut GtkWidget, title: &str) {
         "CARD_FLIPPED" => {
             // Silently absorb CARD_FLIPPED event
         }
+        "SHOW_KEYBOARD" => {
+            println!("[HOST] Calling Kindle LIPC to open virtual keyboard...");
+            let _ = std::process::Command::new("/usr/bin/lipc-set-prop")
+                .args(["-s", "com.lab126.keyboard", "open", "ranki.ranki.ranki:abc:1"])
+                .spawn();
+        }
+        "HIDE_KEYBOARD" => {
+            println!("[HOST] Calling Kindle LIPC to close virtual keyboard...");
+            let _ = std::process::Command::new("/usr/bin/lipc-set-prop")
+                .args(["-s", "com.lab126.keyboard", "close", "ranki.ranki.ranki"])
+                .spawn();
+        }
+        "REFRESH_SCREEN" => {
+            println!("[HOST] Calling Kindle LIPC to refresh e-ink screen...");
+            let _ = std::process::Command::new("/usr/bin/lipc-send-event")
+                .args(["com.lab126.pillow", "refreshScreen"])
+                .spawn();
+        }
         "EXIT_DECK" => {
             let mut svc = ANKI_SERVICE.lock().unwrap();
             let _ = svc.wal_checkpoint();

@@ -67,8 +67,9 @@
                 renderDeckList(payload);
             } else if (event === 'DECK_EMPTY') {
                 showToast(payload.message || '🎉 该牌组今日待复习卡片已全部完成！');
-                if (payload.decks) {
-                    renderDeckList(payload);
+                if (payload.studied_today) {
+                    var summaryEl = document.getElementById('deck-summary');
+                    if (summaryEl) summaryEl.textContent = payload.studied_today;
                 }
             } else if (event === 'SHOW_CARD_PIPELINE') {
                 renderCardPipeline(payload);
@@ -121,56 +122,80 @@
         return restoredHtml;
     }
 
-    // 1. Render AnkiDroid-Authentic Deck Browser (No Table Grid)
-    function renderDeckList(data) {
-        currentView = 'deck-picker';
-        document.getElementById('deck-view').style.display = 'block';
-        document.getElementById('review-view').style.display = 'none';
+    var PAGE_SIZE = 10;
+    var currentDeckPage = 1;
 
-        // Top Header in Deck Mode
-        var brandEl = document.getElementById('deck-header-brand');
-        if (brandEl) brandEl.style.display = 'inline-block';
+    function getVisibleDecks() {
+        if (!cachedDecks || cachedDecks.length === 0) return [];
+        var visible = [];
+        for (var i = 0; i < cachedDecks.length; i++) {
+            var deck = cachedDecks[i];
+            var fn = deck.full_name || '';
+            var shouldHide = false;
+            for (var pName in collapsedDecks) {
+                if (collapsedDecks.hasOwnProperty(pName) && collapsedDecks[pName]) {
+                    if (fn.indexOf(pName + '::') === 0) {
+                        shouldHide = true;
+                        break;
+                    }
+                }
+            }
+            if (!shouldHide) {
+                visible.push(deck);
+            }
+        }
+        return visible;
+    }
 
-        var backBtn = document.getElementById('btn-back');
-        if (backBtn) backBtn.style.display = 'none';
+    function updateDeckPager(page, totalPages) {
+        var infoEl = document.getElementById('deck-page-info');
+        if (infoEl) {
+            infoEl.textContent = '第 ' + page + ' / ' + totalPages + ' 页';
+        }
+        var prevBtn = document.getElementById('btn-page-prev');
+        if (prevBtn) {
+            prevBtn.disabled = (page <= 1);
+        }
+        var nextBtn = document.getElementById('btn-page-next');
+        if (nextBtn) {
+            nextBtn.disabled = (page >= totalPages);
+        }
+    }
 
-        var titleEl = document.getElementById('deck-title');
-        if (titleEl) titleEl.style.display = 'none';
+    function applyCollapsedVisibility() {
+        renderDeckPage();
+    }
 
-        var actionsEl = document.getElementById('deck-actions');
-        if (actionsEl) actionsEl.style.display = 'inline-block';
+    function toggleCollapse(fullName) {
+        collapsedDecks[fullName] = !collapsedDecks[fullName];
+        applyCollapsedVisibility();
+    }
 
-        var badgesEl = document.getElementById('header-badges');
-        if (badgesEl) badgesEl.style.display = 'none';
-
+    function renderDeckPage() {
         var listEl = document.getElementById('deck-list');
         listEl.innerHTML = '';
 
-        var decks = (data && data.decks) || [];
-        cachedDecks = decks;
-
-        if (decks.length === 0) {
+        var visibleDecks = getVisibleDecks();
+        if (visibleDecks.length === 0) {
             listEl.innerHTML = '<div class="empty-msg" style="padding: 40px; text-align: center; font-size: 28px;">没有可复习的牌组</div>';
+            updateDeckPager(1, 1);
             return;
         }
 
-        var totalDue = 0;
-        for (var j = 0; j < decks.length; j++) {
-            totalDue += (decks[j].due_count || 0);
+        var totalPages = Math.ceil(visibleDecks.length / PAGE_SIZE) || 1;
+        if (currentDeckPage > totalPages) {
+            currentDeckPage = totalPages;
+        }
+        if (currentDeckPage < 1) {
+            currentDeckPage = 1;
         }
 
-        var subtitleEl = document.getElementById('deck-subtitle');
-        if (subtitleEl) {
-            subtitleEl.textContent = '待复习: ' + totalDue + ' 张';
-        }
+        var startIdx = (currentDeckPage - 1) * PAGE_SIZE;
+        var endIdx = Math.min(startIdx + PAGE_SIZE, visibleDecks.length);
+        var pageDecks = visibleDecks.slice(startIdx, endIdx);
 
-        var summaryEl = document.getElementById('deck-summary');
-        if (summaryEl) {
-            summaryEl.textContent = data.studied_today || ('今天在 0 秒内学习了 0 张卡片 (平均每张卡片 0 秒)');
-        }
-
-        for (var i = 0; i < decks.length; i++) {
-            var deck = decks[i];
+        for (var i = 0; i < pageDecks.length; i++) {
+            var deck = pageDecks[i];
             var depth = deck.depth || 0;
             var isParent = !!deck.has_children;
             var indentPx = depth * 28;
@@ -192,12 +217,12 @@
                 chevron.className = 'deck-chevron';
                 chevron.textContent = isCollapsed ? '▸' : '▾';
                 chevron.setAttribute('data-target-full-name', deck.full_name);
-                chevron.onclick = (function (fn, chevEl) {
+                chevron.onclick = (function (fn) {
                     return function (e) {
                         e.stopPropagation();
-                        toggleCollapse(fn, chevEl);
+                        toggleCollapse(fn);
                     };
-                })(deck.full_name, chevron);
+                })(deck.full_name);
                 leftDiv.appendChild(chevron);
             }
 
@@ -233,6 +258,19 @@
             row.appendChild(leftDiv);
             row.appendChild(rightDiv);
 
+            // Touch highlight management without stuck CSS :active
+            (function (targetRow) {
+                targetRow.addEventListener('touchstart', function () {
+                    targetRow.className = targetRow.className + ' active';
+                }, false);
+                targetRow.addEventListener('touchend', function () {
+                    targetRow.className = targetRow.className.replace(/\bactive\b/g, '').trim();
+                }, false);
+                targetRow.addEventListener('touchcancel', function () {
+                    targetRow.className = targetRow.className.replace(/\bactive\b/g, '').trim();
+                }, false);
+            })(row);
+
             // Click deck row to select deck
             row.onclick = (function (dId) {
                 return function () {
@@ -243,36 +281,50 @@
             listEl.appendChild(row);
         }
 
-        // Apply collapsed state
-        applyCollapsedVisibility();
+        updateDeckPager(currentDeckPage, totalPages);
     }
 
-    // Toggle collapse for parent deck
-    function toggleCollapse(fullName, chevronEl) {
-        collapsedDecks[fullName] = !collapsedDecks[fullName];
-        chevronEl.textContent = collapsedDecks[fullName] ? '▸' : '▾';
-        applyCollapsedVisibility();
-    }
+    // 1. Render AnkiDroid-Authentic Deck Browser (No Table Grid)
+    function renderDeckList(data) {
+        currentView = 'deck-picker';
+        document.getElementById('deck-view').style.display = 'block';
+        document.getElementById('review-view').style.display = 'none';
 
-    // Apply visibility based on collapsed parent decks
-    function applyCollapsedVisibility() {
-        var rows = document.querySelectorAll('.deck-row');
-        for (var i = 0; i < rows.length; i++) {
-            var row = rows[i];
-            var fn = row.getAttribute('data-full-name') || '';
-            var shouldHide = false;
+        // Top Header in Deck Mode
+        var brandEl = document.getElementById('deck-header-brand');
+        if (brandEl) brandEl.style.display = 'inline-block';
 
-            for (var pName in collapsedDecks) {
-                if (collapsedDecks.hasOwnProperty(pName) && collapsedDecks[pName]) {
-                    if (fn.indexOf(pName + '::') === 0) {
-                        shouldHide = true;
-                        break;
-                    }
-                }
-            }
+        var backBtn = document.getElementById('btn-back');
+        if (backBtn) backBtn.style.display = 'none';
 
-            row.style.display = shouldHide ? 'none' : 'block';
+        var titleEl = document.getElementById('deck-title');
+        if (titleEl) titleEl.style.display = 'none';
+
+        var actionsEl = document.getElementById('deck-actions');
+        if (actionsEl) actionsEl.style.display = 'inline-block';
+
+        var badgesEl = document.getElementById('header-badges');
+        if (badgesEl) badgesEl.style.display = 'none';
+
+        var decks = (data && data.decks) || [];
+        cachedDecks = decks;
+
+        var totalDue = 0;
+        for (var j = 0; j < decks.length; j++) {
+            totalDue += (decks[j].due_count || 0);
         }
+
+        var subtitleEl = document.getElementById('deck-subtitle');
+        if (subtitleEl) {
+            subtitleEl.textContent = '待复习: ' + totalDue + ' 张';
+        }
+
+        var summaryEl = document.getElementById('deck-summary');
+        if (summaryEl) {
+            summaryEl.textContent = data.studied_today || ('今天在 0 秒内学习了 0 张卡片 (平均每张卡片 0 秒)');
+        }
+
+        renderDeckPage();
     }
 
     // Update interval labels on rating buttons
@@ -624,10 +676,78 @@
             };
         }
 
+        // Deck View Pager Controls
+        var prevPageBtn = document.getElementById('btn-page-prev');
+        if (prevPageBtn) {
+            prevPageBtn.onclick = function () {
+                if (currentDeckPage > 1) {
+                    currentDeckPage--;
+                    renderDeckPage();
+                    sendHost('REFRESH_SCREEN', {});
+                }
+            };
+        }
+
+        var nextPageBtn = document.getElementById('btn-page-next');
+        if (nextPageBtn) {
+            nextPageBtn.onclick = function () {
+                var visibleDecks = getVisibleDecks();
+                var totalPages = Math.ceil(visibleDecks.length / PAGE_SIZE) || 1;
+                if (currentDeckPage < totalPages) {
+                    currentDeckPage++;
+                    renderDeckPage();
+                    sendHost('REFRESH_SCREEN', {});
+                }
+            };
+        }
+
+        var refreshScreenBtn = document.getElementById('btn-refresh-screen');
+        if (refreshScreenBtn) {
+            refreshScreenBtn.onclick = function () {
+                sendHost('REFRESH_SCREEN', {});
+            };
+        }
+
+        // Virtual Keyboard & Modal Input Management
+        var settingUser = document.getElementById('setting-user');
+        var settingPass = document.getElementById('setting-pass');
+        var settingServer = document.getElementById('setting-server');
+        var modalInputs = [settingUser, settingPass, settingServer];
+
+        for (var mi = 0; mi < modalInputs.length; mi++) {
+            if (modalInputs[mi]) {
+                modalInputs[mi].addEventListener('focus', function () {
+                    sendHost('SHOW_KEYBOARD', {});
+                }, false);
+                modalInputs[mi].addEventListener('blur', function () {
+                    sendHost('HIDE_KEYBOARD', {});
+                }, false);
+            }
+        }
+
+        function hideSettingsKeyboard() {
+            for (var ki = 0; ki < modalInputs.length; ki++) {
+                if (modalInputs[ki]) {
+                    modalInputs[ki].blur();
+                }
+            }
+            sendHost('HIDE_KEYBOARD', {});
+        }
+
+        var modalSettingsEl = document.getElementById('modal-settings');
+        if (modalSettingsEl) {
+            modalSettingsEl.addEventListener('touchstart', function (e) {
+                if (e.target && e.target.tagName !== 'INPUT' && e.target.tagName !== 'BUTTON') {
+                    hideSettingsKeyboard();
+                }
+            }, false);
+        }
+
         // Settings Modal Buttons
         var modalCloseBtn = document.getElementById('btn-modal-close');
         if (modalCloseBtn) {
             modalCloseBtn.onclick = function () {
+                hideSettingsKeyboard();
                 document.getElementById('modal-settings').style.display = 'none';
             };
         }
@@ -635,6 +755,7 @@
         var modalSaveBtn = document.getElementById('btn-modal-save');
         if (modalSaveBtn) {
             modalSaveBtn.onclick = function () {
+                hideSettingsKeyboard();
                 var srv = document.getElementById('setting-server').value || '';
                 sendHost('SAVE_SETTINGS', { sync_server: srv });
                 document.getElementById('modal-settings').style.display = 'none';
@@ -644,6 +765,7 @@
         var modalLoginBtn = document.getElementById('btn-modal-login');
         if (modalLoginBtn) {
             modalLoginBtn.onclick = function () {
+                hideSettingsKeyboard();
                 var u = document.getElementById('setting-user').value || '';
                 var p = document.getElementById('setting-pass').value || '';
                 var srv = document.getElementById('setting-server').value || '';
