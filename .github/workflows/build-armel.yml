@@ -21,6 +21,11 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
+      - name: Verify ES5 & Task 3 Frontend Assets
+        run: |
+          node tools/check_es5.js views/app.js
+          node tools/verify_task3.js
+
       - name: Build Builder Docker Image
         run: |
           echo "Building docker image from Dockerfile.armel..."

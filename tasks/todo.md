@@ -24,14 +24,14 @@
   - [x] 5. 彻底删除 `backend.vala`, `ffi.h`, `ffi.rs`, `protobuf-vala/` 及 24 个 `.proto`
   - [x] 6. 验证全链路门禁全绿通过 (CI Run #50 验证成功，体积 12.43MB)
 
-- [ ] **Task 3: 落实印刷级双缓冲 SPA 前端引擎 (离屏毫秒级预渲染与质感参数)**
-  - [ ] 1. 编写纯 ES5 单页应用 `views/index.html` 与 `views/app.js`
-  - [ ] 2. 在 `views/mathjax/` 归档 ~1.8MB MathJax 2.7.9 核心及 20 款 TeX `.woff` 矢量字体
-  - [ ] 3. 实现 `#card-active` 与 `#card-buffer`（`left: -9999px; visibility: hidden`）双缓冲切换
-  - [ ] 4. 落地时序队列锁（Queue Lock）解决快速翻卡竞态
-  - [ ] 5. 注入印刷级质感参数（纯黑 `#000000`、22px 黄金字号、禁用 matchFontHeight）
-  - [ ] 6. 确保评分按钮物理触控热区 $\ge 48\text{px} \times 48\text{px}$，彻底移除旗子与横屏按钮
-  - [ ] 7. 运行 `tools/check_es5.js` 门禁并验证 38 道高难考题 100% 渲染
+- [x] **Task 3: 落实印刷级双缓冲 SPA 前端引擎 (离屏毫秒级预渲染与质感参数)**
+  - [x] 1. 编写纯 ES5 单页应用 `views/index.html` 与 `views/app.js`
+  - [x] 2. 在 `views/mathjax/` 归档 ~1.8MB MathJax 2.7.9 核心及 20 款 TeX `.woff` 矢量字体 (实际 1.26MB, 22 款字体)
+  - [x] 3. 实现 `#card-active` 与 `#card-buffer` 双缓冲切换 (`position: absolute; left: -9999px; top: 0; width: 1072px; display: block; visibility: visible;` 确保 WebKit 1.0 字体排版计算)
+  - [x] 4. 落地时序队列锁（Queue Lock）解决快速翻卡竞态
+  - [x] 5. 注入印刷级质感参数（纯黑 `#000000`、22px 黄金字号、禁用 matchFontHeight）
+  - [x] 6. 确保评分按钮物理触控热区 $\ge 48\text{px} \times 48\text{px}$，彻底移除旗子与横屏按钮
+  - [x] 7. 运行 `tools/check_es5.js` 门禁并验证 38 道高难考题 100% 渲染 (CI/本地验证闭环)
 
 - [ ] **Task 4: CI/CD 现代化与物理机 100 张卡片全量压测交付**
   - [ ] 1. 重构 `.github/workflows/build-armel.yml`，剥离 Vala/Protobuf 构建链，转为纯 Cargo CI

@@ -2,8 +2,39 @@
 <html>
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=1072, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>RAnki</title>
     <link rel="stylesheet" href="style.css">
+    <style id="card-dynamic-style"></style>
+    <!-- MathJax 2.7.9 Configuration -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        showProcessingMessages: false,
+        messageStyle: "none",
+        skipStartupTypeset: true,
+        extensions: ["tex2jax.js"],
+        jax: ["input/TeX", "output/HTML-CSS"],
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+          displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+          processEscapes: true
+        },
+        TeX: {
+          extensions: ["AMSmath.js", "AMSsymbols.js", "noErrors.js", "noUndefined.js"],
+          noErrors: { disabled: false },
+          noUndefined: { disabled: false }
+        },
+        "HTML-CSS": {
+          availableFonts: ["TeX"],
+          preferredFont: "TeX",
+          webFont: "TeX",
+          imageFont: null,
+          matchFontHeight: false,
+          linebreaks: { automatic: false }
+        }
+      });
+    </script>
+    <script src="mathjax/MathJax.js?config=TeX-AMS_HTML"></script>
 </head>
 <body>
     <!-- Top 56px Lean Header -->
@@ -17,7 +48,6 @@
     <div id="deck-view">
         <h2 style="margin-bottom: 16px; font-size: 26px;">选择复习牌组</h2>
         <div id="deck-list">
-            <!-- Populated dynamically via IPC -->
             <div class="empty-msg">正在加载牌组...</div>
         </div>
     </div>
@@ -26,8 +56,8 @@
     <div id="review-view" style="display: none;">
         <!-- Card Content Core Area -->
         <div class="card-area">
-            <!-- Active Front/Back Slot -->
-            <div id="card-active">
+            <!-- Active Slot -->
+            <div id="card-active" class="card-box">
                 <div style="text-align: center; margin-top: 100px;">
                     <h2>RAnki 纯 Rust 核心启动就绪</h2>
                     <p style="margin-top: 20px;">双缓冲离屏秒开与印刷级排版引擎已加载</p>
@@ -35,7 +65,7 @@
             </div>
 
             <!-- Offscreen Pre-rendering Buffer Slot -->
-            <div id="card-buffer"></div>
+            <div id="card-buffer" class="card-box offscreen"></div>
         </div>
 
         <!-- Bottom 120px Touch Operation Bar -->
@@ -50,19 +80,19 @@
                 <div class="btn-group">
                     <button id="btn-again" class="rate-btn">
                         <span class="label">重来 (Again)</span>
-                        <span class="interval">&lt; 1 分钟</span>
+                        <span class="interval" id="interval-again">&lt; 1 分钟</span>
                     </button>
                     <button id="btn-hard" class="rate-btn">
                         <span class="label">困难 (Hard)</span>
-                        <span class="interval">10 分钟</span>
+                        <span class="interval" id="interval-hard">10 分钟</span>
                     </button>
                     <button id="btn-good" class="rate-btn">
                         <span class="label">良好 (Good)</span>
-                        <span class="interval">1 天</span>
+                        <span class="interval" id="interval-good">1 天</span>
                     </button>
                     <button id="btn-easy" class="rate-btn">
                         <span class="label">简单 (Easy)</span>
-                        <span class="interval">4 天</span>
+                        <span class="interval" id="interval-easy">4 天</span>
                     </button>
                 </div>
             </div>

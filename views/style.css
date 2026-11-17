@@ -16,7 +16,7 @@ body {
     color: #000000 !important;
     font-family: serif;
     font-size: 22px;
-    line-height: 1.5;
+    line-height: 1.45;
     width: 1072px;
     height: 1448px;
     overflow: hidden;
@@ -91,7 +91,6 @@ body {
 
 .card-area {
     flex: 1;
-    padding: 32px 24px;
     overflow-y: auto;
     position: relative;
     font-size: 22px;
@@ -99,26 +98,40 @@ body {
 }
 
 /* Front & Back Dual Buffer Slots */
-#card-active {
-    position: static;
-    left: 0;
-    visibility: visible;
+.card-box {
     width: 100%;
+    min-height: 100%;
+    padding: 28px 24px;
+    box-sizing: border-box;
+    display: block;
+    word-wrap: break-word;
 }
 
-#card-buffer {
-    position: absolute;
-    left: -9999px;
-    visibility: hidden;
-    width: 100%;
+.card-box.offscreen {
+    position: absolute !important;
+    left: -9999px !important;
+    top: 0 !important;
+    width: 1072px !important;
+    display: block !important;
+    visibility: visible !important;
+}
+
+.card-box img {
+    max-width: 100% !important;
+    height: auto !important;
 }
 
 /* MathJax Formulas: Print-grade pure black & auto viewport scaling */
 .mjx-chtml, .MathJax_Display, .MathJax {
     color: #000000 !important;
     max-width: 100% !important;
+    outline: 0 !important;
     overflow-x: auto;
     overflow-y: hidden;
+}
+
+#MathJax_Message {
+    display: none !important;
 }
 
 /* Bottom 120px Touch Operation Bar */

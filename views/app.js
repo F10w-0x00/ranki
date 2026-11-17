@@ -10,6 +10,10 @@
     var isTypesettingDone = true;
     var pendingFlip = false;
 
+    var activeEl = null;
+    var bufferEl = null;
+    var styleEl = null;
+
     // Send up-channel command to Rust Host
     function sendHost(action, payload) {
         var token = tokenCounter++;
@@ -71,7 +75,7 @@
             return;
         }
 
-        // If MathJax typesetting is still running in #card-buffer, queue the flip
+        // If MathJax typesetting is still running in offscreen buffer, engage Queue Lock
         if (!isTypesettingDone) {
             console.log("[RAnki-SPA] Typesetting not complete. Queue Lock engaged.");
             pendingFlip = true;
@@ -82,23 +86,17 @@
     }
 
     function executeDomFlip() {
-        var active = document.getElementById('card-active');
-        var buffer = document.getElementById('card-buffer');
-        if (!active || !buffer) {
+        if (!activeEl || !bufferEl) {
             return;
         }
 
-        // In-place physical DOM swap (<= 5ms)
-        buffer.style.position = 'static';
-        buffer.style.left = '0';
-        buffer.style.visibility = 'visible';
+        // In-place physical DOM class & pointer swap (<= 5ms)
+        bufferEl.className = "card-box";
+        activeEl.className = "card-box offscreen";
 
-        active.style.position = 'absolute';
-        active.style.left = '-9999px';
-        active.style.visibility = 'hidden';
-
-        active.id = 'card-buffer';
-        buffer.id = 'card-active';
+        var temp = activeEl;
+        activeEl = bufferEl;
+        bufferEl = temp;
 
         isFlipped = true;
         pendingFlip = false;
@@ -118,21 +116,42 @@
         pendingFlip = false;
         isTypesettingDone = false;
 
-        var active = document.getElementById('card-active');
-        var buffer = document.getElementById('card-buffer');
+        // Inject card template CSS
+        if (styleEl && data.css) {
+            styleEl.textContent = data.css;
+        }
 
-        // Front question goes to active viewport
-        active.innerHTML = data.question_html || '';
+        // Update intervals on rating buttons
+        if (data.intervals && data.intervals.length >= 4) {
+            var againEl = document.getElementById('interval-again');
+            if (againEl) againEl.textContent = data.intervals[0];
 
-        // Back answer goes to offscreen buffer (left: -9999px)
-        buffer.innerHTML = data.answer_html || '';
+            var hardEl = document.getElementById('interval-hard');
+            if (hardEl) hardEl.textContent = data.intervals[1];
+
+            var goodEl = document.getElementById('interval-good');
+            if (goodEl) goodEl.textContent = data.intervals[2];
+
+            var easyEl = document.getElementById('interval-easy');
+            if (easyEl) easyEl.textContent = data.intervals[3];
+        }
+
+        // Front question goes to active visible slot
+        activeEl.innerHTML = data.question_html || '';
+
+        // Back answer goes to offscreen buffer slot (left: -9999px)
+        bufferEl.innerHTML = data.answer_html || '';
 
         document.getElementById('bar-unflipped').style.display = 'block';
         document.getElementById('bar-flipped').style.display = 'none';
 
-        // Typeset buffer with MathJax if available
-        if (window.MathJax && window.MathJax.Hub) {
-            MathJax.Hub.Queue(["Typeset", MathJax.Hub, buffer], function () {
+        // Dual-buffer MathJax typesetting
+        if (window.MathJax && window.MathJax.Hub && window.MathJax.Hub.Queue) {
+            // 1. Typeset active front
+            window.MathJax.Hub.Queue(["Typeset", window.MathJax.Hub, activeEl]);
+
+            // 2. Typeset offscreen back buffer and signal readiness
+            window.MathJax.Hub.Queue(["Typeset", window.MathJax.Hub, bufferEl], function () {
                 isTypesettingDone = true;
                 if (pendingFlip) {
                     executeDomFlip();
@@ -157,6 +176,10 @@
 
     // Attach click events to DOM elements
     window.onload = function () {
+        activeEl = document.getElementById('card-active');
+        bufferEl = document.getElementById('card-buffer');
+        styleEl = document.getElementById('card-dynamic-style');
+
         var btnShowAnswer = document.getElementById('btn-show-answer');
         if (btnShowAnswer) {
             btnShowAnswer.onclick = flipCard;
