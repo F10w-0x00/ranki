@@ -10,12 +10,12 @@
 - [x] **Task 2**: Restore verified ES5 KaTeX bundle (`views/katex/`, 635 KB, 20 WOFF fonts, `vlist-t2` patch) + `tools/test_regression.js` (838/838 formulas PASS)
 - [x] **Task 3**: Build `views/card.html`, `views/card.css`, `views/card.js` (`<div class="card kindle">` official centering, `Anthropic Sans` + `SonyReader Ming`, calibrated `28px` + adjustable `20–38px`, monochrome `<font color="red">`, `<ruby>`, `<cite>`, `\bbox`, Card-ID 4-slot buffer, MathJax 2.7.9 fallback, discrete `±85%` paging)
 - [x] **Task 4**: Build `tools/preview_cards.html` (`1072×1448` local desktop preview with user's real STEM cards)
-- [ ] **Checkpoint 1**: 838/838 formula regression PASS, `check_es5.js` PASS, human visually approves `1072×1448` centered paper-book typography
+- [x] **Checkpoint 1**: 838/838 formula regression PASS, `check_es5.js` PASS, human visually approves `1072×1448` centered paper-book typography
 
 ### Phase 2: Rock-Solid `anki-core` & Background Async Sync
-- [ ] **Task 5**: Upgrade `src/config.rs` (safe Route B settings schema, clamped values, atomic save, zero hardcoded secrets, unit tests)
-- [ ] **Task 6**: Refactor `src/anki/mod.rs` (Card-ID-verified `AdvanceResult`, deduplicated root `total_due`, `QueueCounts` + `ActiveQueue` underline, `undo()`, `bury_current()`, `suspend_current()`, WAL checkpoint, unit tests)
-- [ ] **Task 7**: Implement `src/anki/sync.rs` (background worker thread + `g_idle_add`, DB-only `normal_sync`, explicit `FullSyncRequired` + `full_download`/`full_upload`, zero media download) & add host `cargo test --lib` to CI
+- [x] **Task 5**: Upgrade `src/config.rs` (safe Route B settings schema, clamped values, atomic save, zero hardcoded secrets, unit tests)
+- [x] **Task 6**: Refactor `src/anki/mod.rs` (Card-ID-verified `AdvanceResult`, deduplicated root `total_due`, `QueueCounts` + `ActiveQueue` underline, `undo()`, `bury_current()`, `suspend_current()`, WAL checkpoint, unit tests)
+- [x] **Task 7**: Implement `src/anki/sync.rs` (background worker thread + `g_idle_add`, DB-only `normal_sync`, explicit `FullSyncRequired` + `full_download`/`full_upload`, zero media download) & add host `cargo test --lib` to CI
 - [ ] **Checkpoint 2**: `anki-core` builds & passes all unit tests in CI
 
 ### Phase 3: Native GTK2/PangoCairo Shell (`native-shell`)

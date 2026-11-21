@@ -11,7 +11,7 @@ on:
 
 jobs:
   build:
-    name: Build ranki-armel (GLIBC <= 2.20 Gate)
+    name: Build ranki-armel (Route B + GLIBC <= 2.20 Gate)
     runs-on: ubuntu-22.04
 
     steps:
@@ -21,19 +21,22 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
-      - name: Verify ES5 & Task 3 Frontend Assets
+      - name: Verify Route B Card Renderer Gates (ES5, Unit Tests, 876 Formulas)
         run: |
           npm ci
-          node tools/check_es5.js views/app.js
-          node tools/verify_task3.js
-          node tools/verify_v2_features.js
+          node tools/check_es5.js views/card.js
+          node tools/check_es5.js --syntax-only views/katex/katex.min.js
+          node tools/check_es5.js --syntax-only views/katex/mhchem.min.js
+          node tools/check_es5.js --syntax-only views/katex/auto-render.min.js
+          node tools/test_card_engine.js
+          node tools/test_regression.js
 
       - name: Build Builder Docker Image
         run: |
           echo "Building docker image from Dockerfile.armel..."
           docker build -t ranki-armel-builder -f Dockerfile.armel .
 
-      - name: Execute Containerized ARMEL Build Pipeline
+      - name: Execute Rust Unit Tests & Containerized ARMEL Build Pipeline
         run: |
           set -o pipefail
           chmod +x tools/ci_build_armel.sh
@@ -49,7 +52,7 @@ jobs:
           name: build-failure-log
           path: build.log
 
-      - name: Record Build Evidence & Telemetry (M0.5)
+      - name: Record Build Evidence & Telemetry
         run: |
           mkdir -p evidence/m0/ci_output
           file build/ranki-armel > evidence/m0/ci_output/file.txt
