@@ -297,7 +297,11 @@ impl AnkiService {
                 .map_err(|e| format!("Failed to answer card {}: {:?}", active_cid.0, e))?;
         }
         self.current_card_id = None;
-        println!("[ANKI] Rated card {} as {:?}", active_cid.0, rating);
+        println!(
+            "[ANKI] Rated card {} as {}",
+            active_cid.0,
+            rating_label(rating)
+        );
 
         self.advance_after_mutation(prefetched_cid)
     }
@@ -442,11 +446,20 @@ fn render_card_content(
 
     Ok(CardContent {
         card_id: cid.0,
-        question_html: rendered.question(),
-        answer_html: rendered.answer(),
+        question_html: rendered.question().into_owned(),
+        answer_html: rendered.answer().into_owned(),
         css: rendered.css,
         intervals,
     })
+}
+
+fn rating_label(rating: Rating) -> &'static str {
+    match rating {
+        Rating::Again => "Again",
+        Rating::Hard => "Hard",
+        Rating::Good => "Good",
+        Rating::Easy => "Easy",
+    }
 }
 
 fn extract_intervals(col: &mut Collection, states: &SchedulingStates) -> [String; 4] {

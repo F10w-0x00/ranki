@@ -36,7 +36,7 @@ pub enum ReviewStage {
     Finished,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy)]
 pub enum ReviewAction {
     None,
     BackToDecks,
