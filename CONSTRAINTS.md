@@ -61,7 +61,7 @@
    - 卡片内容必须包裹在 `<div class="card kindle">` 内，严格保持官方 Anki **居中对齐**；
    - 正文与公式锁定纯黑 `#000000`（杜绝灰阶发虚），字体锁定 `Anthropic Sans` + `SonyReader Ming`，默认 `42px`（300 PPI 下约 3.56 mm ≈ 五号字 10.1 pt，支持 `28px–54px` 调节），行高 `1.56`；
    - 彩色文本统一做高对比黑白语义映射（红/橙警示虚线底纹、其他彩色粗体点线、高亮底色浅灰），音视频/图片统一显示简洁 `[不支持...]` 占位提示，防乱码过滤不可见控制符与 Emoji；
-   - 默认主力公式引擎采用 **MathJax 2.7.9**（`TeX-AMS_HTML` + `mhchem3` + `bbox` + `AMSmath`/`AMSsymbols` + 22 款本地 WOFF 字模，KPW3 WebKitGTK 1.0 嵌套公式零错位），启动于牌组大厅即后台预热，配合 Card-ID 4 槽预渲染消除切卡/翻面等待；保留 ES5 KaTeX 作为设置页可选切换引擎；
+   - 唯一公式引擎采用 **MathJax 2.7.9**（`TeX-AMS_HTML` + `mhchem3` + `bbox` + `AMSmath`/`AMSsymbols` + 22 款本地 WOFF 字模，KPW3 WebKitGTK 1.0 嵌套公式零错位），启动于牌组大厅即后台预热，配合 Card-ID 4 槽预渲染与单帧原子显隐消除切卡/翻面等待与双帧残影（已彻底移除在 KPW3 上不兼容的 KaTeX）；
    - 超长公式通过 `-webkit-transform` 自适应等比缩放，严禁横向滚动条撑爆页面；
    - 全面禁用 Unicode Emoji，全界面零豆腐块 `□`。
 3. **墨水屏人机工学与零残影翻页**：

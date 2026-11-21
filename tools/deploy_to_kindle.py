@@ -18,7 +18,6 @@ DEFAULT_CONFIG_INI = (
     "hkey=\n"
     "sync_server=\n"
     "font_size_px=42\n"
-    "math_engine=mathjax\n"
 )
 
 

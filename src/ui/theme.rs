@@ -156,6 +156,24 @@ pub unsafe fn draw_text_centered(
     g_object_unref(layout as *mut c_void);
 }
 
+/// Measure UTF-8 text pixel (width, height) without painting (for exact optical centering).
+pub unsafe fn measure_text_px(cr: *mut cairo_t, text: &str, px: f64, bold: bool) -> (i32, i32) {
+    let c_text = match CString::new(text) {
+        Ok(s) => s,
+        Err(_) => return (0, 0),
+    };
+    let layout = pango_cairo_create_layout(cr);
+    let desc = make_font_desc(px, bold);
+    pango_layout_set_font_description(layout, desc);
+    pango_layout_set_text(layout, c_text.as_ptr(), -1);
+    let mut tw: i32 = 0;
+    let mut th: i32 = 0;
+    pango_layout_get_pixel_size(layout, &mut tw, &mut th);
+    pango_font_description_free(desc);
+    g_object_unref(layout as *mut c_void);
+    (tw, th)
+}
+
 /// Draw left-aligned text vertically centered inside `r`, returning pixel width drawn.
 pub unsafe fn draw_text_left(
     cr: *mut cairo_t,

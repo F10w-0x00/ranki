@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 /*
  * tools/test_card_engine.js
- * Automated unit tests for views/card.js (CardEngine state machine, Card-ID guard,
- * HTML preprocessor, discrete pagination, font clamping, wide-equation centering/reset,
- * rapid render cancellation, and WebKit 1.0 detection).
+ * Automated unit tests for views/card.js (pure MathJax 2.7.9 CardEngine state machine,
+ * Card-ID guard, HTML preprocessor, discrete pagination, font clamping,
+ * <li> wide-equation explicit layout-box wrapper & reset, atomic single-frame reveal,
+ * and monochrome MathJax \bbox normalization).
  */
 var fs = require('fs');
 var path = require('path');
@@ -41,6 +42,7 @@ function createMockEnv(userAgent) {
     var titles = [];
     var timers = [];
     var nextTimerId = 1;
+    var visibilitySnapshots = [];
 
     var doc = {
         readyState: 'complete',
@@ -49,7 +51,20 @@ function createMockEnv(userAgent) {
         set title(v) { this._title = v; titles.push(v); },
         getElementById: function (id) { return elements[id] || null; },
         addEventListener: function () {},
-        createElement: function () { return { style: {} }; },
+        createElement: function (tag) {
+            return {
+                tagName: String(tag || 'span').toUpperCase(),
+                className: '',
+                style: {},
+                children: [],
+                parentNode: null,
+                appendChild: function (child) {
+                    child.parentNode = this;
+                    this.children.push(child);
+                    return child;
+                }
+            };
+        },
         getElementsByTagName: function () { return [{ appendChild: function () {} }]; }
     };
 
@@ -65,12 +80,14 @@ function createMockEnv(userAgent) {
                     StartupHook: function (_evt, fn) { fn(); }
                 },
                 Queue: function (task, cb) {
-                    if (task && task[2]) task[2]._mathJaxRendered = true;
+                    if (task && task[2]) {
+                        visibilitySnapshots.push(task[2].style.visibility || '');
+                        task[2]._mathJaxRendered = true;
+                    }
                     if (typeof cb === 'function') cb();
                 }
             }
         },
-        renderMathInElement: function (el) { el._mathRendered = true; },
         setTimeout: function (fn, delay) {
             var id = nextTimerId++;
             timers.push({ id: id, fn: fn, delay: delay, cleared: false });
@@ -91,6 +108,7 @@ function createMockEnv(userAgent) {
         engine: sandbox.CardEngine,
         elements: elements,
         titles: titles,
+        visibilitySnapshots: visibilitySnapshots,
         flushTimers: function () {
             var safety = 0;
             while (timers.length > 0 && safety < 20) {
@@ -104,15 +122,15 @@ function createMockEnv(userAgent) {
     };
 }
 
-// Test 1: WebKit 1.0 UA detection vs Modern Chrome
-var envWk1 = createMockEnv('Mozilla/5.0 (X11; Linux armv7l) AppleWebKit/537.6 (KHTML, like Gecko)');
-assert.strictEqual(envWk1.sandbox.__RANKI_WEBKIT1_VLIST_PATCH__, true, 'Expected WebKit 1.0 patch enabled');
-var envChrome = createMockEnv('Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 Chrome/130.0.0.0 Safari/537.36');
-assert.strictEqual(envChrome.sandbox.__RANKI_WEBKIT1_VLIST_PATCH__, false, 'Expected WebKit 1.0 patch disabled on Chrome');
-console.log('[PASS] Test 1: WebKit 1.0 vlist-t2 auto-detection works cleanly.');
+var env = createMockEnv();
+
+// Test 1: Pure MathJax 2.7.9 engine and CARD_READY signal
+assert.strictEqual(env.engine.getState().mathEngine, 'mathjax', 'Engine must be pure MathJax 2.7.9');
+assert.ok(env.titles[0] && env.titles[0].indexOf('RA:CARD_READY:') === 0, 'CARD_READY must fire on init');
+console.log('[PASS] Test 1: Pure MathJax 2.7.9 CardEngine initializes and emits CARD_READY.');
 
 // Test 2: HTML preprocessor (scripts, bare \ce, unified color normalization, media placeholders, anti-tofu)
-var pp = envWk1.engine._preprocessCardHtml;
+var pp = env.engine._preprocessCardHtml;
 assert.strictEqual(pp('<script>alert(1)</script><b>Hi</b>'), '<b>Hi</b>');
 assert.strictEqual(pp('Water \\ce{H2O} and \\(\\ce{Ca^2+}\\)'), 'Water \\(\\ce{H2O}\\) and \\(\\ce{Ca^2+}\\)');
 assert.ok(pp('<span style="color: red">trap</span>').indexOf('class="eink-red"') !== -1);
@@ -127,120 +145,135 @@ assert.strictEqual(pp('\u2068OK\u2069 \uD83C\uDF89 \u2705 \u274C \u26A0\uFE0F'),
 assert.strictEqual(pp('Plain Chinese & English card with no math'), 'Plain Chinese & English card with no math');
 console.log('[PASS] Test 2: HTML preprocessor handles colors, media placeholders, and anti-tofu sanitization.');
 
-// Test 3: Default engine is MathJax 2.7.9 & font clamps strictly within [28, 54] (default 42px)
-assert.strictEqual(envWk1.engine.getState().mathEngine, 'mathjax', 'Default math engine must be mathjax');
-assert.strictEqual(envWk1.engine.getState().fontSizePx, 42);
-envWk1.engine.setConfig({ font_size_px: 10 });
-assert.strictEqual(envWk1.engine.getState().fontSizePx, 28);
-envWk1.engine.setConfig({ font_size_px: 99 });
-assert.strictEqual(envWk1.engine.getState().fontSizePx, 54);
-envWk1.engine.setConfig({ font_size_px: 42, math_engine: 'katex' });
-assert.strictEqual(envWk1.engine.getState().mathEngine, 'katex');
-envWk1.engine.setConfig({ math_engine: 'mathjax' });
-assert.strictEqual(envWk1.engine.getState().mathEngine, 'mathjax');
-console.log('[PASS] Test 3: Default engine is MathJax 2.7.9 and font size defaults to 42px clamped [28, 54].');
+// Test 3: Font size defaults to 42px and clamps strictly within [28, 54]
+assert.strictEqual(env.engine.getState().fontSizePx, 42);
+env.engine.setConfig({ font_size_px: 10 });
+assert.strictEqual(env.engine.getState().fontSizePx, 28);
+env.engine.setConfig({ font_size_px: 99 });
+assert.strictEqual(env.engine.getState().fontSizePx, 54);
+env.engine.setConfig({ font_size_px: 42 });
+assert.strictEqual(env.engine.getState().fontSizePx, 42);
+console.log('[PASS] Test 3: Font size defaults to 42px and clamps strictly within [28, 54].');
 
-// Test 4: Render immediate, instant flip (flushing queued back), prefetch, and Card-ID verified swap
-envWk1.engine.renderImmediate({
+// Test 4: Atomic single-frame reveal + Card-ID verified 4-slot pipeline
+env.engine.renderImmediate({
     current: { card_id: 101, question_html: 'Q101', answer_html: 'A101', css: '.c101{}' },
     next: { card_id: 102, question_html: 'Q102', answer_html: 'A102', css: '.c102{}' }
 });
-assert.strictEqual(envWk1.engine.getState().activeCardId, 101);
-assert.strictEqual(envWk1.elements['card-a-front'].innerHTML, 'Q101');
-assert.strictEqual(envWk1.elements['card-note-style'].textContent, '.c101{}');
+assert.strictEqual(env.visibilitySnapshots[0], 'hidden', 'Front must stay hidden while MathJax typesets to avoid 2-frame ghosting');
+assert.strictEqual(env.elements['card-a-front'].style.visibility, 'visible', 'Front must become visible once MathJax finishes');
+assert.strictEqual(env.engine.getState().activeCardId, 101);
+assert.strictEqual(env.elements['card-a-front'].innerHTML, 'Q101');
+assert.strictEqual(env.elements['card-note-style'].textContent, '.c101{}');
 
-// Flip immediately BEFORE timers flush -> must synchronously flush Back render!
-envWk1.engine.flipToAnswer();
-assert.strictEqual(envWk1.engine.getState().isFlipped, true);
-assert.strictEqual(envWk1.elements['card-a-back'].innerHTML, 'A101');
-assert.strictEqual(envWk1.elements['slot-a-back'].className, 'slot-viewport');
+env.engine.flipToAnswer();
+assert.strictEqual(env.engine.getState().isFlipped, true);
+assert.strictEqual(env.elements['card-a-back'].innerHTML, 'A101');
+assert.strictEqual(env.elements['slot-a-back'].className, 'slot-viewport');
 
-// Flush prefetch timer so Card 102 finishes pre-rendering in Group B
-envWk1.flushTimers();
-assert.strictEqual(envWk1.engine.getState().prefetchedCardId, 102);
-assert.strictEqual(envWk1.elements['card-b-front'].innerHTML, 'Q102');
+env.flushTimers();
+assert.strictEqual(env.engine.getState().prefetchedCardId, 102);
+assert.strictEqual(env.elements['card-b-front'].innerHTML, 'Q102');
 
-// Card-ID mismatch guard: attempting to swap to 999 MUST fail safely!
-var badSwap = envWk1.engine.swapToPrefetched({ expected_card_id: 999 });
+var badSwap = env.engine.swapToPrefetched({ expected_card_id: 999 });
 assert.strictEqual(badSwap, false, 'Stale Card-ID swap must be rejected');
-assert.strictEqual(envWk1.engine.getState().activeCardId, 101, 'Active card must remain untouched on mismatch');
+assert.strictEqual(env.engine.getState().activeCardId, 101, 'Active card must remain untouched on mismatch');
 
-// Exact Card-ID match: swap to 102 succeeds and updates CSS to .c102{}
-var okSwap = envWk1.engine.swapToPrefetched({
+var okSwap = env.engine.swapToPrefetched({
     expected_card_id: 102,
     prefetch_next: { card_id: 103, question_html: 'Q103', answer_html: 'A103', css: '.c103{}' }
 });
 assert.strictEqual(okSwap, true);
-assert.strictEqual(envWk1.engine.getState().activeGroup, 'B');
-assert.strictEqual(envWk1.engine.getState().activeCardId, 102);
-assert.strictEqual(envWk1.elements['card-note-style'].textContent, '.c102{}');
-assert.strictEqual(envWk1.elements['slot-b-front'].className, 'slot-viewport');
-console.log('[PASS] Test 4: Card-ID verified 4-slot pipeline prevents desync and updates card CSS.');
+assert.strictEqual(env.engine.getState().activeGroup, 'B');
+assert.strictEqual(env.engine.getState().activeCardId, 102);
+assert.strictEqual(env.elements['card-note-style'].textContent, '.c102{}');
+assert.strictEqual(env.elements['slot-b-front'].className, 'slot-viewport');
+console.log('[PASS] Test 4: Atomic single-frame reveal & Card-ID verified 4-slot pipeline pass.');
 
 // Test 5: Discrete 85% viewport pagination (deterministic page stops, exact clamp)
-var vpB = envWk1.elements['slot-b-front'];
+var vpB = env.elements['slot-b-front'];
 vpB.clientHeight = 1000;
-vpB.scrollHeight = 2200; // maxScroll = 1200, step = 850 -> 3 pages (0, 850, 1200)
+vpB.scrollHeight = 2200;
 vpB.scrollTop = 0;
-var st1 = envWk1.engine.pageScroll(1);
+var st1 = env.engine.pageScroll(1);
 assert.strictEqual(vpB.scrollTop, 850);
 assert.strictEqual(st1.page, 2);
 assert.strictEqual(st1.total, 3);
-var st2 = envWk1.engine.pageScroll(1);
+var st2 = env.engine.pageScroll(1);
 assert.strictEqual(vpB.scrollTop, 1200);
 assert.strictEqual(st2.page, 3);
-var st3 = envWk1.engine.pageScroll(-1);
+var st3 = env.engine.pageScroll(-1);
 assert.strictEqual(vpB.scrollTop, 850);
 assert.strictEqual(st3.page, 2);
-var st4 = envWk1.engine.pageScroll(-1);
+var st4 = env.engine.pageScroll(-1);
 assert.strictEqual(vpB.scrollTop, 0);
 assert.strictEqual(st4.page, 1);
 console.log('[PASS] Test 5: Discrete 85% viewport pagination clamps and hits deterministic stops.');
 
-// Test 6: Wide-equation centering layout-collapse & clean reset when font shrinks
-var eqNode = { scrollWidth: 1200, offsetHeight: 100, style: {} };
-envWk1.engine._scaleEquationNode(eqNode, 876);
-// ratio = floor(876/1200 * 1000)/1000 = 0.73 -> scaledW = 876, marginRight = -324px
-assert.strictEqual(eqNode.style.transform, 'scale(0.73)');
-assert.strictEqual(eqNode.style.transformOrigin, '0 0');
-assert.strictEqual(eqNode.style.marginRight, '-324px');
-assert.strictEqual(eqNode.style.marginBottom, '-27px');
-// Now simulate user shrinking font size so eqNode fits (700 <= 876): must cleanly reset transform & margins!
-eqNode.scrollWidth = 700;
-envWk1.engine._scaleEquationNode(eqNode, 876);
-assert.strictEqual(eqNode.style.transform, '');
-assert.strictEqual(eqNode.style.marginRight, '');
-assert.strictEqual(eqNode.style.marginBottom, '');
-console.log('[PASS] Test 6: Wide-equation scaling collapses box for exact centering and resets cleanly on font resize.');
+// Test 6: Wide-equation <li> container width cap + explicit .eq-scale-wrap box & clean unwrap
+var mockCard = { tagName: 'DIV', clientWidth: 960 };
+var mockLi = {
+    tagName: 'LI',
+    parentNode: mockCard,
+    children: [],
+    insertBefore: function (newNode, refNode) {
+        newNode.parentNode = this;
+        var idx = this.children.indexOf(refNode);
+        if (idx === -1) this.children.push(newNode);
+        else this.children.splice(idx, 0, newNode);
+    },
+    removeChild: function (oldNode) {
+        var idx = this.children.indexOf(oldNode);
+        if (idx !== -1) this.children.splice(idx, 1);
+        oldNode.parentNode = null;
+    }
+};
+var eqInLi = { tagName: 'SPAN', scrollWidth: 850, offsetHeight: 54, style: {}, parentNode: mockLi };
+mockLi.children.push(eqInLi);
+
+var liAvail = env.engine._getAvailableContainerWidth(eqInLi, mockCard, 876);
+assert.ok(liAvail < 820 && liAvail > 760, 'Expected <li> width cap around ~802px, got ' + liAvail);
+
+env.engine._scaleEquationNode(eqInLi, liAvail);
+assert.strictEqual(eqInLi.parentNode.className, 'eq-scale-wrap', 'Wide equation in DOM must be wrapped in explicit .eq-scale-wrap');
+assert.strictEqual(eqInLi.style.transformOrigin, '0 0');
+assert.ok(parseInt(eqInLi.parentNode.style.width, 10) <= liAvail, 'Wrapper width must fit inside <li>');
+
+// Shrink font so equation fits naturally -> must unwrap .eq-scale-wrap cleanly!
+eqInLi.scrollWidth = 650;
+env.engine._scaleEquationNode(eqInLi, liAvail);
+assert.strictEqual(eqInLi.parentNode, mockLi, 'Unscaled equation must unwrap back into <li>');
+assert.strictEqual(eqInLi.style.transform, '');
+console.log('[PASS] Test 6: <li> container cap & explicit .eq-scale-wrap prevent bullet wrapping and unwrap cleanly.');
 
 // Test 7: Rapid back-to-back renderImmediate cancels stale back/prefetch timers cleanly
-envWk1.engine.renderImmediate({
+env.engine.renderImmediate({
     current: { card_id: 201, question_html: 'Q201', answer_html: 'A201', css: '' },
     next: { card_id: 202, question_html: 'Q202', answer_html: 'A202', css: '' }
 });
-envWk1.engine.renderImmediate({
+env.engine.renderImmediate({
     current: { card_id: 301, question_html: 'Q301', answer_html: 'A301', css: '' },
     next: { card_id: 302, question_html: 'Q302', answer_html: 'A302', css: '' }
 });
-envWk1.flushTimers();
-assert.strictEqual(envWk1.engine.getState().activeCardId, 301);
-assert.strictEqual(envWk1.engine.getState().prefetchedCardId, 302);
-assert.strictEqual(envWk1.elements['card-a-back'].innerHTML, 'A301', 'Stale card 201 back must not overwrite 301');
+env.flushTimers();
+assert.strictEqual(env.engine.getState().activeCardId, 301);
+assert.strictEqual(env.engine.getState().prefetchedCardId, 302);
+assert.strictEqual(env.elements['card-a-back'].innerHTML, 'A301', 'Stale card 201 back must not overwrite 301');
 console.log('[PASS] Test 7: Rapid renderImmediate cancels stale back/prefetch renders without race corruption.');
 
 // Test 8: Finished screen
-envWk1.engine.showFinished('Done today');
-assert.strictEqual(envWk1.elements['slot-finished'].className, 'slot-viewport');
-assert.strictEqual(envWk1.elements['finished-sub'].textContent, 'Done today');
+env.engine.showFinished('Done today');
+assert.strictEqual(env.elements['slot-finished'].className, 'slot-viewport');
+assert.strictEqual(env.elements['finished-sub'].textContent, 'Done today');
 console.log('[PASS] Test 8: Finished state renders cleanly.');
 
-// Test 9 (Regression Guard): Never break KaTeX/mhchem transparent \vphantom{X} struts!
+// Test 9: Monochrome MathJax \bbox & color normalization strictly protects transparent layout struts
 var cardCssCode = fs.readFileSync(path.join(repoRoot, 'views', 'card.css'), 'utf8');
 var cssNoComments = cardCssCode.replace(/\/\*[\s\S]*?\*\//g, '');
 assert.strictEqual(
-    /\.katex\s+\*/.test(cssNoComments),
+    /\.MathJax\s+\*/.test(cssNoComments),
     false,
-    'card.css must NEVER contain `.katex *` wildcard rules that override color:transparent on \\vphantom{X} struts!'
+    'card.css must NEVER contain `.MathJax *` wildcard rules that override transparent layout struts!'
 );
 var phantomNode = { style: { color: 'transparent', borderColor: 'transparent' } };
 var rgbaZeroNode = { style: { color: 'rgba(0, 0, 0, 0)' } };
@@ -248,13 +281,13 @@ var coloredNode = { style: { color: 'yellow', backgroundColor: 'yellow', borderC
 var mockMathCard = {
     querySelectorAll: function () { return [phantomNode, rgbaZeroNode, coloredNode]; }
 };
-envWk1.engine._normalizeMathColors(mockMathCard);
-assert.strictEqual(phantomNode.style.color, 'transparent', '\\vphantom transparent strut must stay transparent');
-assert.strictEqual(phantomNode.style.borderColor, 'transparent', 'MathJax transparent spacer border must stay transparent');
-assert.strictEqual(rgbaZeroNode.style.color, 'rgba(0, 0, 0, 0)', 'rgba(0,0,0,0) strut must stay transparent');
-assert.strictEqual(coloredNode.style.color, '#000000', 'Colored TeX text must normalize to pure black #000000');
-assert.strictEqual(coloredNode.style.backgroundColor, '#e6e6e6', 'Colored MathJax \\bbox highlight must normalize to #e6e6e6');
-assert.strictEqual(coloredNode.style.borderColor, '#000000', 'Colored MathJax \\bbox border must normalize to #000000');
-console.log('[PASS] Test 9: MathJax \\bbox & KaTeX \\vphantom struts are cleanly monochrome-normalized without regressions.');
+env.engine._normalizeMathColors(mockMathCard);
+assert.strictEqual(phantomNode.style.color, 'transparent');
+assert.strictEqual(phantomNode.style.borderColor, 'transparent');
+assert.strictEqual(rgbaZeroNode.style.color, 'rgba(0, 0, 0, 0)');
+assert.strictEqual(coloredNode.style.color, '#000000');
+assert.strictEqual(coloredNode.style.backgroundColor, '#e6e6e6');
+assert.strictEqual(coloredNode.style.borderColor, '#000000');
+console.log('[PASS] Test 9: MathJax monochrome normalization protects transparent struts and converts colored \\bbox.');
 
 console.log('=== ALL 9 CARD ENGINE UNIT TESTS PASSED ===');

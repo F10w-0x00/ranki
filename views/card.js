@@ -1,15 +1,9 @@
 /* RAnki Route B — Resident Card Canvas Engine (views/card.js)
- * Strict ES5 for WebKitGTK 1.0 (JavaScriptCore 2012)
+ * Pure MathJax 2.7.9 + Strict ES5 for Kindle PW3 WebKitGTK 1.0 (JavaScriptCore 2012)
  * Zero ES6+, zero post-2012 DOM APIs, zero Emoji, zero localStorage.
  */
 (function () {
-    // 1. Auto-enable WebKitGTK 1.0 (2012) KaTeX vlist-t2 baseline fix only on old WebKit
-    var ua = (typeof navigator !== 'undefined' && navigator.userAgent) ? navigator.userAgent : '';
-    var wkMatch = ua.match(/AppleWebKit\/(\d+)/);
-    var isChromium = (ua.indexOf('Chrome/') !== -1 || ua.indexOf('Edg/') !== -1);
-    window.__RANKI_WEBKIT1_VLIST_PATCH__ = !!(!isChromium && wkMatch && parseInt(wkMatch[1], 10) < 600);
-
-    // 2. Engine State
+    // 1. Engine State
     var tokenCounter = 1;
     var activeGroup = 'A';       // 'A' or 'B'
     var isFlipped = false;
@@ -19,7 +13,6 @@
     var prefetchedCardCss = '';
 
     var fontSizePx = 42;
-    var mathEngine = 'mathjax';  // 'mathjax' (default, battle-tested on KPW3) or 'katex'
     var mathJaxLoaded = false;
     var mathJaxLoading = false;
     var mathJaxHooked = false;
@@ -46,28 +39,6 @@
     var slotFinished = null;
     var noteStyleEl = null;
     var fontOverrideEl = null;
-
-    var KATEX_MACROS = {
-        '\\bbox': function (context) {
-            if (context.future().text === '[') {
-                context.popToken();
-                while (context.future().text !== ']' && context.future().text !== 'EOF') {
-                    context.popToken();
-                }
-                if (context.future().text === ']') {
-                    context.popToken();
-                }
-            }
-            return '\\boxed';
-        }
-    };
-
-    var KATEX_DELIMITERS = [
-        { left: '$$', right: '$$', display: true },
-        { left: '\\[', right: '\\]', display: true },
-        { left: '\\(', right: '\\)', display: false },
-        { left: '$', right: '$', display: false }
-    ];
 
     function nowMs() {
         return new Date().getTime();
@@ -314,8 +285,8 @@
     function normalizeMathColors(cardEl) {
         if (!cardEl || !cardEl.querySelectorAll) return;
         // Convert explicit colored TeX (\color{yellow}, \textcolor{blue}, \bbox[yellow, border:2px solid red])
-        // to crisp monochrome while strictly preserving transparent struts (\vphantom{X}, MathJax spacers)!
-        var styled = cardEl.querySelectorAll('.katex [style], .MathJax [style]');
+        // to crisp monochrome while strictly preserving transparent layout struts & spacers!
+        var styled = cardEl.querySelectorAll('.MathJax [style]');
         for (var i = 0; i < styled.length; i++) {
             var el = styled[i];
             if (!el.style) continue;
@@ -342,9 +313,44 @@
         }
     }
 
+    function unwrapScaleWrapper(target) {
+        if (!target || !target.parentNode) return;
+        var wrap = target.parentNode;
+        if (wrap.className === 'eq-scale-wrap' && wrap.parentNode && wrap.parentNode.insertBefore) {
+            wrap.parentNode.insertBefore(target, wrap);
+            wrap.parentNode.removeChild(wrap);
+        }
+    }
+
+    function getAvailableContainerWidth(el, cardEl, cardMaxW) {
+        var avail = cardMaxW;
+        var cur = el ? el.parentNode : null;
+        while (cur && cur !== cardEl) {
+            var tag = cur.tagName ? String(cur.tagName).toUpperCase() : '';
+            if (tag === 'LI') {
+                // Inside <ul>/<ol> (padding-left: 1.15em), reserve bullet + right breathing room
+                // so WebKitGTK 1.0 NEVER wraps inline equations below the list marker!
+                var liCap = cardMaxW - Math.ceil(fontSizePx * 1.55) - 8;
+                if (liCap < 180) liCap = 180;
+                if (liCap < avail) avail = liCap;
+                break;
+            }
+            if (tag === 'TD' || tag === 'TH' || tag === 'CITE' || tag === 'BLOCKQUOTE') {
+                var cw = cur.clientWidth || 0;
+                if (cw > 120 && (cw - 24) < avail) {
+                    avail = cw - 24;
+                }
+                break;
+            }
+            cur = cur.parentNode;
+        }
+        return avail;
+    }
+
     function scaleEquationNode(target, maxW) {
         if (!target || !target.style) return;
-        // Always reset previous scale first so font-size changes never double-scale
+        // Always unwrap & reset previous scale first so font-size changes never double-scale
+        unwrapScaleWrapper(target);
         target.style.webkitTransform = '';
         target.style.transform = '';
         target.style.webkitTransformOrigin = '';
@@ -364,9 +370,24 @@
             target.style.transformOrigin = '0 0';
             target.style.webkitTransform = 'scale(' + ratio + ')';
             target.style.transform = 'scale(' + ratio + ')';
-            target.style.marginRight = '-' + (sw - scaledW) + 'px';
-            if (sh > 0 && sh > scaledH) {
-                target.style.marginBottom = '-' + (sh - scaledH) + 'px';
+
+            // Wrap in an explicit scaledW x scaledH layout box so WebKit 1.0 line layout
+            // (especially inside <li>) sees the TRUE shrunk width without negative-margin line breaks!
+            if (target.parentNode && target.parentNode.insertBefore &&
+                typeof document !== 'undefined' && document.createElement) {
+                var wrap = document.createElement('span');
+                wrap.className = 'eq-scale-wrap';
+                wrap.style.width = scaledW + 'px';
+                if (scaledH > 0) {
+                    wrap.style.height = scaledH + 'px';
+                }
+                target.parentNode.insertBefore(wrap, target);
+                wrap.appendChild(target);
+            } else {
+                target.style.marginRight = '-' + (sw - scaledW) + 'px';
+                if (sh > 0 && sh > scaledH) {
+                    target.style.marginBottom = '-' + (sh - scaledH) + 'px';
+                }
             }
         }
     }
@@ -374,27 +395,25 @@
     function fitWideEquations(cardEl) {
         if (!cardEl || !cardEl.querySelectorAll) return;
 
-        // 0. Surgically normalize colored LaTeX without ever breaking transparent \vphantom struts
+        // 0. Surgically normalize colored LaTeX without ever breaking transparent struts
         normalizeMathColors(cardEl);
 
         // 1. Cloze math polish: inline-block keeps underline cleanly BELOW tall denominators
         var clozes = cardEl.querySelectorAll('.cloze');
         for (var c = 0; c < clozes.length; c++) {
             var cl = clozes[c];
-            var hasMath = cl.querySelectorAll && cl.querySelectorAll('.katex, .MathJax').length > 0;
+            var hasMath = cl.querySelectorAll && cl.querySelectorAll('.MathJax').length > 0;
             if (hasMath) {
                 if (cl.className.indexOf('cloze-math') === -1) {
                     cl.className = cl.className + ' cloze-math';
                 }
-                var hasBox = cl.querySelectorAll('.fbox, .fcolorbox').length > 0;
-                if (!hasBox) {
-                    var mjStyled = cl.querySelectorAll('.MathJax [style]');
-                    for (var m = 0; m < mjStyled.length; m++) {
-                        if (mjStyled[m].style && mjStyled[m].style.borderWidth &&
-                            mjStyled[m].style.borderStyle && mjStyled[m].style.borderStyle !== 'none') {
-                            hasBox = true;
-                            break;
-                        }
+                var hasBox = false;
+                var mjStyled = cl.querySelectorAll('.MathJax [style]');
+                for (var m = 0; m < mjStyled.length; m++) {
+                    if (mjStyled[m].style && mjStyled[m].style.borderWidth &&
+                        mjStyled[m].style.borderStyle && mjStyled[m].style.borderStyle !== 'none') {
+                        hasBox = true;
+                        break;
                     }
                 }
                 if (hasBox && cl.className.indexOf('cloze-boxed') === -1) {
@@ -407,7 +426,7 @@
         var emphNodes = cardEl.querySelectorAll('font[color], .eink-red, .eink-color');
         for (var r = 0; r < emphNodes.length; r++) {
             var rd = emphNodes[r];
-            var rdHasMath = rd.querySelectorAll && rd.querySelectorAll('.katex, .MathJax').length > 0;
+            var rdHasMath = rd.querySelectorAll && rd.querySelectorAll('.MathJax').length > 0;
             if (rdHasMath && rd.className.indexOf('eink-red-math') === -1 && rd.className.indexOf('eink-color-math') === -1) {
                 var cls = (rd.className.indexOf('eink-color') !== -1) ? 'eink-color-math' : 'eink-red-math';
                 rd.className = (rd.className ? rd.className + ' ' : '') + cls;
@@ -415,34 +434,38 @@
         }
 
         // 3. Measure available horizontal card width (accounting for 42px left/right padding)
-        var maxW = (cardEl.clientWidth || 960) - 84;
-        if (maxW <= 120) maxW = 860;
+        var cardMaxW = (cardEl.clientWidth || 960) - 84;
+        if (cardMaxW <= 120) cardMaxW = 860;
 
-        // Scale display math inner .katex / .MathJax (keeps parent display block centering exact!)
-        var dispNodes = cardEl.querySelectorAll('.katex-display, .MathJax_Display');
+        // Scale display math inner .MathJax (keeps parent .MathJax_Display centering exact!)
+        var dispNodes = cardEl.querySelectorAll('.MathJax_Display');
         for (var d = 0; d < dispNodes.length; d++) {
-            var inner = dispNodes[d].querySelectorAll ? dispNodes[d].querySelectorAll('.katex, .MathJax') : [];
+            var dispMaxW = getAvailableContainerWidth(dispNodes[d], cardEl, cardMaxW);
+            var inner = dispNodes[d].querySelectorAll ? dispNodes[d].querySelectorAll('.MathJax') : [];
             if (inner.length > 0) {
-                scaleEquationNode(inner[0], maxW);
+                scaleEquationNode(inner[0], dispMaxW);
             } else {
-                scaleEquationNode(dispNodes[d], maxW);
+                scaleEquationNode(dispNodes[d], dispMaxW);
             }
         }
 
-        // Scale standalone inline .katex / .MathJax (skipping those inside display wrappers)
-        var inlineNodes = cardEl.querySelectorAll('.katex, .MathJax');
+        // Scale standalone inline .MathJax (measuring enclosing <li>/<td>/<cite> width accurately!)
+        var inlineNodes = cardEl.querySelectorAll('.MathJax');
         for (var i = 0; i < inlineNodes.length; i++) {
             var el = inlineNodes[i];
             var p = el.parentNode;
             if (p && p.className &&
-                (p.className.indexOf('katex-display') !== -1 || p.className.indexOf('MathJax_Display') !== -1)) {
+                (p.className.indexOf('MathJax_Display') !== -1 ||
+                 (p.className === 'eq-scale-wrap' && p.parentNode && p.parentNode.className &&
+                  p.parentNode.className.indexOf('MathJax_Display') !== -1))) {
                 continue;
             }
-            scaleEquationNode(el, maxW);
+            var itemMaxW = getAvailableContainerWidth(el, cardEl, cardMaxW);
+            scaleEquationNode(el, itemMaxW);
         }
     }
 
-    // 7. Primary MathJax 2.7.9 Ready Hook (attaches to preloaded MathJax in card.html or loads dynamically)
+    // 7. MathJax 2.7.9 Ready Hook (attaches to preloaded MathJax in card.html or loads dynamically)
     function flushMathJaxWaiters() {
         mathJaxLoaded = true;
         mathJaxLoading = false;
@@ -512,40 +535,25 @@
         document.getElementsByTagName('head')[0].appendChild(script);
     }
 
-    // 8. Core Typesetting Function (MathJax 2.7.9 primary or optional KaTeX)
-    function renderIntoElement(cardEl, rawHtml, expectedGen, onDone) {
+    // 8. Core Typesetting Function (Pure MathJax 2.7.9 with atomic single-frame e-ink reveal)
+    function renderIntoElement(cardEl, rawHtml, expectedGen, hideUntilReady, onDone) {
         var t0 = nowMs();
+        if (hideUntilReady && cardEl.style) {
+            cardEl.style.visibility = 'hidden';
+        }
         cardEl.innerHTML = preprocessCardHtml(rawHtml);
 
-        if (mathEngine === 'mathjax') {
-            ensureMathJaxLoaded(function () {
+        ensureMathJaxLoaded(function () {
+            if (expectedGen && expectedGen !== renderGen) return;
+            window.MathJax.Hub.Queue(['Typeset', window.MathJax.Hub, cardEl], function () {
                 if (expectedGen && expectedGen !== renderGen) return;
-                window.MathJax.Hub.Queue(['Typeset', window.MathJax.Hub, cardEl], function () {
-                    if (expectedGen && expectedGen !== renderGen) return;
-                    fitWideEquations(cardEl);
-                    if (onDone) onDone(nowMs() - t0);
-                });
-            });
-            return;
-        }
-
-        // Optional Switchable Engine: ES5 KaTeX synchronous rendering
-        if (typeof window.renderMathInElement === 'function') {
-            try {
-                window.renderMathInElement(cardEl, {
-                    delimiters: KATEX_DELIMITERS,
-                    macros: KATEX_MACROS,
-                    strict: 'ignore',
-                    throwOnError: false
-                });
-            } catch (e) {
-                if (typeof console !== 'undefined' && console.log) {
-                    console.log('[CardEngine] KaTeX render warning: ' + e.message);
+                fitWideEquations(cardEl);
+                if (cardEl.style) {
+                    cardEl.style.visibility = 'visible';
                 }
-            }
-        }
-        fitWideEquations(cardEl);
-        if (onDone) onDone(nowMs() - t0);
+                if (onDone) onDone(nowMs() - t0);
+            });
+        });
     }
 
     // 9. Slot Accessors & Visibility Helpers
@@ -668,9 +676,9 @@
         pendingPrefetchTimer = setTimeout(function () {
             pendingPrefetchTimer = null;
             if (expectedGen !== renderGen) return;
-            renderIntoElement(bg.frontCard, prefetchedFrontRaw, expectedGen, function () {
+            renderIntoElement(bg.frontCard, prefetchedFrontRaw, expectedGen, false, function () {
                 if (expectedGen !== renderGen) return;
-                renderIntoElement(bg.backCard, prefetchedBackRaw, expectedGen, function () {
+                renderIntoElement(bg.backCard, prefetchedBackRaw, expectedGen, false, function () {
                     if (expectedGen !== renderGen) return;
                     prefetchedCardId = nextCard.card_id || 0;
                 });
@@ -691,36 +699,13 @@
         _preprocessCardHtml: preprocessCardHtml,
         _computePageState: computePageState,
         _scaleEquationNode: scaleEquationNode,
+        _getAvailableContainerWidth: getAvailableContainerWidth,
         _normalizeMathColors: normalizeMathColors,
 
         setConfig: function (cfg) {
             if (!cfg) return;
-            var engineChanged = false;
             if (typeof cfg.font_size_px === 'number') {
                 applyFontSize(cfg.font_size_px);
-            }
-            if ((cfg.math_engine === 'katex' || cfg.math_engine === 'mathjax') && cfg.math_engine !== mathEngine) {
-                mathEngine = cfg.math_engine;
-                engineChanged = true;
-            }
-            // If engine switched while viewing a card, immediately re-typeset active card & clear stale prefetch
-            if (engineChanged && activeCardId !== 0) {
-                renderGen++;
-                var myGen = renderGen;
-                cancelBackgroundWork();
-                pendingBackRender = null;
-                prefetchedCardId = 0;
-                var gSwitch = getGroupSlots(activeGroup);
-                var targetCard = isFlipped ? gSwitch.backCard : gSwitch.frontCard;
-                var targetRaw = isFlipped ? activeBackRaw : activeFrontRaw;
-                var otherCard = isFlipped ? gSwitch.frontCard : gSwitch.backCard;
-                var otherRaw = isFlipped ? activeFrontRaw : activeBackRaw;
-                renderIntoElement(targetCard, targetRaw, myGen, function () {
-                    if (myGen !== renderGen) return;
-                    emitPageState();
-                    renderIntoElement(otherCard, otherRaw, myGen, null);
-                });
-                return;
             }
             // Refit active viewport & report updated pagination after font change
             var vp = getActiveViewport();
@@ -759,14 +744,14 @@
             g.backView.scrollTop = 0;
             setVisibleSlot(g.frontView);
 
-            // Render visible Front immediately
-            renderIntoElement(g.frontCard, activeFrontRaw, myGen, function (elapsedMs) {
+            // Atomic e-ink reveal: keep front hidden during MathJax typesetting so raw TeX never ghosts!
+            renderIntoElement(g.frontCard, activeFrontRaw, myGen, true, function (elapsedMs) {
                 if (myGen !== renderGen) return;
                 var st = emitPageState();
                 notifyHost('RENDER_DONE', {
                     card_id: activeCardId,
                     mode: 'immediate',
-                    engine: mathEngine,
+                    engine: 'mathjax',
                     ms: elapsedMs,
                     page: st.page,
                     total: st.total
@@ -777,7 +762,7 @@
                 var backCid = activeCardId;
                 pendingBackRender = function () {
                     if (myGen !== renderGen || activeCardId !== backCid) return;
-                    renderIntoElement(g.backCard, backHtml, myGen, function () {
+                    renderIntoElement(g.backCard, backHtml, myGen, isFlipped, function () {
                         if (myGen !== renderGen || activeCardId !== backCid) return;
                         if (isFlipped) {
                             emitPageState();
@@ -794,8 +779,8 @@
         flipToAnswer: function () {
             if (isFlipped || activeCardId === 0) return;
             var t0 = nowMs();
-            flushPendingBack();
             isFlipped = true;
+            flushPendingBack();
             var g = getGroupSlots(activeGroup);
             resetPageIndex(g.backView);
             setVisibleSlot(g.backView);
@@ -840,6 +825,8 @@
             applyNoteCss(activeCardCss);
 
             var g = getGroupSlots(activeGroup);
+            if (g.frontCard && g.frontCard.style) g.frontCard.style.visibility = 'visible';
+            if (g.backCard && g.backCard.style) g.backCard.style.visibility = 'visible';
             resetPageIndex(g.frontView);
             g.backView.scrollTop = 0;
             setVisibleSlot(g.frontView);
@@ -848,7 +835,7 @@
             notifyHost('RENDER_DONE', {
                 card_id: activeCardId,
                 mode: 'prefetch_hit',
-                engine: mathEngine,
+                engine: 'mathjax',
                 ms: nowMs() - t0,
                 page: st.page,
                 total: st.total
@@ -884,7 +871,7 @@
                 prefetchedCardId: prefetchedCardId,
                 isFlipped: isFlipped,
                 fontSizePx: fontSizePx,
-                mathEngine: mathEngine
+                mathEngine: 'mathjax'
             };
         }
     };
@@ -916,10 +903,8 @@
         }
 
         notifyHost('CARD_READY', {
-            default_engine: mathEngine,
-            mathjax_present: !!(window.MathJax && window.MathJax.Hub),
-            webkit1_patch: window.__RANKI_WEBKIT1_VLIST_PATCH__,
-            katex_ready: typeof window.renderMathInElement === 'function'
+            engine: 'mathjax',
+            mathjax_present: !!(window.MathJax && window.MathJax.Hub)
         });
     }
 

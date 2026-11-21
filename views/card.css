@@ -117,14 +117,15 @@ html, body {
     margin: 0 0 14px 0;
 }
 
-/* Lists stay centered as a cohesive block while bullets align cleanly */
+/* Lists stay centered as a cohesive block while bullets align cleanly without squeezing inline math */
 .card.kindle ul,
 .card.kindle ol {
     display: inline-block;
     text-align: left;
     margin: 10px auto 14px auto;
-    padding-left: 1.35em;
-    max-width: 92%;
+    padding-left: 1.15em;
+    max-width: 100%;
+    vertical-align: top;
 }
 
 .card.kindle li {
@@ -249,41 +250,10 @@ html, body {
     display: none !important;
 }
 
-/* KaTeX & MathJax Pure-Black Print Tuning (harmonized 1.02em with 42px body)
- * CRITICAL: NEVER apply `.katex * { color: #000 !important }` — KaTeX/mhchem rely on
- * inline `style="color: transparent"` for \vphantom{X} struts! Set color on `.katex` root only.
+/* MathJax 2.7.9 Print Tuning (battle-tested on 2012 WebKitGTK 1.0)
+ * CRITICAL: NEVER apply wildcard `color: #000 !important` inside `.MathJax *` so
+ * transparent layout struts and spacers remain untouched.
  */
-.card.kindle .katex {
-    color: #000000 !important;
-    font-size: 1.02em;
-    white-space: nowrap;
-}
-
-.card.kindle .katex-display {
-    margin: 0.55em 0;
-    text-align: center;
-    overflow: visible;
-}
-
-.card.kindle .katex-display > .katex {
-    white-space: nowrap;
-    display: inline-block;
-    vertical-align: top;
-}
-
-/* Highlighted formula boxes (\bbox -> \boxed): MUST stay transparent so KaTeX overlay never obscures glyphs */
-.card.kindle .katex .fbox,
-.card.kindle .katex .fcolorbox {
-    border: 1.5px solid #000000 !important;
-    background-color: transparent !important;
-}
-
-.card.kindle .katex-error {
-    color: #000000 !important;
-    border-bottom: 1px dotted #000000;
-}
-
-/* MathJax 2.7.9 Primary Engine Print Tuning (battle-tested on 2012 WebKitGTK 1.0) */
 .card.kindle .MathJax,
 .card.kindle .MathJax_Display,
 .card.kindle .mjx-chtml {
@@ -306,11 +276,13 @@ html, body {
     display: none !important;
 }
 
-/* Auto-scaled overflow wrapper for wide equations */
-.eq-scale-wrap {
+/* Explicit layout-box wrapper for scaled wide equations (prevents WebKit 1.0 <li> bullet line-break bug!) */
+.card.kindle .eq-scale-wrap {
     display: inline-block;
-    max-width: 100%;
     vertical-align: middle;
+    overflow: visible;
+    text-align: left;
+    line-height: 1.0;
 }
 
 /* Deck Finished Screen (Monochrome Vector, Zero Emoji) */

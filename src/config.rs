@@ -8,7 +8,7 @@ pub const DEFAULT_FONT_SIZE_PX: u32 = 42;
 pub const MIN_FONT_SIZE_PX: u32 = 28;
 pub const MAX_FONT_SIZE_PX: u32 = 54;
 pub const BUILTIN_FOCUS_TIMER_SECS: u32 = 20;
-pub const BUILTIN_AUTO_REFRESH_CARDS: u32 = 20;
+pub const BUILTIN_AUTO_REFRESH_CARDS: u32 = 8;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AppConfig {
@@ -17,7 +17,6 @@ pub struct AppConfig {
     pub hkey: String,
     pub sync_server: String,
     pub font_size_px: u32,
-    pub math_engine: String,
 }
 
 impl AppConfig {
@@ -28,7 +27,6 @@ impl AppConfig {
             hkey: String::new(),
             sync_server: String::new(),
             font_size_px: DEFAULT_FONT_SIZE_PX,
-            math_engine: "mathjax".to_string(),
         }
     }
 
@@ -57,11 +55,10 @@ impl AppConfig {
         if let Ok(content) = fs::read_to_string(&path) {
             config.parse_ini_str(&content);
             println!(
-                "[CONFIG] Loaded {:?} (hkey_len={}, font_size_px={}, math_engine={})",
+                "[CONFIG] Loaded {:?} (hkey_len={}, font_size_px={})",
                 path,
                 config.hkey.len(),
-                config.font_size_px,
-                config.math_engine
+                config.font_size_px
             );
         } else {
             println!("[CONFIG] Config {:?} not found; using safe defaults.", path);
@@ -97,9 +94,6 @@ impl AppConfig {
                             self.font_size_px = clamp_font_size(px);
                         }
                     }
-                    "math_engine" => {
-                        self.math_engine = normalize_math_engine(val).to_string();
-                    }
                     _ => {}
                 }
             }
@@ -110,18 +104,13 @@ impl AppConfig {
         self.font_size_px = clamp_font_size(px);
     }
 
-    pub fn set_math_engine(&mut self, engine: &str) {
-        self.math_engine = normalize_math_engine(engine).to_string();
-    }
-
     pub fn serialize_ini(&self) -> String {
         format!(
-            "[General]\ncollection_dir={}\nhkey={}\nsync_server={}\nfont_size_px={}\nmath_engine={}\n",
+            "[General]\ncollection_dir={}\nhkey={}\nsync_server={}\nfont_size_px={}\n",
             self.collection_dir,
             self.hkey,
             self.sync_server,
-            clamp_font_size(self.font_size_px),
-            normalize_math_engine(&self.math_engine)
+            clamp_font_size(self.font_size_px)
         )
     }
 
@@ -185,14 +174,6 @@ pub fn clamp_font_size(px: u32) -> u32 {
     px.clamp(MIN_FONT_SIZE_PX, MAX_FONT_SIZE_PX)
 }
 
-pub fn normalize_math_engine(raw: &str) -> &'static str {
-    if raw.eq_ignore_ascii_case("katex") {
-        "katex"
-    } else {
-        "mathjax"
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -203,9 +184,8 @@ mod tests {
         assert_eq!(cfg.collection_dir, "/mnt/us/anki_data_test");
         assert!(cfg.hkey.is_empty());
         assert_eq!(cfg.font_size_px, 42);
-        assert_eq!(cfg.math_engine, "mathjax");
         assert_eq!(BUILTIN_FOCUS_TIMER_SECS, 20);
-        assert_eq!(BUILTIN_AUTO_REFRESH_CARDS, 20);
+        assert_eq!(BUILTIN_AUTO_REFRESH_CARDS, 8);
     }
 
     #[test]
@@ -217,17 +197,15 @@ mod tests {
              hkey=tok_abc123\n\
              sync_server=https://sync.example.com/\n\
              font_size_px=12\n\
-             math_engine=KATEX\n\
+             math_engine=katex\n\
              scale=1.2\n",
         );
         assert_eq!(cfg.hkey, "tok_abc123");
         assert_eq!(cfg.sync_server, "https://sync.example.com/");
         assert_eq!(cfg.font_size_px, MIN_FONT_SIZE_PX);
-        assert_eq!(cfg.math_engine, "katex");
 
-        cfg.parse_ini_str("font_size_px=999\nmath_engine=unknown\n");
+        cfg.parse_ini_str("font_size_px=999\n");
         assert_eq!(cfg.font_size_px, MAX_FONT_SIZE_PX);
-        assert_eq!(cfg.math_engine, "mathjax");
     }
 
     #[test]
@@ -243,7 +221,6 @@ mod tests {
         cfg.hkey = "my_token".to_string();
         cfg.sync_server = "https://anki.local".to_string();
         cfg.set_font_size_px(46);
-        cfg.set_math_engine("mathjax");
         cfg.save().expect("save should succeed");
 
         let loaded = AppConfig::load_from_path(path);

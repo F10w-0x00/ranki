@@ -214,4 +214,5 @@ extern "C" {
         response_id: c_int,
     ) -> *mut GtkWidget;
     pub fn gtk_dialog_run(dialog: *mut GtkWidget) -> c_int;
+    pub fn gtk_dialog_response(dialog: *mut GtkWidget, response_id: c_int);
 }

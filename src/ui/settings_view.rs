@@ -1,8 +1,8 @@
 //! Page 2: Minimalist Native GTK2 Settings & AnkiWeb Login View
 //! - Uses real GtkEntry widgets in the upper half of the 1072x1448 screen so Kindle's
 //!   native LIPC virtual keyboard (bottom ~520px) NEVER covers any input box.
-//! - Radically minimal: AnkiWeb Login/Server, Font Size (28-54px), Math Engine (KaTeX/MathJax).
-//!   Built-in 20s circular timer & 20-card auto GC16 refresh need zero settings clutter.
+//! - Radically minimal: AnkiWeb Login/Server & Font Size (28-54px).
+//!   Built-in MathJax 2.7.9, 20s circular timer & automatic GC16 refresh need zero settings clutter.
 use std::ffi::{CStr, CString};
 use std::ptr;
 
@@ -26,7 +26,6 @@ pub struct SettingsView {
     pub label_font_val: *mut GtkWidget,
     pub btn_font_down: *mut GtkWidget,
     pub btn_font_up: *mut GtkWidget,
-    pub btn_math_engine: *mut GtkWidget,
     back_pressed: bool,
 }
 
@@ -43,7 +42,6 @@ impl SettingsView {
         on_logout_click: unsafe extern "C" fn(*mut GtkWidget, gpointer),
         on_font_down_click: unsafe extern "C" fn(*mut GtkWidget, gpointer),
         on_font_up_click: unsafe extern "C" fn(*mut GtkWidget, gpointer),
-        on_math_toggle_click: unsafe extern "C" fn(*mut GtkWidget, gpointer),
     ) -> Self {
         let root = gtk_vbox_new(FALSE, 0);
         let white = GdkColor {
@@ -119,15 +117,6 @@ impl SettingsView {
         gtk_box_pack_start(font_row, btn_font_up, FALSE, FALSE, 0);
         gtk_box_pack_start(form, font_row, FALSE, FALSE, 4);
 
-        // Math engine switch (MathJax 2.7.9 primary / KaTeX experimental)
-        let math_row = gtk_hbox_new(FALSE, 18);
-        let lbl_math = make_label("公式渲染引擎:", f_label);
-        let btn_math_engine = make_button("MathJax 2.7.9 (推荐)", f_btn, on_math_toggle_click);
-        gtk_widget_set_size_request(btn_math_engine, 320, 60);
-        gtk_box_pack_start(math_row, lbl_math, TRUE, TRUE, 0);
-        gtk_box_pack_end(math_row, btn_math_engine, FALSE, FALSE, 0);
-        gtk_box_pack_start(form, math_row, FALSE, FALSE, 4);
-
         pango_font_description_free(f_label);
         pango_font_description_free(f_status);
         pango_font_description_free(f_entry);
@@ -148,7 +137,6 @@ impl SettingsView {
             label_font_val,
             btn_font_down,
             btn_font_up,
-            btn_math_engine,
             back_pressed: false,
         }
     }
@@ -172,13 +160,6 @@ impl SettingsView {
 
     pub unsafe fn sync_reading_controls(&self, cfg: &AppConfig) {
         set_label_text(self.label_font_val, &format!("{} px", cfg.font_size_px));
-
-        let engine_label = if cfg.math_engine == "katex" {
-            "KaTeX (极速实验)"
-        } else {
-            "MathJax 2.7.9 (推荐)"
-        };
-        set_button_label(self.btn_math_engine, engine_label);
     }
 
     pub unsafe fn read_credentials(&self) -> (String, String, String) {

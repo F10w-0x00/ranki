@@ -21,15 +21,12 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
-      - name: Verify Route B Card Renderer Gates (ES5, Unit Tests, 876 Formulas)
+      - name: Verify Route B Card Renderer Gates (ES5, Unit Tests, MathJax Bundle & 876 Formulas)
         run: |
           npm ci
           node tools/check_es5.js views/card.js
-          node tools/check_es5.js --syntax-only views/katex/katex.min.js
-          node tools/check_es5.js --syntax-only views/katex/mhchem.min.js
-          node tools/check_es5.js --syntax-only views/katex/auto-render.min.js
           node tools/test_card_engine.js
-          node tools/test_regression.js
+          node tools/test_mathjax_bundle.js
 
       - name: Build Builder Docker Image
         run: |

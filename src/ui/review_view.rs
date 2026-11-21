@@ -221,10 +221,26 @@ impl ReviewView {
             self.top_pressed == TopPress::Back,
         );
 
-        // Deck short name
+        // Official Anki 3-queue counter: New + Learn + Review — PERFECTLY centered on SCREEN_W (536px)!
+        let parts = [
+            (self.counts.new.to_string(), ActiveQueue::New),
+            (self.counts.learn.to_string(), ActiveQueue::Learn),
+            (self.counts.review.to_string(), ActiveQueue::Review),
+        ];
+        let (plus_w, _) = measure_text_px(cr, " + ", 24.0, false);
+        let mut total_w = (plus_w as f64) * 2.0;
+        for (num_str, q_kind) in &parts {
+            let active = self.stage != ReviewStage::Finished && self.counts.active_queue == *q_kind;
+            let (nw, _) = measure_text_px(cr, num_str, 25.0, active);
+            total_w += nw as f64;
+        }
+        let counter_start_x = (((SCREEN_W as f64) - total_w) / 2.0).clamp(320.0, 660.0 - total_w);
+
+        // Deck short name (clamped cleanly to the left of the centered 3-queue counter)
+        let deck_max_w = (counter_start_x - 16.0 - 152.0).max(120.0);
         draw_text_left(
             cr,
-            Rect::new(152.0, 0.0, 270.0, TOP_BAR_H as f64),
+            Rect::new(152.0, 0.0, deck_max_w, TOP_BAR_H as f64),
             &self.deck_name,
             26.0,
             true,
@@ -232,13 +248,7 @@ impl ReviewView {
             true,
         );
 
-        // Official Anki 3-queue counter: New + Learn + Review (active queue underlined!)
-        let mut cx = 434.0;
-        let parts = [
-            (self.counts.new.to_string(), ActiveQueue::New),
-            (self.counts.learn.to_string(), ActiveQueue::Learn),
-            (self.counts.review.to_string(), ActiveQueue::Review),
-        ];
+        let mut cx = counter_start_x;
         for (idx, (num_str, q_kind)) in parts.iter().enumerate() {
             if idx > 0 {
                 let (pw, _) = draw_text_left(

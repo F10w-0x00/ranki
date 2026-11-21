@@ -540,6 +540,14 @@ var SAMPLE_CARDS = [
         css: OFFICIAL_ANKI_CSS,
         q: '<b><u>多色文本与媒体防乱码实测</u></b><br><hr><br>红/橙警示：<font color="red">绝对不能漏负号</font>、<span style="color: orange">边界条件</span><br><br>蓝/绿/紫普通彩色：<span style="color: #0066cc">关键定义</span>、<font color="green">守恒量</font>、<span style="color: purple">\\(\\frac{\\mathrm{d}p}{\\mathrm{d}t}=F\\)</span><br><br>高亮底色：<mark>重点结论</mark> / <span style="background-color: yellow">黄色荧光笔</span><br><br>不支持媒体兜底：<br>如图所示：<img src="diagram.png"> · 朗读：[sound:demo_01.mp3] · <video src="clip.mp4"></video><br><br>防乱码净化：✅ 正确 / ❌ 错误 / ⚠️ 陷阱 / 🎉 无豆腐块',
         a: '<b><u>多色文本与媒体防乱码实测</u></b><br><hr><br>红/橙警示：<font color="red">绝对不能漏负号</font>、<span style="color: orange">边界条件</span><br><br>蓝/绿/紫普通彩色：<span style="color: #0066cc">关键定义</span>、<font color="green">守恒量</font>、<span style="color: purple">\\(\\frac{\\mathrm{d}p}{\\mathrm{d}t}=F\\)</span><br><br>高亮底色：<mark>重点结论</mark> / <span style="background-color: yellow">黄色荧光笔</span><br><br>不支持媒体兜底：<br>如图所示：<img src="diagram.png"> · 朗读：[sound:demo_01.mp3] · <video src="clip.mp4"></video><br><br>防乱码净化：✅ 正确 / ❌ 错误 / ⚠️ 陷阱 / 🎉 无豆腐块<br><hr id="answer"><cite>所有彩色文字在黑白墨水屏上均保持纯黑高对比与清晰语义区分，音视频与图片均转为干净占位提示，零破图、零豆腐块。</cite>'
+    },
+    {
+        id: 1007,
+        title: '7. 高中常用物理量 · 列表宽公式防折行实测 (Photo 2 复现)',
+        deck: '理科',
+        css: OFFICIAL_ANKI_CSS,
+        q: '<b><u>高中常用物理量</u></b><br><hr><ul><li>\\(1km = [...]m = [...]cm = [...]mm = [...]\\mu m = [...]nm\\)</li><li>\\(1m/s = [...]km/h\\)</li><li>\\(1A = [...]mA = [...]\\mu A\\)</li><li>\\(1MV = [...]KV = [...]V = [...]mV = [...]\\mu V\\)</li><li>\\(1kWh = [...] \\times [...]J\\)</li><li>\\(1F = [...]mF = [...]\\mu F = [...]nF = [...]pF\\)</li></ul>',
+        a: '<b><u>高中常用物理量</u></b><br><hr><ul><li>\\(1km = 10^3m = 10^5cm = 10^6mm = 10^9\\mu m = 10^{12}nm\\)</li><li>\\(1m/s = 3.6km/h\\)</li><li>\\(1A = 10^3mA = 10^6\\mu A\\)</li><li>\\(1MV = 10^3KV = 10^6V = 10^9mV = 10^{12}\\mu V\\)</li><li>\\(1kWh = 3.6 \\times 10^6J\\)</li><li>\\(1F = 10^3mF = 10^6\\mu F = 10^9nF = 10^{12}pF\\)</li></ul>'
     }
 ];
 
@@ -856,8 +864,8 @@ window.addEventListener('message', function (ev) {
     var msg = ev && ev.data;
     if (!msg || msg.source !== 'ranki-card') return;
     if (msg.action === 'CARD_READY') {
-        telemetryEl.textContent = '[CARD_READY] engine=' + (msg.payload.default_engine || 'mathjax') + ' mathjax=' + msg.payload.mathjax_present + ' katex=' + msg.payload.katex_ready;
-        sendToCard('setConfig', { font_size_px: fontSize, math_engine: 'mathjax' });
+        telemetryEl.textContent = '[CARD_READY] engine=' + (msg.payload.engine || 'mathjax') + ' mathjax=' + msg.payload.mathjax_present;
+        sendToCard('setConfig', { font_size_px: fontSize });
         loadCard(0);
     } else if (msg.action === 'PAGE_STATE') {
         pageIndEl.textContent = (msg.payload.total > 1) ? (msg.payload.page + '/' + msg.payload.total) : '';

@@ -8,7 +8,7 @@ pub mod review_view;
 pub mod settings_view;
 pub mod theme;
 
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::ffi::{CStr, CString};
 use std::path::PathBuf;
 use std::ptr;
@@ -49,6 +49,7 @@ static LAST_CARD_TOKEN: AtomicU64 = AtomicU64::new(0);
 
 thread_local! {
     static APP: RefCell<Option<AppController>> = const { RefCell::new(None) };
+    static ACTIVE_CHOICE_DIALOG: Cell<*mut GtkWidget> = const { Cell::new(ptr::null_mut()) };
 }
 
 struct AppController {
@@ -61,6 +62,8 @@ struct AppController {
     config: AppConfig,
     anki: AnkiService,
     reviews_since_refresh: u32,
+    needs_clean_refresh: bool,
+    pending_refresh_timer: Option<guint>,
     settings_return_page: i32,
     pending_card_script: Option<String>,
 
@@ -192,7 +195,6 @@ pub fn run_application() {
             on_settings_logout_click,
             on_settings_font_down_click,
             on_settings_font_up_click,
-            on_settings_math_toggle_click,
         );
 
         if anki.is_open() {
@@ -217,6 +219,8 @@ pub fn run_application() {
                 config,
                 anki,
                 reviews_since_refresh: 0,
+                needs_clean_refresh: false,
+                pending_refresh_timer: None,
                 settings_return_page: PAGE_DECKS,
                 pending_card_script: None,
                 sync_rx: None,
@@ -227,6 +231,8 @@ pub fn run_application() {
 
         gtk_widget_show_all(window);
         gtk_notebook_set_current_page(notebook, PAGE_DECKS);
+        // Clean cold-start GC16 flash once GTK has painted initial Deck Browser (wipes Kindle Home ghosting)
+        schedule_clean_refresh(350);
         println!("[HOST] Native GTK2/Cairo window shown. Entering gtk_main()...");
         gtk_main();
         println!("[HOST] Cleanly exited gtk_main().");
@@ -274,8 +280,7 @@ fn run_card_js(script: &str) {
 fn push_card_config_to_webview() {
     let info = with_app_ref(|app| {
         let json = serde_json::json!({
-            "font_size_px": app.config.font_size_px,
-            "math_engine": app.config.math_engine
+            "font_size_px": app.config.font_size_px
         })
         .to_string();
         let script = format!("if(window.CardEngine){{window.CardEngine.setConfig({});}}", json);
@@ -284,6 +289,25 @@ fn push_card_config_to_webview() {
     if let Some((true, wv, script)) = info {
         unsafe { exec_card_script(wv, &script) };
     }
+}
+
+/// Debounced hardware GC16 clean refresh (waits delay_ms so GTK2/WebKit finishes painting first).
+fn schedule_clean_refresh(delay_ms: u32) {
+    with_app(|app| unsafe {
+        if let Some(id) = app.pending_refresh_timer.take() {
+            g_source_remove(id);
+        }
+        app.pending_refresh_timer =
+            Some(g_timeout_add(delay_ms, on_scheduled_clean_refresh, ptr::null_mut()));
+    });
+}
+
+unsafe extern "C" fn on_scheduled_clean_refresh(_data: gpointer) -> gboolean {
+    with_app(|app| {
+        app.pending_refresh_timer = None;
+    });
+    eink::trigger_full_refresh();
+    FALSE
 }
 
 fn show_deck_banner(msg: &str, auto_clear_ms: Option<u32>) {
@@ -444,6 +468,8 @@ fn handle_deck_action(action: DeckAction) {
                 if !app.anki.is_open() {
                     return Err("本地数据库未打开，请先同步或检查测试库。".to_string());
                 }
+                app.needs_clean_refresh = true;
+                app.reviews_since_refresh = 0;
                 app.anki.enter_deck(did)
             });
 
@@ -480,6 +506,7 @@ fn handle_review_action(action: ReviewAction) {
                     gtk_notebook_set_current_page(app.notebook, PAGE_DECKS);
                 }
             });
+            schedule_clean_refresh(120);
         }
         ReviewAction::FlipCard => {
             let wv = with_app(|app| {
@@ -509,21 +536,19 @@ fn handle_review_action(action: ReviewAction) {
                 let prefetched = app.review_view.prefetched_card_id;
                 let res = app.anki.rate_card(cid, rating, prefetched);
                 app.reviews_since_refresh += 1;
-                let should_refresh = app.reviews_since_refresh >= BUILTIN_AUTO_REFRESH_CARDS;
-                if should_refresh {
+                if app.reviews_since_refresh >= BUILTIN_AUTO_REFRESH_CARDS {
                     app.reviews_since_refresh = 0;
+                    // Defer GC16 flash until AFTER the next card finishes RENDER_DONE!
+                    app.needs_clean_refresh = true;
                 }
-                Some((res, should_refresh))
+                Some(res)
             })
             .flatten();
 
-            if let Some((res, should_refresh)) = outcome {
+            if let Some(res) = outcome {
                 match res {
                     Ok(adv) => apply_advance_result(adv),
                     Err(e) => eprintln!("[ANKI] rate_card error: {}", e),
-                }
-                if should_refresh {
-                    eink::trigger_full_refresh();
                 }
             }
         }
@@ -561,7 +586,7 @@ fn handle_review_action(action: ReviewAction) {
                             apply_advance_result(adv);
                         }
                     }
-                    RESP_REFRESH => eink::trigger_full_refresh(),
+                    RESP_REFRESH => schedule_clean_refresh(120),
                     RESP_SETTINGS => {
                         with_app(|app| unsafe { app.review_view.timer.hide() });
                         open_settings_page(PAGE_REVIEW, None);
@@ -629,6 +654,15 @@ fn start_collection_sync(mode: SyncMode) {
     }
 }
 
+unsafe extern "C" fn on_choice_btn_clicked(_btn: *mut GtkWidget, data: gpointer) {
+    let resp_id = data as isize as i32;
+    let dlg = ACTIVE_CHOICE_DIALOG.with(|c| c.get());
+    if !dlg.is_null() {
+        gtk_dialog_response(dlg, resp_id);
+    }
+}
+
+/// Vertical full-width e-ink action sheet dialog (avoids GTK2's horizontal GtkHButtonBox overflow!).
 unsafe fn run_choice_dialog(
     parent: *mut GtkWidget,
     title: &str,
@@ -640,15 +674,23 @@ unsafe fn run_choice_dialog(
     gtk_window_set_title(dialog, d_title.as_ptr());
     gtk_window_set_transient_for(dialog, parent);
     gtk_window_set_position(dialog, GTK_WIN_POS_CENTER_ON_PARENT);
-    gtk_widget_set_size_request(dialog, 760, -1);
+    gtk_widget_set_size_request(dialog, 720, -1);
+
+    let white = GdkColor {
+        pixel: 0,
+        red: 0xFFFF,
+        green: 0xFFFF,
+        blue: 0xFFFF,
+    };
+    gtk_widget_modify_bg(dialog, GTK_STATE_NORMAL, &white);
 
     let area = gtk_dialog_get_content_area(dialog);
-    let vbox = gtk_vbox_new(FALSE, 16);
-    gtk_container_set_border_width(vbox, 28);
+    let vbox = gtk_vbox_new(FALSE, 14);
+    gtk_container_set_border_width(vbox, 32);
 
-    let f_title = make_font_desc(28.0, true);
+    let f_title = make_font_desc(30.0, true);
     let f_msg = make_font_desc(24.0, false);
-    let f_btn = make_font_desc(24.0, true);
+    let f_btn = make_font_desc(26.0, true);
 
     if let Ok(ct) = CString::new(title) {
         let lt = gtk_label_new(ct.as_ptr());
@@ -661,30 +703,47 @@ unsafe fn run_choice_dialog(
         gtk_misc_set_alignment(lm, 0.0, 0.5);
         gtk_label_set_line_wrap(lm, TRUE);
         gtk_widget_modify_font(lm, f_msg as *mut std::ffi::c_void);
-        gtk_box_pack_start(vbox, lm, FALSE, FALSE, 4);
+        gtk_box_pack_start(vbox, lm, FALSE, FALSE, 6);
     }
 
-    gtk_box_pack_start(area, vbox, TRUE, TRUE, 0);
-
+    let sig_clicked = CString::new("clicked").unwrap();
     for &(label, resp_id) in buttons {
         if let Ok(cl) = CString::new(label) {
-            let btn = gtk_dialog_add_button(dialog, cl.as_ptr(), resp_id);
-            gtk_widget_set_size_request(btn, -1, 64);
+            let btn = gtk_button_new_with_label(cl.as_ptr());
+            gtk_widget_set_size_request(btn, 640, 68);
             gtk_widget_modify_font(btn, f_btn as *mut std::ffi::c_void);
             let child = gtk_bin_get_child(btn);
             if !child.is_null() {
                 gtk_widget_modify_font(child, f_btn as *mut std::ffi::c_void);
             }
+            g_signal_connect_data(
+                btn as gpointer,
+                sig_clicked.as_ptr(),
+                Some(std::mem::transmute(on_choice_btn_clicked as usize)),
+                resp_id as isize as gpointer,
+                None,
+                0,
+            );
+            gtk_box_pack_start(vbox, btn, FALSE, FALSE, 0);
         }
     }
+
+    gtk_box_pack_start(area, vbox, TRUE, TRUE, 0);
 
     pango_font_description_free(f_title);
     pango_font_description_free(f_msg);
     pango_font_description_free(f_btn);
 
+    ACTIVE_CHOICE_DIALOG.with(|c| c.set(dialog));
     gtk_widget_show_all(dialog);
     let response = gtk_dialog_run(dialog);
+    ACTIVE_CHOICE_DIALOG.with(|c| c.set(ptr::null_mut()));
     gtk_widget_destroy(dialog);
+
+    // Wipe modal dialog frame ghosting cleanly once GTK repaints the underlying view
+    if response != RESP_REFRESH {
+        schedule_clean_refresh(120);
+    }
     response
 }
 
@@ -969,6 +1028,9 @@ unsafe extern "C" fn on_card_title_notify(
             }
         }
         "PAGE_STATE" | "RENDER_DONE" | "FLIP_DONE" => {
+            if action != "PAGE_STATE" {
+                gtk_widget_queue_draw(web_view);
+            }
             if let Ok(v) = serde_json::from_str::<serde_json::Value>(payload_str) {
                 if action != "PAGE_STATE" {
                     println!(
@@ -981,13 +1043,24 @@ unsafe extern "C" fn on_card_title_notify(
                 }
                 let p = v["page"].as_u64().unwrap_or(1) as u32;
                 let t = v["total"].as_u64().unwrap_or(1) as u32;
-                with_app(|app| {
+                let trigger_clean = with_app(|app| {
                     if app.review_view.page_cur != p || app.review_view.page_total != t {
                         app.review_view.page_cur = p;
                         app.review_view.page_total = t;
                         gtk_widget_queue_draw(app.review_view.top_area);
                     }
-                });
+                    if action == "RENDER_DONE" && app.needs_clean_refresh {
+                        app.needs_clean_refresh = false;
+                        true
+                    } else {
+                        false
+                    }
+                })
+                .unwrap_or(false);
+
+                if trigger_clean {
+                    schedule_clean_refresh(100);
+                }
             }
         }
         "PREFETCH_MISS" => {
@@ -1059,6 +1132,7 @@ unsafe extern "C" fn on_settings_top_release(
             }
             gtk_notebook_set_current_page(app.notebook, ret);
         });
+        schedule_clean_refresh(120);
     }
     TRUE
 }
@@ -1135,20 +1209,6 @@ unsafe extern "C" fn on_settings_font_up_click(_w: *mut GtkWidget, _data: gpoint
     with_app(|app| {
         let next = (app.config.font_size_px + 2).min(MAX_FONT_SIZE_PX);
         app.config.set_font_size_px(next);
-        let _ = app.config.save();
-        app.settings_view.sync_reading_controls(&app.config);
-    });
-    push_card_config_to_webview();
-}
-
-unsafe extern "C" fn on_settings_math_toggle_click(_w: *mut GtkWidget, _data: gpointer) {
-    with_app(|app| {
-        let next = if app.config.math_engine == "katex" {
-            "mathjax"
-        } else {
-            "katex"
-        };
-        app.config.set_math_engine(next);
         let _ = app.config.save();
         app.settings_view.sync_reading_controls(&app.config);
     });
