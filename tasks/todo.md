@@ -16,7 +16,7 @@
 - [x] **Task 5**: Upgrade `src/config.rs` (safe Route B settings schema, clamped values, atomic save, zero hardcoded secrets, unit tests)
 - [x] **Task 6**: Refactor `src/anki/mod.rs` (Card-ID-verified `AdvanceResult`, deduplicated root `total_due`, `QueueCounts` + `ActiveQueue` underline, `undo()`, `bury_current()`, `suspend_current()`, WAL checkpoint, unit tests)
 - [x] **Task 7**: Implement `src/anki/sync.rs` (background worker thread + `g_idle_add`, DB-only `normal_sync`, explicit `FullSyncRequired` + `full_download`/`full_upload`, zero media download) & add host `cargo test --lib` to CI
-- [ ] **Checkpoint 2**: `anki-core` builds & passes all unit tests in CI
+- [x] **Checkpoint 2**: `anki-core` builds & passes all 12/12 host unit tests in CI (Run `44890487270`)
 
 ### Phase 3: Native GTK2/PangoCairo Shell (`native-shell`)
 - [x] **Task 8**: Build thin FFI layer (`src/ffi/{gtk,cairo,webkit}.rs`), update `build.rs` (whitelisted GTK2/Cairo/Pango/Fontconfig), `src/ui/theme.rs` (Fontconfig app fonts), and `src/ui/eink.rs` (LIPC keyboard + hardware GC16 full refresh)
@@ -24,7 +24,7 @@
 - [x] **Task 10**: Build `src/ui/focus_timer.rs` (isolated `54×54px` Cairo 1 Hz discrete 20s iPhone Duo circular focus timer, pure monochrome, clean empty hollow ring at 0s, stop/hide on Flip)
 - [x] **Task 11**: Build `src/ui/review_view.rs` (Review Top Bar with `新+学+复` underline, Undo, `···` overflow menu, subtle `1/2` indicator, embedded `focus_timer`; resident card WebView with GDK-level zero-bar swipe/tap paging; PangoCairo Bottom 4-Rating Bar)
 - [x] **Task 12**: Build `src/ui/settings_view.rs` (minimalist native `GtkEntry` + LIPC keyboard + font/engine controls + non-blocking Sync/`FullSync` dialogs) and wire `src/ui/mod.rs` + `src/main.rs`
-- [ ] **Checkpoint 3**: GitHub Actions ARMEL CI build PASS + all 4 mechanical gates PASS (`GLIBC <= 2.18`, `DT_NEEDED`, 0 `.dynsym` leaks, ES5 + banned APIs, ≤ 20 MB)
+- [x] **Checkpoint 3**: GitHub Actions ARMEL CI build PASS (Run `44890487270`, `15.10 MB`) + all 4 mechanical gates PASS (`GLIBC_2.18`, 14/14 `DT_NEEDED`, 0 `.dynsym` leaks, ES5 + banned APIs)
 
 ### Phase 4: KPW3 Real-Device Validation
 - [ ] **Task 13**: Safe dev deploy to `D:\extensions\ranki-dev\` (`D:\anki_data_test\`, 0-byte `D:\anki_data\` guarantee) + 3 hardware spikes (KaTeX visual/speed, 52×52px Duo timer + GC16 + GDK swipe paging, native keyboard + Wi-Fi sync + Undo/Bury/Suspend) + 50–100 card stress test
