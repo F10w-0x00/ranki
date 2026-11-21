@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RAnki Card Canvas</title>
+    <link rel="stylesheet" href="katex/katex.min.css">
+    <link rel="stylesheet" href="card.css">
+    <style id="card-note-style"></style>
+    <style id="card-font-override"></style>
+</head>
+<body>
+    <!-- Group A: 2 Slots (Front / Back) -->
+    <div id="slot-a-front" class="slot-viewport">
+        <div class="slot-scroller">
+            <div id="card-a-front" class="card kindle"></div>
+        </div>
+    </div>
+    <div id="slot-a-back" class="slot-viewport offscreen">
+        <div class="slot-scroller">
+            <div id="card-a-back" class="card kindle"></div>
+        </div>
+    </div>
+
+    <!-- Group B: 2 Prefetch Slots (Front / Back) -->
+    <div id="slot-b-front" class="slot-viewport offscreen">
+        <div class="slot-scroller">
+            <div id="card-b-front" class="card kindle"></div>
+        </div>
+    </div>
+    <div id="slot-b-back" class="slot-viewport offscreen">
+        <div class="slot-scroller">
+            <div id="card-b-back" class="card kindle"></div>
+        </div>
+    </div>
+
+    <!-- Empty / Finished State -->
+    <div id="slot-finished" class="slot-viewport offscreen">
+        <div class="finished-wrap">
+            <div class="finished-mark"></div>
+            <div id="finished-title" class="finished-title">今日复习已完成</div>
+            <div id="finished-sub" class="finished-sub">当前牌组已无更多待复习卡片</div>
+        </div>
+    </div>
+
+    <!-- Primary Ultra-Fast ES5 Math Engine: KaTeX + mhchem + auto-render -->
+    <script src="katex/katex.min.js"></script>
+    <script src="katex/mhchem.min.js"></script>
+    <script src="katex/auto-render.min.js"></script>
+    <script src="card.js"></script>
+</body>
+</html>
