@@ -134,8 +134,8 @@ Rebuild RAnki for Kindle Paperwhite 3 (DP75SDI) using **Route B**: a pure-Rust d
 #### Task 5: Upgrade Safe Configuration Manager (`src/config.rs`)
 **Description:** Extend `AppConfig` to manage all Route B settings (`collection_dir`, `hkey`, `sync_server`, `font_size_px`, `focus_timer_enabled`, `focus_timer_secs`, `auto_refresh_cards`, `math_engine`) with clamped safe bounds, atomic write-and-rename saving, zero hardcoded secrets, and unit tests.
 **Acceptance criteria:**
-- [ ] Loads legacy `config.ini` cleanly with sensible defaults (`font_size_px=28`, `focus_timer_enabled=true`, `focus_timer_secs=20`, `auto_refresh_cards=20`, `math_engine=katex`).
-- [ ] Clamps invalid values (`font_size_px` 20..=38, `focus_timer_secs` 5..=120) and preserves unknown keys cleanly.
+- [ ] Loads legacy `config.ini` cleanly with sensible defaults (`font_size_px=36`, `focus_timer_enabled=true`, `focus_timer_secs=20`, `auto_refresh_cards=20`, `math_engine=katex`).
+- [ ] Clamps invalid values (`font_size_px` 24..=48, `focus_timer_secs` 5..=120) and preserves unknown keys cleanly.
 - [ ] Unit tests cover parse, clamp, and round-trip save in a temp directory.
 **Verification:**
 - [ ] `cargo test --lib config` passes (in CI / Rust toolchain).
@@ -201,7 +201,7 @@ Rebuild RAnki for Kindle Paperwhite 3 (DP75SDI) using **Route B**: a pure-Rust d
 **Estimated scope:** Medium-Large (split cleanly into FFI + `eink`/`theme` helpers; keep commit cohesive and thin)
 
 #### Task 9: PangoCairo Minimalist Paginated Deck Browser (`src/ui/deck_view.rs`)
-**Description:** Build Page 0 of the `GtkNotebook` entirely with PangoCairo `GtkDrawingArea`s: 76px header (`RAnki`, deduplicated `待复习 N 张`, crisp vector `同步`/`设置`/`刷新`/`退出` buttons), 960px centered deck list canvas (10 generous rows/page, `#D8D8D8` hairline dividers, `depth * 32px` indent, `▸`/`▾` collapse hit zone, right-aligned `新/学/复` tabular counts, instant monochrome invert tap feedback), 92px footer (`< 上一页  第 X / Y 页  下一页 >` + `studied_today`), and swipe gesture page turning.
+**Description:** Build Page 0 of the `GtkNotebook` entirely with PangoCairo `GtkDrawingArea`s: 76px header (`RAnki`, deduplicated `待复习 N 张`, crisp vector `同步`/`设置`/`刷新`/`退出` buttons), 960px centered deck list canvas (10 generous rows/page, `#D8D8D8` hairline dividers, all subdecks auto-expanded by default, `depth * 32px` indent, `▾`/`▸` optional collapse hit zone, right-aligned `新/学/复` tabular counts, instant monochrome invert tap feedback), 92px footer (`< 上一页  第 X / Y 页  下一页 >` + `studied_today`), and swipe gesture page turning.
 **Acceptance criteria:**
 - [ ] Renders full recursive deck tree with working subdeck collapse/expand and accurate root-only `total_due`.
 - [ ] Supports both footer page buttons and swipe gestures (Up/Down or Left/Right) with zero scrollbars and zero tofu emoji.
@@ -214,7 +214,7 @@ Rebuild RAnki for Kindle Paperwhite 3 (DP75SDI) using **Route B**: a pure-Rust d
 **Estimated scope:** Small (1 file)
 
 #### Task 10: Isolated 52×52px Cairo 20s iPhone Duo Circular Focus Timer (`src/ui/focus_timer.rs`)
-**Description:** Implement the standalone `52×52px` Cairo `GtkDrawingArea` focus countdown widget: starts on card Front (`remaining = focus_timer_secs`, default 20), ticks via `g_timeout_add(1000)` calling `gtk_widget_queue_draw_area(widget, 0, 0, 52, 52)` ONLY, draws a crisp 1-bit monochrome clockwise-shrinking filled circular sector (18° per second), shows hollow ring + bold center dot at 0s (gentle visual cue, never auto-flips/auto-rates), and stops/hides immediately on Flip or when disabled.
+**Description:** Implement the standalone `52×52px` Cairo `GtkDrawingArea` focus countdown widget: starts on card Front (`remaining = focus_timer_secs`, default 20), ticks via `g_timeout_add(1000)` calling `gtk_widget_queue_draw_area(widget, 0, 0, 52, 52)` ONLY, draws a crisp 1-bit monochrome clockwise-shrinking filled circular sector (18° per second), shows a clean empty hollow monochrome ring at 0s (no center dot — gentle visual cue, never auto-flips/auto-rates), and stops/hides immediately on Flip or when disabled.
 **Acceptance criteria:**
 - [ ] Timer state transitions (`Hidden` → `Running(20..1)` → `Expired` → `Hidden`) covered by pure-Rust unit tests.
 - [ ] Redraws strictly within its isolated 52×52px widget bounds; removes `g_timeout` source cleanly on Flip/Exit (0% idle CPU).

@@ -2,7 +2,8 @@
 /*
  * tools/test_card_engine.js
  * Automated unit tests for views/card.js (CardEngine state machine, Card-ID guard,
- * HTML preprocessor, discrete pagination, font clamping, and WebKit 1.0 detection).
+ * HTML preprocessor, discrete pagination, font clamping, wide-equation centering/reset,
+ * rapid render cancellation, and WebKit 1.0 detection).
  */
 var fs = require('fs');
 var path = require('path');
@@ -98,21 +99,23 @@ var envChrome = createMockEnv('Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 
 assert.strictEqual(envChrome.sandbox.__RANKI_WEBKIT1_VLIST_PATCH__, false, 'Expected WebKit 1.0 patch disabled on Chrome');
 console.log('[PASS] Test 1: WebKit 1.0 vlist-t2 auto-detection works cleanly.');
 
-// Test 2: HTML preprocessor (strip scripts, wrap bare \ce, protect math, normalize red)
+// Test 2: HTML preprocessor (strip scripts, wrap bare \ce, protect math, normalize red, plain text)
 var pp = envWk1.engine._preprocessCardHtml;
 assert.strictEqual(pp('<script>alert(1)</script><b>Hi</b>'), '<b>Hi</b>');
 assert.strictEqual(pp('Water \\ce{H2O} and \\(\\ce{Ca^2+}\\)'), 'Water \\(\\ce{H2O}\\) and \\(\\ce{Ca^2+}\\)');
 assert.ok(pp('<span style="color: red">trap</span>').indexOf('class="eink-red"') !== -1);
+assert.strictEqual(pp('Plain Chinese & English card with no math'), 'Plain Chinese & English card with no math');
 console.log('[PASS] Test 2: HTML preprocessor sanitizes scripts, wraps bare \\ce, preserves math, normalizes red.');
 
-// Test 3: Font clamping
+// Test 3: Font clamping [24, 48] with default 36px
+assert.strictEqual(envWk1.engine.getState().fontSizePx, 36);
 envWk1.engine.setConfig({ font_size_px: 10 });
-assert.strictEqual(envWk1.engine.getState().fontSizePx, 20);
+assert.strictEqual(envWk1.engine.getState().fontSizePx, 24);
 envWk1.engine.setConfig({ font_size_px: 99 });
-assert.strictEqual(envWk1.engine.getState().fontSizePx, 38);
-envWk1.engine.setConfig({ font_size_px: 28 });
-assert.strictEqual(envWk1.engine.getState().fontSizePx, 28);
-console.log('[PASS] Test 3: Font size clamps strictly within [20, 38].');
+assert.strictEqual(envWk1.engine.getState().fontSizePx, 48);
+envWk1.engine.setConfig({ font_size_px: 36 });
+assert.strictEqual(envWk1.engine.getState().fontSizePx, 36);
+console.log('[PASS] Test 3: Font size defaults to 36px and clamps strictly within [24, 48].');
 
 // Test 4: Render immediate, instant flip (flushing queued back), prefetch, and Card-ID verified swap
 envWk1.engine.renderImmediate({
@@ -151,7 +154,7 @@ assert.strictEqual(envWk1.elements['card-note-style'].textContent, '.c102{}');
 assert.strictEqual(envWk1.elements['slot-b-front'].className, 'slot-viewport');
 console.log('[PASS] Test 4: Card-ID verified 4-slot pipeline prevents desync and updates card CSS.');
 
-// Test 5: Discrete 85% viewport pagination (zero paging bar, exact clamp)
+// Test 5: Discrete 85% viewport pagination (deterministic page stops, exact clamp)
 var vpB = envWk1.elements['slot-b-front'];
 vpB.clientHeight = 1000;
 vpB.scrollHeight = 2200; // maxScroll = 1200, step = 850 -> 3 pages (0, 850, 1200)
@@ -169,12 +172,43 @@ assert.strictEqual(st3.page, 2);
 var st4 = envWk1.engine.pageScroll(-1);
 assert.strictEqual(vpB.scrollTop, 0);
 assert.strictEqual(st4.page, 1);
-console.log('[PASS] Test 5: Discrete 85% viewport pagination clamps and computes page/total accurately.');
+console.log('[PASS] Test 5: Discrete 85% viewport pagination clamps and hits deterministic stops.');
 
-// Test 6: Finished screen
+// Test 6: Wide-equation centering layout-collapse & clean reset when font shrinks
+var eqNode = { scrollWidth: 1200, offsetHeight: 100, style: {} };
+envWk1.engine._scaleEquationNode(eqNode, 876);
+// ratio = floor(876/1200 * 1000)/1000 = 0.73 -> scaledW = 876, marginRight = -324px
+assert.strictEqual(eqNode.style.transform, 'scale(0.73)');
+assert.strictEqual(eqNode.style.transformOrigin, '0 0');
+assert.strictEqual(eqNode.style.marginRight, '-324px');
+assert.strictEqual(eqNode.style.marginBottom, '-27px');
+// Now simulate user shrinking font size so eqNode fits (700 <= 876): must cleanly reset transform & margins!
+eqNode.scrollWidth = 700;
+envWk1.engine._scaleEquationNode(eqNode, 876);
+assert.strictEqual(eqNode.style.transform, '');
+assert.strictEqual(eqNode.style.marginRight, '');
+assert.strictEqual(eqNode.style.marginBottom, '');
+console.log('[PASS] Test 6: Wide-equation scaling collapses box for exact centering and resets cleanly on font resize.');
+
+// Test 7: Rapid back-to-back renderImmediate cancels stale back/prefetch timers cleanly
+envWk1.engine.renderImmediate({
+    current: { card_id: 201, question_html: 'Q201', answer_html: 'A201', css: '' },
+    next: { card_id: 202, question_html: 'Q202', answer_html: 'A202', css: '' }
+});
+envWk1.engine.renderImmediate({
+    current: { card_id: 301, question_html: 'Q301', answer_html: 'A301', css: '' },
+    next: { card_id: 302, question_html: 'Q302', answer_html: 'A302', css: '' }
+});
+envWk1.flushTimers();
+assert.strictEqual(envWk1.engine.getState().activeCardId, 301);
+assert.strictEqual(envWk1.engine.getState().prefetchedCardId, 302);
+assert.strictEqual(envWk1.elements['card-a-back'].innerHTML, 'A301', 'Stale card 201 back must not overwrite 301');
+console.log('[PASS] Test 7: Rapid renderImmediate cancels stale back/prefetch renders without race corruption.');
+
+// Test 8: Finished screen
 envWk1.engine.showFinished('Done today');
 assert.strictEqual(envWk1.elements['slot-finished'].className, 'slot-viewport');
 assert.strictEqual(envWk1.elements['finished-sub'].textContent, 'Done today');
-console.log('[PASS] Test 6: Finished state renders cleanly.');
+console.log('[PASS] Test 8: Finished state renders cleanly.');
 
-console.log('=== ALL 6 CARD ENGINE UNIT TESTS PASSED ===');
+console.log('=== ALL 8 CARD ENGINE UNIT TESTS PASSED ===');

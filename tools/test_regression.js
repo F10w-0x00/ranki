@@ -106,7 +106,39 @@ for (var s = 0; s < specialCases.length; s++) {
 }
 console.log('[PASS] All ' + specialCases.length + ' STEM/chemistry/bbox/calculus special cases passed.');
 
-// 3. Test all 838 real user formulas
+// 3. Test all 38 torture & real physics/chemistry/math benchmark cases (tools/test_cases.json)
+var benchFile = path.join(projectRoot, 'tools', 'test_cases.json');
+var benchCases = JSON.parse(fs.readFileSync(benchFile, 'utf8')).cases;
+if (!benchCases || benchCases.length !== 38) {
+    console.error('[FAIL] Expected 38 benchmark cases in ' + benchFile);
+    process.exit(1);
+}
+var benchPass = 0;
+var benchFailures = [];
+var bt0 = Date.now();
+for (var b = 0; b < benchCases.length; b++) {
+    var bc = benchCases[b];
+    try {
+        katex.renderToString(bc.latex, {
+            output: 'html',
+            throwOnError: true,
+            displayMode: !!bc.display,
+            macros: macros,
+            strict: 'ignore'
+        });
+        benchPass++;
+    } catch (e) {
+        benchFailures.push({ id: bc.id, name: bc.name, error: e.message });
+    }
+}
+var benchMs = Date.now() - bt0;
+console.log('38-Case Torture/STEM Benchmark Result: ' + benchPass + '/' + benchCases.length + ' passed in ' + benchMs + 'ms.');
+if (benchFailures.length > 0) {
+    console.error('[FAIL] Benchmark failures:', JSON.stringify(benchFailures, null, 2));
+    process.exit(1);
+}
+
+// 4. Test all 838 real user formulas
 var formulasFile = path.join(projectRoot, 'tools', 'fixtures', 'collection_formulas.json');
 var formulasToTest = JSON.parse(fs.readFileSync(formulasFile, 'utf8')).formulas;
 if (!formulasToTest || formulasToTest.length === 0) {

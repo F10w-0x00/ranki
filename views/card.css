@@ -72,12 +72,12 @@ html, body {
 .card.kindle {
     max-width: 960px;
     margin: 0 auto;
-    padding: 36px 48px 64px 48px;
+    padding: 32px 42px 60px 42px;
     background-color: #ffffff !important;
     color: #000000 !important;
     font-family: 'Anthropic Sans Web', 'SonyReader Ming', 'Songti SC', 'SimSun', serif !important;
-    font-size: 28px;
-    line-height: 1.62;
+    font-size: 36px;
+    line-height: 1.58;
     text-align: center;
     word-wrap: break-word;
     overflow-wrap: break-word;
@@ -86,7 +86,7 @@ html, body {
 /* Card Title Emphasis (matches user's <b><u>Title</u></b> pattern) */
 .card.kindle > b > u,
 .card.kindle > u > b {
-    font-size: 1.18em;
+    font-size: 1.14em;
     font-weight: bold;
     text-decoration: none;
     border-bottom: 2px solid #000000;
@@ -171,13 +171,19 @@ html, body {
     border-radius: 3px;
 }
 
+.card.kindle .eink-red-math {
+    display: inline-block;
+    vertical-align: middle;
+    padding: 3px 7px;
+}
+
 /* Ruby Annotations (Greek symbols, chemistry elements, rare characters) */
 .card.kindle ruby {
     ruby-align: center;
 }
 
 .card.kindle rt {
-    font-size: 0.54em;
+    font-size: 0.50em;
     line-height: 1.15;
     color: #222222;
     font-weight: normal;
@@ -187,13 +193,13 @@ html, body {
 .card.kindle cite {
     display: block;
     font-style: normal;
-    font-size: 0.88em;
-    line-height: 1.65;
+    font-size: 0.90em;
+    line-height: 1.62;
     color: #111111;
     background-color: #f7f7f7;
     border-top: 1px solid #cccccc;
     border-bottom: 1px solid #cccccc;
-    padding: 16px 26px;
+    padding: 16px 24px;
     margin: 14px auto 8px auto;
     border-radius: 4px;
     text-align: center;
@@ -204,15 +210,15 @@ html, body {
     display: none !important;
 }
 
-/* KaTeX & MathJax Pure-Black Print Tuning */
+/* KaTeX & MathJax Pure-Black Print Tuning (harmonized 1.04em with body font) */
 .card.kindle .katex {
     color: #000000 !important;
-    font-size: 1.08em;
+    font-size: 1.04em;
     white-space: nowrap;
 }
 
 .card.kindle .katex-display {
-    margin: 0.6em 0;
+    margin: 0.55em 0;
     text-align: center;
     overflow: visible;
 }
@@ -220,6 +226,7 @@ html, body {
 .card.kindle .katex-display > .katex {
     white-space: nowrap;
     display: inline-block;
+    vertical-align: top;
 }
 
 /* Highlighted formula boxes (\bbox -> \boxed): MUST stay transparent so KaTeX overlay never obscures glyphs */

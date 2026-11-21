@@ -20,8 +20,8 @@
 
 ### Phase 3: Native GTK2/PangoCairo Shell (`native-shell`)
 - [ ] **Task 8**: Build thin FFI layer (`src/ffi/{gtk,cairo,webkit}.rs`), update `build.rs` (whitelisted GTK2/Cairo/Pango/Fontconfig), `src/ui/theme.rs` (Fontconfig app fonts), and `src/ui/eink.rs` (debounced LIPC keyboard + hardware GC16 full refresh)
-- [ ] **Task 9**: Build `src/ui/deck_view.rs` (100% PangoCairo minimalist paginated Deck Browser, 10 rows/page, subdeck fold/unfold, swipe paging, zero tofu)
-- [ ] **Task 10**: Build `src/ui/focus_timer.rs` (isolated `52×52px` Cairo 1 Hz discrete 20s iPhone Duo circular focus timer, pure monochrome, gentle 0s cue, stop/hide on Flip)
+- [ ] **Task 9**: Build `src/ui/deck_view.rs` (100% PangoCairo minimalist paginated Deck Browser, 10 rows/page, subdecks auto-expanded by default with optional fold, swipe paging, zero tofu)
+- [ ] **Task 10**: Build `src/ui/focus_timer.rs` (isolated `52×52px` Cairo 1 Hz discrete 20s iPhone Duo circular focus timer, pure monochrome, clean empty hollow ring at 0s, stop/hide on Flip)
 - [ ] **Task 11**: Build `src/ui/review_view.rs` (Review Top Bar with `新+学+复` underline, Undo, `···` overflow menu, subtle `1/2` indicator, embedded `focus_timer`; resident card WebView with GDK-level zero-bar swipe/tap paging; PangoCairo Bottom 4-Rating Bar)
 - [ ] **Task 12**: Build `src/ui/settings_dialog.rs` (native `GtkDialog` + `GtkEntry` + LIPC keyboard + font/timer/refresh/engine controls + non-blocking Sync/`FullSync` dialogs) and wire `src/ui/mod.rs` + `src/main.rs`
 - [ ] **Checkpoint 3**: GitHub Actions ARMEL CI build PASS + all 4 mechanical gates PASS (`GLIBC <= 2.18`, `DT_NEEDED`, 0 `.dynsym` leaks, ES5 + banned APIs, ≤ 20 MB)

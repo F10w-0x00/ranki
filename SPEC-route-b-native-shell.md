@@ -84,7 +84,7 @@ Located alongside executable (`/mnt/us/extensions/ranki-dev/config.ini`) with Wi
 collection_dir=/mnt/us/anki_data_test
 hkey=
 sync_server=
-font_size_px=28
+font_size_px=36
 focus_timer_enabled=true
 focus_timer_secs=20
 auto_refresh_cards=20
@@ -165,8 +165,8 @@ Loaded **once** at startup into the resident `WebKitWebView` via `file:///.../vi
 - Default card baseline (applied cleanly below card-specific styles, with `.kindle` e-ink refinements):
   - `text-align: center;` (explicit default matching official Anki; lists `ul`/`ol` centered cleanly as inline-block or left-aligned inside a centered readable block — keeping visual balance!).
   - `font-family: 'Anthropic Sans Web', 'SonyReader Ming', serif;`
-  - Calibrated default font size: **`28px`** at 300 PPI (~2.37 mm physical x-height/cap-height, comfortable paper-book proportion for 6" Kindle — NOT 44px giant poster, NOT 16px tiny text), dynamically updated via `setFontSize(px)` (`20px–38px`).
-  - `line-height: 1.55; color: #000000; background: #ffffff; padding: 28px 44px;`
+  - Calibrated default font size: **`36px`** at 300 PPI (~3.05 mm / 8.6 pt physical height, harmonized between compact paperback and original RAnki's `20px × zoom 2 = 40px`), dynamically updated via `setFontSize(px)` (`24px–48px` in `2px` steps).
+  - `line-height: 1.58; color: #000000; background: #ffffff; padding: 32px 42px 60px 42px;`
   - **STEM Card Grammar Support** (matching [anki-card-maker/SKILL.md](file:///C:/Users/Felyn/.gemini/config/skills/anki-card-maker/SKILL.md)):
     - `b u`, `u b`: clear header hierarchy with crisp `<hr>` (`1.5px solid #000000`, `margin: 18px auto`).
     - `.cloze`: `font-weight: bold; border-bottom: 2px solid #000000; padding: 0 4px; color: #000000 !important;`
@@ -199,7 +199,7 @@ Loaded **once** at startup into the resident `WebKitWebView` via `file:///.../vi
 - Contains a borderless, tabless `GtkNotebook`:
   - **Page 0: Deck Browser** (100% PangoCairo `GtkDrawingArea`s — zero WebKit, zero GTK TreeView!):
     - Top bar (`76px`): Left `RAnki` + `待复习 N 张` (root decks only); Right vector-icon crisp pill buttons: `同步` | `设置` | `刷新` | `退出`.
-    - Deck list canvas (`1280px`, centered `960px` column): 10 generous rows/page (`~106px` each), clean hairline dividers (`#D8D8D8`), `depth * 32px` indent, `▸`/`▾` collapse hit zone (`64×106px` easy thumb target), right-aligned tabular `新` / `学` / `复` counts (bold `#000` when active, subtle `#999` when `0`). Instant black-invert tap feedback on press, cleared immediately on release.
+    - Deck list canvas (`1280px`, centered `960px` column): 10 generous rows/page (`~106px` each), clean hairline dividers (`#D8D8D8`), **all subdecks auto-expanded by default**, `depth * 32px` indent, `▾`/`▸` optional collapse hit zone (`64×106px` easy thumb target), right-aligned tabular `新` / `学` / `复` counts (bold `#000` when active, subtle `#999` when `0`). Instant black-invert tap feedback on press, cleared immediately on release.
     - Bottom footer (`92px`): `< 上一页   第 X / Y 页   下一页 >` + native Anki `studied_today` line.
   - **Page 1: Reviewer** (`GtkVBox`):
     - **Top Bar (`GtkHBox`, `76px`, `1.5px` bottom hairline)**:
@@ -222,7 +222,7 @@ Loaded **once** at startup into the resident `WebKitWebView` via `file:///.../vi
 - **State machine**:
   - `Idle/Hidden`: hidden/blank when disabled in settings OR when card answer is shown OR when deck finished.
   - `Running(remaining_secs, total_secs)`: started at `remaining = total_secs` (default `20`) whenever a card Front is displayed; decrements by `1` every `1000 ms` via `g_timeout_add(1000, ...)`.
-  - `Expired`: triggered at `remaining == 0`; stops timer (0% idle CPU!), renders gentle crisp visual cue (empty crisp circle with hollow ring / bold center indicator — **never** auto-flips or auto-rates!).
+  - `Expired`: triggered at `remaining == 0`; stops timer (0% idle CPU!), renders a **clean empty hollow monochrome circle** (no center dot — silent visual cue, never auto-flips or auto-rates!).
 - **E-ink Rendering Discipline**:
   - Pure 1-bit monochrome Cairo drawing (`#000000` and `#FFFFFF`, `CAIRO_ANTIALIAS_NONE` or crisp high-contrast vector), drawing a solid filled pie sector (or thick ring sector) shrinking clockwise from 12 o'clock in `total_secs` discrete steps (`360° / total_secs` per tick).
   - Monotonic black → white pixel transition per card = near-zero ghosting!
@@ -231,7 +231,7 @@ Loaded **once** at startup into the resident `WebKitWebView` via `file:///.../vi
 #### Native Settings, Login & Kindle Keyboard (`src/ui/settings_dialog.rs`)
 - Real `GtkDialog` (Lab126 dialog title so `awesome`/`pillow` positions it cleanly above the virtual keyboard at top of screen!).
 - Real `GtkEntry` inputs for Email, Password (masked), and Custom Sync Server; `focus-in-event` / `focus-out-event` invokes debounced LIPC `com.lab126.keyboard` (`open "ranki.ranki.ranki:abc:1"` / `close "ranki.ranki.ranki"`), matching upstream RAnki's proven `Lipstick` pattern.
-- Controls for: Font Size (`20–38px`), 20s Focus Timer (On/Off + duration `10/15/20/30/45/60s`), Auto Full Refresh (`Off / 15 / 20 / 30 cards`), Math Engine (`KaTeX / MathJax`).
+- Controls for: Font Size (`24–48px`, default `36px`), 20s Focus Timer (On/Off + duration `10/15/20/30/45/60s`), Auto Full Refresh (`Off / 15 / 20 / 30 cards`), Math Engine (`KaTeX / MathJax`).
 
 #### Hardware E-ink Full Refresh (`src/ui/eink.rs`)
 - Exposes `trigger_full_refresh()`: attempts direct KPW3 `mxcfb` ioctl (or `/usr/sbin/eips -f ""` fallback), logged clearly on first call; invoked on manual `刷新` button, deck page turns (optional/clean), and every `auto_refresh_cards` reviews.
@@ -414,5 +414,5 @@ pub fn rate_card(
 ## 11. Resolved Decisions & Final Sign-off
 
 1. **`CONSTRAINTS.md` 同步更新（已确认 OK）**：保留全部 4 道机械门禁（`GLIBC <= 2.20`、`DT_NEEDED` 白名单、`.dynsym` 零泄漏、严格 ES5）、性能预算、Unix LF 与生产库 `D:\anki_data\` 零改动红线不变；仅同步更新旧架构过时条款为路线 B 标准。
-2. **20 秒圆形专注倒计时（已确认 OK）**：复习顶栏最右侧独立 `52×52px` Cairo 画布，1 Hz 离散顺时针消减纯黑白扇形（仿 iPhone Duo），归零定格为空心圆环 + 中心小黑点（静默提示、不自动翻面或判错），翻开答案即停并隐藏。
+2. **20 秒圆形专注倒计时（已确认修订）**：复习顶栏最右侧独立 `52×52px` Cairo 画布，1 Hz 离散顺时针消减纯黑白扇形（仿 iPhone Duo），归零定格为**纯空白空心圆环（中间无黑点）**（静默提示、不自动翻面或判错），翻开答案即停并隐藏。
 3. **长卡片无翻页条流畅翻页（按反馈修订，待确认）**：彻底取消翻页条；改由 Rust 在 GTK2/GDK 层直接拦截卡片区触摸手势——拖动过程中 0 帧重绘（彻底消灭“文字泥潭”与误选文字），抬手瞬间一帧干脆跳转 85% 屏高（保留 1.5 行上下文防丢行）：**上划 / 轻点下 35% = 下一页**，**下划 / 轻点上 35% = 上一页**；仅在卡片超一屏时在顶栏角落轻显 `1/2` 页码。牌组页同步支持滑动翻页。

@@ -18,7 +18,7 @@
     var activeCardCss = '';
     var prefetchedCardCss = '';
 
-    var fontSizePx = 28;
+    var fontSizePx = 36;
     var mathEngine = 'katex';    // 'katex' or 'mathjax'
     var mathJaxLoaded = false;
     var mathJaxLoading = false;
@@ -120,12 +120,12 @@
         return restored;
     }
 
-    // 5. Font Size & Dynamic Card Style Management
+    // 5. Font Size & Dynamic Card Style Management (24..48px, default 36px @ 300 PPI)
     function applyFontSize(px) {
         var clamped = parseInt(px, 10);
-        if (isNaN(clamped)) clamped = 28;
-        if (clamped < 20) clamped = 20;
-        if (clamped > 38) clamped = 38;
+        if (isNaN(clamped)) clamped = 36;
+        if (clamped < 24) clamped = 24;
+        if (clamped > 48) clamped = 48;
         fontSizePx = clamped;
 
         if (fontOverrideEl) {
@@ -140,11 +140,40 @@
         }
     }
 
-    // 6. Auto-scale wide equations via -webkit-transform & polish cloze math boxes
+    // 6. Auto-scale wide equations via -webkit-transform (centered layout collapse, zero clipping)
+    function scaleEquationNode(target, maxW) {
+        if (!target || !target.style) return;
+        // Always reset previous scale first so font-size changes never double-scale
+        target.style.webkitTransform = '';
+        target.style.transform = '';
+        target.style.webkitTransformOrigin = '';
+        target.style.transformOrigin = '';
+        target.style.marginRight = '';
+        target.style.marginBottom = '';
+
+        var sw = target.scrollWidth || target.offsetWidth || 0;
+        var sh = target.offsetHeight || target.scrollHeight || 0;
+        if (sw > maxW && sw > 0) {
+            var ratio = Math.floor((maxW / sw) * 1000) / 1000;
+            if (ratio < 0.38) ratio = 0.38;
+            var scaledW = Math.ceil(sw * ratio);
+            var scaledH = Math.ceil(sh * ratio);
+            target.style.display = 'inline-block';
+            target.style.webkitTransformOrigin = '0 0';
+            target.style.transformOrigin = '0 0';
+            target.style.webkitTransform = 'scale(' + ratio + ')';
+            target.style.transform = 'scale(' + ratio + ')';
+            target.style.marginRight = '-' + (sw - scaledW) + 'px';
+            if (sh > 0 && sh > scaledH) {
+                target.style.marginBottom = '-' + (sh - scaledH) + 'px';
+            }
+        }
+    }
+
     function fitWideEquations(cardEl) {
         if (!cardEl || !cardEl.querySelectorAll) return;
 
-        // Ensure clozes wrapping tall math formulas never let border-bottom slice through fractions
+        // 1. Cloze math polish: inline-block keeps underline cleanly BELOW tall denominators
         var clozes = cardEl.querySelectorAll('.cloze');
         for (var c = 0; c < clozes.length; c++) {
             var cl = clozes[c];
@@ -160,28 +189,40 @@
             }
         }
 
-        var maxW = cardEl.clientWidth - 96; // account for 48px horizontal padding each side
-        if (maxW <= 100) maxW = 860;
+        // 2. Red-emphasis math polish: keep dashed underline below fractions too
+        var reds = cardEl.querySelectorAll('font[color], .eink-red');
+        for (var r = 0; r < reds.length; r++) {
+            var rd = reds[r];
+            var rdHasMath = rd.querySelectorAll && rd.querySelectorAll('.katex, .MathJax').length > 0;
+            if (rdHasMath && rd.className.indexOf('eink-red-math') === -1) {
+                rd.className = (rd.className ? rd.className + ' ' : '') + 'eink-red-math';
+            }
+        }
 
-        var nodes = cardEl.querySelectorAll('.katex-display, .katex, .MathJax_Display');
-        for (var i = 0; i < nodes.length; i++) {
-            var el = nodes[i];
-            // Skip inline .katex inside a .katex-display parent (parent handles scaling)
-            if (el.className && el.className.indexOf('katex-display') === -1 &&
-                el.parentNode && el.parentNode.className &&
+        // 3. Measure available horizontal card width (accounting for 42px left/right padding)
+        var maxW = (cardEl.clientWidth || 960) - 84;
+        if (maxW <= 120) maxW = 860;
+
+        // Scale display math inner .katex (keeps parent .katex-display centering exact!)
+        var dispNodes = cardEl.querySelectorAll('.katex-display');
+        for (var d = 0; d < dispNodes.length; d++) {
+            var inner = dispNodes[d].querySelectorAll ? dispNodes[d].querySelectorAll('.katex') : [];
+            if (inner.length > 0) {
+                scaleEquationNode(inner[0], maxW);
+            } else {
+                scaleEquationNode(dispNodes[d], maxW);
+            }
+        }
+
+        // Scale standalone inline .katex (skipping those inside .katex-display)
+        var inlineNodes = cardEl.querySelectorAll('.katex, .MathJax_Display');
+        for (var i = 0; i < inlineNodes.length; i++) {
+            var el = inlineNodes[i];
+            if (el.parentNode && el.parentNode.className &&
                 el.parentNode.className.indexOf('katex-display') !== -1) {
                 continue;
             }
-            var sw = el.scrollWidth || 0;
-            if (sw > maxW && sw > 0) {
-                var ratio = Math.floor((maxW / sw) * 1000) / 1000;
-                if (ratio < 0.45) ratio = 0.45;
-                el.style.webkitTransform = 'scale(' + ratio + ')';
-                el.style.transform = 'scale(' + ratio + ')';
-                el.style.webkitTransformOrigin = 'center top';
-                el.style.transformOrigin = 'center top';
-                el.style.display = 'inline-block';
-            }
+            scaleEquationNode(el, maxW);
         }
     }
 
@@ -407,6 +448,7 @@
     var CardEngine = {
         _preprocessCardHtml: preprocessCardHtml,
         _computePageState: computePageState,
+        _scaleEquationNode: scaleEquationNode,
 
         setConfig: function (cfg) {
             if (!cfg) return;

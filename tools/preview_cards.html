@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
-<title>RAnki Route B — KPW3 (1072×1448) 1:1 视觉与排版预览</title>
+<title>RAnki Route B — KPW3 (1072×1448) 1:1 视觉与 38 题公式 Benchmark 预览</title>
 <style>
     @font-face {
         font-family: 'Anthropic Sans Web';
@@ -29,64 +29,82 @@
 
     /* Left Desktop Control Panel */
     .sidebar {
-        width: 340px;
+        width: 360px;
         flex-shrink: 0;
         background: #262930;
         border-right: 1px solid #3a3f4b;
-        padding: 20px;
+        padding: 18px;
         display: flex;
         flex-direction: column;
-        gap: 16px;
+        gap: 14px;
         overflow-y: auto;
+        max-height: 100vh;
     }
-    .sidebar h1 { font-size: 18px; font-weight: 700; letter-spacing: 0.3px; }
+    .sidebar h1 { font-size: 17px; font-weight: 700; letter-spacing: 0.3px; }
     .sidebar .sub { font-size: 12px; color: #9aa3b2; margin-top: 4px; line-height: 1.5; }
     .panel {
         background: #1e2026;
         border: 1px solid #353a46;
         border-radius: 8px;
-        padding: 12px;
+        padding: 11px;
         display: flex;
         flex-direction: column;
-        gap: 10px;
+        gap: 9px;
     }
-    .panel-title { font-size: 12px; font-weight: 700; color: #b5bfd0; text-transform: uppercase; letter-spacing: 0.6px; }
-    .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .panel-title { font-size: 11px; font-weight: 700; color: #b5bfd0; text-transform: uppercase; letter-spacing: 0.6px; }
+    .btn-row { display: flex; gap: 6px; flex-wrap: wrap; }
     .ctrl-btn {
         background: #323744;
         color: #eef1f6;
         border: 1px solid #495062;
         border-radius: 6px;
-        padding: 7px 11px;
-        font-size: 13px;
+        padding: 7px 9px;
+        font-size: 12px;
         cursor: pointer;
         flex: 1;
-        min-width: 72px;
+        min-width: 64px;
         text-align: center;
     }
     .ctrl-btn:hover { background: #3e4556; }
     .ctrl-btn.active { background: #ffffff; color: #111111; border-color: #ffffff; font-weight: 700; }
-    .card-list { display: flex; flex-direction: column; gap: 6px; }
+    .card-list { display: flex; flex-direction: column; gap: 5px; }
     .card-pick {
         text-align: left;
         background: #2b303b;
         color: #e4e8ef;
         border: 1px solid #3f4656;
         border-radius: 6px;
-        padding: 8px 10px;
-        font-size: 13px;
+        padding: 7px 10px;
+        font-size: 12px;
         cursor: pointer;
     }
     .card-pick:hover { background: #363c4a; }
     .card-pick.active { background: #ffffff; color: #000000; font-weight: 700; border-color: #ffffff; }
+    .bench-select {
+        width: 100%;
+        background: #2b303b;
+        color: #eef1f6;
+        border: 1px solid #495062;
+        border-radius: 6px;
+        padding: 7px 8px;
+        font-size: 12px;
+    }
+    .phys-readout {
+        font-size: 12px;
+        color: #d8dee9;
+        background: #15171c;
+        border-radius: 5px;
+        padding: 6px 8px;
+        text-align: center;
+    }
     .telemetry {
         font-family: Consolas, monospace;
-        font-size: 12px;
+        font-size: 11px;
         color: #a6e3a1;
         background: #15171c;
         border-radius: 6px;
-        padding: 10px;
-        line-height: 1.6;
+        padding: 9px;
+        line-height: 1.55;
         white-space: pre-wrap;
     }
 
@@ -96,7 +114,7 @@
         display: flex;
         justify-content: center;
         align-items: flex-start;
-        padding: 24px;
+        padding: 20px;
         overflow: auto;
     }
     .kindle-scale-wrap {
@@ -140,7 +158,7 @@
     }
     .screen-page.visible { display: flex; }
 
-    /* Review Top Bar: 76px */
+    /* Review Top Bar: 76px (subordinate compact chrome so 36px body dominates) */
     .rev-topbar {
         height: 76px;
         width: 1072px;
@@ -152,28 +170,28 @@
         background: #ffffff;
         flex-shrink: 0;
     }
-    .rev-left { display: flex; align-items: center; gap: 16px; }
+    .rev-left { display: flex; align-items: center; gap: 14px; }
     .native-pill {
-        height: 48px;
-        padding: 0 18px;
+        height: 46px;
+        padding: 0 16px;
         border: 1.5px solid #000000;
         border-radius: 8px;
         background: #ffffff;
         color: #000000;
-        font-size: 23px;
+        font-size: 22px;
         font-weight: bold;
         font-family: inherit;
         cursor: pointer;
         display: inline-flex;
         align-items: center;
-        gap: 8px;
+        gap: 6px;
     }
     .native-pill:active { background: #000000; color: #ffffff; }
     .native-pill.ghost { border-color: #cccccc; color: #444444; font-weight: normal; }
     .rev-deck-name {
         font-size: 24px;
         font-weight: bold;
-        max-width: 260px;
+        max-width: 280px;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -198,10 +216,9 @@
         font-size: 20px;
         color: #555555;
         font-weight: bold;
-        min-width: 44px;
+        min-width: 48px;
         text-align: center;
     }
-    /* Isolated 52x52px Cairo 20s Duo Circular Timer */
     #duo-timer-canvas {
         width: 52px;
         height: 52px;
@@ -224,7 +241,6 @@
         display: block;
         background: #ffffff;
     }
-    /* Simulates Rust GTK2/GDK pointer interception (zero drag frames, swipe + tap-zone paging) */
     #gdk-gesture-layer {
         position: absolute;
         top: 0; left: 0; right: 0; bottom: 0;
@@ -281,10 +297,10 @@
     }
     .rate-box:active { background: #000000; color: #ffffff; }
     .rate-box:active .rate-int { color: #dddddd; }
-    .rate-int { font-size: 20px; color: #444444; }
-    .rate-lbl { font-size: 28px; font-weight: bold; }
+    .rate-int { font-size: 22px; color: #444444; }
+    .rate-lbl { font-size: 30px; font-weight: bold; }
 
-    /* ===== Page 0: Deck Browser Blueprint (PangoCairo Spec) ===== */
+    /* ===== Page 0: Auto-Expanded Minimalist Deck Browser Blueprint ===== */
     .deck-topbar {
         height: 76px;
         width: 1072px;
@@ -300,10 +316,10 @@
     .deck-body {
         flex: 1;
         width: 960px;
-        margin: 12px auto 0 auto;
+        margin: 10px auto 0 auto;
     }
     .d-row {
-        height: 106px;
+        height: 104px;
         border-bottom: 1px solid #d8d8d8;
         display: flex;
         align-items: center;
@@ -315,6 +331,8 @@
     .d-row:active * { color: #ffffff !important; }
     .d-name { font-size: 30px; display: flex; align-items: center; gap: 10px; }
     .d-name.parent { font-weight: bold; }
+    .d-name.child { font-size: 28px; }
+    .d-chev { display: inline-block; width: 28px; text-align: center; color: #444444; }
     .d-counts { display: flex; width: 220px; justify-content: flex-end; gap: 22px; font-size: 26px; font-weight: bold; }
     .d-num { width: 52px; text-align: right; }
     .d-num.zero { font-weight: normal; color: #999999; }
@@ -337,14 +355,14 @@
     <aside class="sidebar">
         <div>
             <h1>RAnki Route B 1:1 预览</h1>
-            <div class="sub">KPW3 物理分辨率 1072×1448 @ 300 PPI<br>卡片正文直连真实 views/card.html + ES5 KaTeX</div>
+            <div class="sub">KPW3 物理屏 90.5×122mm (1072×1448 @ 300 PPI)<br>直连真实 views/card.html + ES5 KaTeX + 38 题极限 Benchmark</div>
         </div>
 
         <div class="panel">
             <div class="panel-title">界面视图切换</div>
             <div class="btn-row">
-                <button id="btn-view-review" class="ctrl-btn active">卡片复习页</button>
-                <button id="btn-view-decks" class="ctrl-btn">牌组大厅原型</button>
+                <button id="btn-view-review" class="ctrl-btn active">卡片复习</button>
+                <button id="btn-view-decks" class="ctrl-btn">牌组大厅(自动展开)</button>
             </div>
         </div>
 
@@ -354,46 +372,61 @@
         </div>
 
         <div class="panel">
-            <div class="panel-title">纸书字号校准 (20–38px)</div>
+            <div class="panel-title">38 题理化数极限公式 Benchmark</div>
+            <div class="btn-row">
+                <button id="btn-bench-all" class="ctrl-btn">全 38 题汇总巡检</button>
+                <button id="btn-bench-audit" class="ctrl-btn">边界溢出审计</button>
+            </div>
+            <select id="bench-select" class="bench-select">
+                <option value="">正在加载 tools/test_cases.json...</option>
+            </select>
+            <div class="btn-row">
+                <button id="btn-bench-prev" class="ctrl-btn">上一题</button>
+                <button id="btn-bench-next" class="ctrl-btn">下一题</button>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">300 PPI 纸书字号校准 (24–48px)</div>
             <div class="btn-row">
                 <button id="btn-font-down" class="ctrl-btn">A-</button>
-                <button id="btn-font-val" class="ctrl-btn active" disabled>28px</button>
+                <button id="btn-font-val" class="ctrl-btn active" disabled>36px</button>
                 <button id="btn-font-up" class="ctrl-btn">A+</button>
             </div>
+            <div id="phys-readout" class="phys-readout">KPW3 实测物理字高：3.05 mm（≈ 8.6 pt，约 25 字/行）</div>
         </div>
 
         <div class="panel">
             <div class="panel-title">20s 仿 Duo 圆形倒计时</div>
             <div class="btn-row">
                 <button id="btn-timer-reset" class="ctrl-btn">重置 20s</button>
-                <button id="btn-timer-zero" class="ctrl-btn">看归零态</button>
+                <button id="btn-timer-zero" class="ctrl-btn">看归零空白环</button>
                 <button id="btn-timer-toggle" class="ctrl-btn">暂停</button>
             </div>
         </div>
 
         <div class="panel">
-            <div class="panel-title">桌面显示缩放</div>
+            <div class="panel-title">桌面屏幕缩放（消除分辨率错觉）</div>
             <div class="btn-row">
-                <button class="ctrl-btn zoom-btn" data-scale="0.48">48%</button>
-                <button class="ctrl-btn zoom-btn active" data-scale="0.58">58%</button>
-                <button class="ctrl-btn zoom-btn" data-scale="0.72">72%</button>
+                <button class="ctrl-btn zoom-btn" data-scale="0.36">36% (≈6寸实体)</button>
+                <button class="ctrl-btn zoom-btn active" data-scale="0.48">48%</button>
+                <button class="ctrl-btn zoom-btn" data-scale="0.62">62%</button>
                 <button class="ctrl-btn zoom-btn" data-scale="1.0">100%</button>
             </div>
-            <div class="sub">长卡测试：在卡片区鼠标/触控<strong>上下划动</strong>或<strong>点上下 35%</strong>，体验无翻页条单帧跳转。</div>
         </div>
 
         <div class="panel">
-            <div class="panel-title">实时遥测 (CardEngine)</div>
+            <div class="panel-title">实时遥测 &amp; 溢出审计</div>
             <div id="telemetry" class="telemetry">等待 views/card.html 就绪...</div>
         </div>
     </aside>
 
     <main class="stage">
-        <div id="scale-wrap" class="kindle-scale-wrap" style="transform: scale(0.58);">
+        <div id="scale-wrap" class="kindle-scale-wrap" style="transform: scale(0.48);">
             <div class="kindle-bezel">
                 <div class="kpw3-screen">
 
-                    <!-- Page 0: Minimalist PangoCairo Deck Browser Blueprint -->
+                    <!-- Page 0: Auto-Expanded Minimalist PangoCairo Deck Browser Blueprint -->
                     <div id="page-decks" class="screen-page">
                         <div class="deck-topbar">
                             <div class="deck-brand">
@@ -407,28 +440,7 @@
                                 <button class="native-pill ghost">退出</button>
                             </div>
                         </div>
-                        <div class="deck-body">
-                            <div class="d-row" onclick="switchView('review')">
-                                <div class="d-name parent"><span>▾</span><span>理科</span></div>
-                                <div class="d-counts"><span class="d-num">12</span><span class="d-num">4</span><span class="d-num">28</span></div>
-                            </div>
-                            <div class="d-row" style="padding-left: 40px;" onclick="switchView('review')">
-                                <div class="d-name"><span>M1 高等数学</span></div>
-                                <div class="d-counts"><span class="d-num">6</span><span class="d-num">2</span><span class="d-num">14</span></div>
-                            </div>
-                            <div class="d-row" style="padding-left: 40px;" onclick="switchView('review')">
-                                <div class="d-name"><span>物理 · 常用二级结论</span></div>
-                                <div class="d-counts"><span class="d-num">3</span><span class="d-num">1</span><span class="d-num">8</span></div>
-                            </div>
-                            <div class="d-row" style="padding-left: 40px;" onclick="switchView('review')">
-                                <div class="d-name"><span>化学 / 生物核心概念</span></div>
-                                <div class="d-counts"><span class="d-num">3</span><span class="d-num">1</span><span class="d-num">6</span></div>
-                            </div>
-                            <div class="d-row">
-                                <div class="d-name parent"><span>▸</span><span>英语 · 精读短语</span></div>
-                                <div class="d-counts"><span class="d-num zero">0</span><span class="d-num zero">0</span><span class="d-num zero">0</span></div>
-                            </div>
-                        </div>
+                        <div id="deck-list-body" class="deck-body"></div>
                         <div class="deck-footer">
                             <div class="deck-pager-row">
                                 <button class="native-pill ghost">&lt; 上一页</button>
@@ -478,7 +490,6 @@
     </main>
 
 <script>
-// Official Anki default Cloze CSS (tests that .card.kindle preserves centering while honoring user font/size)
 var OFFICIAL_ANKI_CSS = '.card { font-family: arial; font-size: 20px; text-align: center; color: black; background-color: white; } .cloze { font-weight: bold; color: blue; }';
 
 var SAMPLE_CARDS = [
@@ -520,13 +531,71 @@ var SAMPLE_CARDS = [
         deck: 'M1 高等数学',
         css: OFFICIAL_ANKI_CSS,
         q: '<b><u>高阶导数·莱布尼茨公式（长推导测试）</u></b><br><hr><br>设函数 \\(u=u(x)\\) 和 \\(v=v(x)\\) 均具有 \\(n\\) 阶导数，则其乘积 \\(uv\\) 的 \\(n\\) 阶导数为：<br><br><span class="cloze">[...]</span>',
-        a: '<b><u>高阶导数·莱布尼茨公式（长推导测试）</u></b><br><hr><br>设函数 \\(u=u(x)\\) 和 \\(v=v(x)\\) 均具有 \\(n\\) 阶导数，则其乘积 \\(uv\\) 的 \\(n\\) 阶导数为：<br><br><span class="cloze">\\((uv)^{(n)} = \\sum_{k=0}^{n} \\mathrm{C}_n^k u^{(n-k)} v^{(k)}\\)</span><br><br>展开为：<br>\\((uv)^{(n)} = u^{(n)}v + n u^{(n-1)}v\' + \\frac{n(n-1)}{2!} u^{(n-2)}v\'\' + \\dots + u v^{(n)}\\)<br><hr id="answer"><cite>数学归纳法完整证明（长卡片翻页实测）：<br><br><b>第一步（基础情形 \\(n=1\\)）：</b><br>由导数乘积法则，\\((uv)\' = u\'v + uv\' = \\mathrm{C}_1^0 u^{(1)}v^{(0)} + \\mathrm{C}_1^1 u^{(0)}v^{(1)}\\)，命题对 \\(n=1\\) 成立。<br><br><b>第二步（归纳假设）：</b><br>假设命题对 \\(n=m\\) 成立，即<br>\\((uv)^{(m)} = \\sum_{k=0}^{m} \\mathrm{C}_m^k u^{(m-k)} v^{(k)}\\)。<br><br><b>第三步（归纳递推 \\(n=m+1\\)）：</b><br>对上式两端再求一次导数：<br>\\((uv)^{(m+1)} = \\sum_{k=0}^{m} \\mathrm{C}_m^k \\left[ u^{(m+1-k)} v^{(k)} + u^{(m-k)} v^{(k+1)} \\right]\\)<br><br>将两项拆分并平移第二个和式的下标 \\(j = k + 1\\)：<br>\\(= u^{(m+1)}v + \\sum_{k=1}^{m} (\\mathrm{C}_m^k + \\mathrm{C}_m^{k-1}) u^{(m+1-k)} v^{(k)} + u v^{(m+1)}\\)<br><br>由组合恒等式 <font color="red">\\(\\mathrm{C}_m^k + \\mathrm{C}_m^{k-1} = \\mathrm{C}_{m+1}^k\\)</font>（帕斯卡法则），立得：<br>\\((uv)^{(m+1)} = \\sum_{k=0}^{m+1} \\mathrm{C}_{m+1}^k u^{(m+1-k)} v^{(k)}\\)。<br><br><b>第四步（记忆参照）：</b><br>形式与二项式定理 \\((a+b)^n = \\sum_{k=0}^n \\mathrm{C}_n^k a^{n-k}b^k\\) 完全一致，只需将幂次替换为导数阶数（0 阶导即函数本身）。<br><br><b>第五步（常用特例）：</b><br>当其中一个因子为多项式（如 \\(x^2\\)）时，高阶导数在有限项后恒为 0，利用莱布尼茨公式可瞬间求得 \\((x^2 e^x)^{(n)}\\) 或 \\((x^2 \\sin x)^{(n)}\\)。</cite>'
+        a: '<b><u>高阶导数·莱布尼茨公式（长推导测试）</u></b><br><hr><br>设函数 \\(u=u(x)\\) 和 \\(v=v(x)\\) 均具有 \\(n\\) 阶导数，则其乘积 \\(uv\\) 的 \\(n\\) 阶导数为：<br><br><span class="cloze">\\((uv)^{(n)} = \\sum_{k=0}^{n} \\mathrm{C}_n^k u^{(n-k)} v^{(k)}\\)</span><br><br>展开为：<br>\\((uv)^{(n)} = u^{(n)}v + n u^{(n-1)}v\' + \\frac{n(n-1)}{2!} u^{(n-2)}v\'\' + \\dots + u v^{(n)}\\)<br><hr id="answer"><cite>数学归纳法完整证明（长卡片翻页实测）：<br><br><b>第一步（基础情形 \\(n=1\\)）：</b><br>由导数乘积法则，\\((uv)\' = u\'v + uv\' = \\mathrm{C}_1^0 u^{(1)}v^{(0)} + \\mathrm{C}_1^1 u^{(0)}v^{(1)}\\)，命题对 \\(n=1\\) 成立。<br><br><b>第二步（归纳假设）：</b><br>假设命题对 \\(n=m\\) 成立，即<br>\\((uv)^{(m)} = \\sum_{k=0}^{m} \\mathrm{C}_m^k u^{(m-k)} v^{(k)}\\)。<br><br><b>第三步（归纳递推 \\(n=m+1\\)）：</b><br>对上式两端再求一次导数：<br>\\((uv)^{(m+1)} = \\sum_{k=0}^{m} \\mathrm{C}_m^k \\left[ u^{(m+1-k)} v^{(k)} + u^{(m-k)} v^{(k+1)} \\right]\\)<br><br>将两项拆分并平移第二个和式的下标 \\(j = k + 1\\)：<br>\\(= u^{(m+1)}v + \\sum_{k=1}^{m} (\\mathrm{C}_m^k + \\mathrm{C}_m^{k-1}) u^{(m+1-k)} v^{(k)} + u v^{(m+1)}\\)<br><br>由组合恒等式 <font color="red">\\(\\mathrm{C}_m^k + \\mathrm{C}_m^{k-1} = \\mathrm{C}_{m+1}^k\\)</font>（帕斯卡法则），立得：<br>\\((uv)^{(m+1)} = \\sum_{k=0}^{m+1} \\mathrm{C}_{m+1}^k u^{(m+1-k)} v^{(k)}\\)。<br><br><b>第四步（记忆参照）：</b><br>形式与二项式定理 \\((a+b)^n = \\sum_{k=0}^n \\mathrm{C}_n^k a^{n-k}b^k\\) 完全一致，只需将幂次替换为导数阶数（0 阶导即函数本身）。</cite>'
     }
 ];
 
+// Auto-expanded Deck Browser Blueprint Data (collapsedDecks = {} by default!)
+var MOCK_DECKS = [
+    { id: 1, full: '理科', name: '理科', depth: 0, hasChildren: true, n: 12, l: 4, r: 28 },
+    { id: 2, full: '理科::M1 高等数学', name: 'M1 高等数学', depth: 1, hasChildren: false, n: 6, l: 2, r: 14 },
+    { id: 3, full: '理科::物理 · 常用二级结论', name: '物理 · 常用二级结论', depth: 1, hasChildren: false, n: 3, l: 1, r: 8 },
+    { id: 4, full: '理科::化学 / 生物核心概念', name: '化学 / 生物核心概念', depth: 1, hasChildren: false, n: 3, l: 1, r: 6 },
+    { id: 5, full: '英语', name: '英语', depth: 0, hasChildren: true, n: 0, l: 0, r: 0 },
+    { id: 6, full: '英语::精读短语', name: '精读短语', depth: 1, hasChildren: false, n: 0, l: 0, r: 0 },
+    { id: 7, full: '英语::长难句结构', name: '长难句结构', depth: 1, hasChildren: false, n: 0, l: 0, r: 0 }
+];
+var collapsedDecks = {}; // Empty by default -> ALL subdecks AUTO-EXPANDED!
+
+function renderDeckBlueprint() {
+    var container = document.getElementById('deck-list-body');
+    container.innerHTML = '';
+    MOCK_DECKS.forEach(function (d) {
+        for (var p in collapsedDecks) {
+            if (collapsedDecks[p] && d.full.indexOf(p + '::') === 0) return;
+        }
+        var row = document.createElement('div');
+        row.className = 'd-row';
+        row.style.paddingLeft = (8 + d.depth * 34) + 'px';
+        row.onclick = function () { switchView('review'); };
+
+        var nameEl = document.createElement('div');
+        nameEl.className = 'd-name ' + (d.hasChildren ? 'parent' : 'child');
+        if (d.hasChildren) {
+            var chev = document.createElement('span');
+            chev.className = 'd-chev';
+            chev.textContent = collapsedDecks[d.full] ? '▸' : '▾';
+            chev.onclick = function (e) {
+                e.stopPropagation();
+                collapsedDecks[d.full] = !collapsedDecks[d.full];
+                renderDeckBlueprint();
+            };
+            nameEl.appendChild(chev);
+        }
+        var txt = document.createElement('span');
+        txt.textContent = d.name;
+        nameEl.appendChild(txt);
+
+        var cnt = document.createElement('div');
+        cnt.className = 'd-counts';
+        [d.n, d.l, d.r].forEach(function (v) {
+            var s = document.createElement('span');
+            s.className = 'd-num' + (v === 0 ? ' zero' : '');
+            s.textContent = v;
+            cnt.appendChild(s);
+        });
+
+        row.appendChild(nameEl);
+        row.appendChild(cnt);
+        container.appendChild(row);
+    });
+}
+
 var currentIdx = 0;
-var fontSize = 28;
+var fontSize = 36;
 var isFlipped = false;
+var benchCases = [];
+var benchIdx = 0;
 var iframe = document.getElementById('card-iframe');
 var telemetryEl = document.getElementById('telemetry');
 var pageIndEl = document.getElementById('top-page-ind');
@@ -538,12 +607,21 @@ function sendToCard(method, arg) {
 }
 
 function logTelemetry(msg) {
-    var lines = telemetryEl.textContent.split('\n').slice(-6);
+    var lines = telemetryEl.textContent.split('\n').slice(-7);
     lines.push(msg);
     telemetryEl.textContent = lines.join('\n');
 }
 
-// ===== 52x52px iPhone Duo Discrete Circular Countdown (1:1 Cairo Blueprint) =====
+function updatePhysicalReadout() {
+    var mm = (fontSize / 300 * 25.4).toFixed(2);
+    var pt = (fontSize / 300 * 72).toFixed(1);
+    var chars = Math.round(876 / fontSize);
+    document.getElementById('btn-font-val').textContent = fontSize + 'px';
+    document.getElementById('phys-readout').textContent =
+        'KPW3 物理字高：' + mm + ' mm（≈ ' + pt + ' pt，约 ' + chars + ' 字/行）';
+}
+
+// ===== 52x52px iPhone Duo Discrete Circular Countdown (Empty Hollow Ring on 0s!) =====
 var timerTotal = 20;
 var timerRem = 20;
 var timerPaused = false;
@@ -553,7 +631,7 @@ var tctx = timerCanvas.getContext('2d');
 
 function drawDuoTimer() {
     tctx.clearRect(0, 0, 52, 52);
-    if (isFlipped) return; // Hidden when answer is shown
+    if (isFlipped) return;
 
     var cx = 26, cy = 26, rOuter = 22, rFill = 18;
     // Outer crisp circle
@@ -563,16 +641,12 @@ function drawDuoTimer() {
     tctx.strokeStyle = '#000000';
     tctx.stroke();
 
+    // Expired (0s): clean EMPTY hollow monochrome circle (no center dot!)
     if (timerRem <= 0) {
-        // Expired gentle visual cue: hollow ring + crisp center dot
-        tctx.beginPath();
-        tctx.arc(cx, cy, 5, 0, Math.PI * 2);
-        tctx.fillStyle = '#000000';
-        tctx.fill();
         return;
     }
 
-    // Remaining clockwise-shrinking filled monochrome pie sector (starts at 12 o'clock)
+    // Remaining clockwise-shrinking filled monochrome pie sector (from 12 o'clock)
     var frac = timerRem / timerTotal;
     var startAngle = -Math.PI / 2 + (1 - frac) * Math.PI * 2;
     var endAngle = -Math.PI / 2 + Math.PI * 2;
@@ -599,7 +673,7 @@ function startTimer() {
     }, 1000);
 }
 
-// ===== Card Loading & Interactions =====
+// ===== Card Loading =====
 function loadCard(idx) {
     currentIdx = (idx + SAMPLE_CARDS.length) % SAMPLE_CARDS.length;
     var c = SAMPLE_CARDS[currentIdx];
@@ -616,6 +690,79 @@ function loadCard(idx) {
     startTimer();
 }
 
+function loadBenchmarkSingle(idx) {
+    if (!benchCases.length) return;
+    benchIdx = (idx + benchCases.length) % benchCases.length;
+    var bc = benchCases[benchIdx];
+    var nxt = benchCases[(benchIdx + 1) % benchCases.length];
+    isFlipped = false;
+    switchView('review');
+    document.getElementById('bench-select').value = String(benchIdx);
+    document.getElementById('top-deck-name').textContent = 'Benchmark ' + bc.index + '/38';
+    document.getElementById('btn-show-ans').style.display = 'block';
+    document.getElementById('rating-grid').className = 'rating-grid';
+
+    var qHtml = '<b><u>[' + bc.cat + '] ' + bc.name + '</u></b><br><hr><br>' + bc.formatted;
+    var aHtml = qHtml + '<br><hr id="answer"><cite>Case ID: ' + bc.id + ' · 原始 LaTeX 长度: ' + bc.latex.length + ' 字符</cite>';
+    var nHtml = '<b><u>[' + nxt.cat + '] ' + nxt.name + '</u></b><br><hr><br>' + nxt.formatted;
+    sendToCard('renderImmediate', {
+        current: { card_id: 9000 + bc.index, question_html: qHtml, answer_html: aHtml, css: OFFICIAL_ANKI_CSS },
+        next: { card_id: 9000 + nxt.index, question_html: nHtml, answer_html: nHtml, css: OFFICIAL_ANKI_CSS }
+    });
+    startTimer();
+}
+
+function loadBenchmarkAll38() {
+    if (!benchCases.length) return;
+    isFlipped = false;
+    switchView('review');
+    document.getElementById('top-deck-name').textContent = '38 题理化数极限总览';
+    document.getElementById('btn-show-ans').style.display = 'block';
+    document.getElementById('rating-grid').className = 'rating-grid';
+
+    var parts = ['<b><u>38 题理化数极限公式 Benchmark 全景巡检</u></b><br><hr>'];
+    var lastCat = '';
+    benchCases.forEach(function (bc) {
+        if (bc.cat !== lastCat) {
+            lastCat = bc.cat;
+            parts.push('<div style="margin:22px 0 8px 0;font-weight:bold;border-bottom:1px solid #000;display:inline-block;">' + bc.cat + '</div><br>');
+        }
+        parts.push('<div style="font-size:0.62em;color:#555;margin-top:14px;">#' + bc.index + ' ' + bc.name + '</div>' + bc.formatted);
+    });
+    var html = parts.join('');
+    sendToCard('renderImmediate', {
+        current: { card_id: 9999, question_html: html, answer_html: html, css: OFFICIAL_ANKI_CSS },
+        next: null
+    });
+    startTimer();
+}
+
+function runOverflowAudit() {
+    try {
+        var idoc = iframe.contentDocument;
+        var activeCard = idoc.querySelector('.slot-viewport:not(.offscreen) .card.kindle');
+        if (!activeCard) { logTelemetry('[AUDIT] No active card'); return; }
+        var cardRect = activeCard.getBoundingClientRect();
+        var eqs = activeCard.querySelectorAll('.katex-display, .katex');
+        var checked = 0, clipped = 0;
+        var worst = '';
+        for (var i = 0; i < eqs.length; i++) {
+            var el = eqs[i];
+            if (el.className.indexOf('katex-display') === -1 && el.parentNode && el.parentNode.className.indexOf('katex-display') !== -1) continue;
+            var r = el.getBoundingClientRect();
+            if (r.width === 0) continue;
+            checked++;
+            if (r.left < cardRect.left - 3 || r.right > cardRect.right + 3) {
+                clipped++;
+                worst = 'left=' + Math.round(r.left - cardRect.left) + ',rightOver=' + Math.round(r.right - cardRect.right);
+            }
+        }
+        logTelemetry('[OVERFLOW AUDIT] ' + (checked - clipped) + '/' + checked + ' OK, clipped=' + clipped + (worst ? ' (' + worst + ')' : ''));
+    } catch (e) {
+        logTelemetry('[AUDIT] 需通过 HTTP 访问以读取 iframe 几何: ' + e.message);
+    }
+}
+
 function doFlip() {
     isFlipped = true;
     document.getElementById('btn-show-ans').style.display = 'none';
@@ -624,7 +771,7 @@ function doFlip() {
     sendToCard('flipToAnswer', null);
 }
 
-function doRate(rating) {
+function doRate() {
     var nextIdx = (currentIdx + 1) % SAMPLE_CARDS.length;
     var nextCard = SAMPLE_CARDS[nextIdx];
     var afterCard = SAMPLE_CARDS[(nextIdx + 1) % SAMPLE_CARDS.length];
@@ -642,9 +789,7 @@ function doRate(rating) {
     startTimer();
 }
 
-function prevCard() {
-    loadCard(currentIdx - 1);
-}
+function prevCard() { loadCard(currentIdx - 1); }
 
 function switchView(v) {
     document.getElementById('page-review').className = 'screen-page' + (v === 'review' ? ' visible' : '');
@@ -665,13 +810,10 @@ function renderPicker() {
     });
 }
 
-// ===== GDK Zero-Bar Swipe & Tap-Zone Gesture Simulator =====
+// GDK Zero-Bar Swipe & Tap-Zone Gesture Simulator
 var gestureEl = document.getElementById('gdk-gesture-layer');
 var dragStart = null;
-
-function onGestureDown(x, y) {
-    dragStart = { x: x, y: y };
-}
+function onGestureDown(x, y) { dragStart = { x: x, y: y }; }
 function onGestureUp(x, y) {
     if (!dragStart) return;
     var dx = x - dragStart.x;
@@ -679,14 +821,11 @@ function onGestureUp(x, y) {
     var rect = gestureEl.getBoundingClientRect();
     var relY = (y - rect.top) / (rect.height || 1);
     dragStart = null;
-
-    // Swipe Up -> Next Page; Swipe Down -> Prev Page
     if (Math.abs(dy) >= 35 && Math.abs(dy) > Math.abs(dx)) {
         sendToCard('pageScroll', dy < 0 ? 1 : -1);
         logTelemetry('[GDK] Swipe ' + (dy < 0 ? 'UP -> pageNext' : 'DOWN -> pagePrev'));
         return;
     }
-    // Tap bottom 35% -> Next Page; Tap top 35% -> Prev Page
     if (Math.abs(dx) < 20 && Math.abs(dy) < 20) {
         if (relY > 0.65) {
             sendToCard('pageScroll', 1);
@@ -697,17 +836,11 @@ function onGestureUp(x, y) {
         }
     }
 }
-
 gestureEl.addEventListener('mousedown', function (e) { onGestureDown(e.clientX, e.clientY); });
 gestureEl.addEventListener('mouseup', function (e) { onGestureUp(e.clientX, e.clientY); });
-gestureEl.addEventListener('touchstart', function (e) {
-    if (e.touches[0]) onGestureDown(e.touches[0].clientX, e.touches[0].clientY);
-}, { passive: true });
-gestureEl.addEventListener('touchend', function (e) {
-    if (e.changedTouches[0]) onGestureUp(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
-});
+gestureEl.addEventListener('touchstart', function (e) { if (e.touches[0]) onGestureDown(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
+gestureEl.addEventListener('touchend', function (e) { if (e.changedTouches[0]) onGestureUp(e.changedTouches[0].clientX, e.changedTouches[0].clientY); });
 
-// Listen to real CardEngine events from iframe
 window.addEventListener('message', function (ev) {
     var msg = ev && ev.data;
     if (!msg || msg.source !== 'ranki-card') return;
@@ -726,17 +859,43 @@ window.addEventListener('message', function (ev) {
     }
 });
 
-// Sidebar controls
+// Load 38 benchmark cases from tools/test_cases.json
+fetch('./test_cases.json')
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+        benchCases = data.cases || [];
+        var sel = document.getElementById('bench-select');
+        sel.innerHTML = '';
+        benchCases.forEach(function (bc, i) {
+            var opt = document.createElement('option');
+            opt.value = String(i);
+            opt.textContent = '#' + bc.index + ' [' + bc.cat + '] ' + bc.name;
+            sel.appendChild(opt);
+        });
+        logTelemetry('[BENCH] Loaded ' + benchCases.length + ' STEM torture cases.');
+    })
+    .catch(function () {
+        document.getElementById('bench-select').innerHTML = '<option>请通过 http://127.0.0.1:8765 访问以加载 38 题</option>';
+    });
+
+document.getElementById('bench-select').onchange = function () {
+    if (this.value !== '') loadBenchmarkSingle(parseInt(this.value, 10));
+};
+document.getElementById('btn-bench-all').onclick = function () { loadBenchmarkAll38(); };
+document.getElementById('btn-bench-audit').onclick = function () { runOverflowAudit(); };
+document.getElementById('btn-bench-prev').onclick = function () { loadBenchmarkSingle(benchIdx - 1); };
+document.getElementById('btn-bench-next').onclick = function () { loadBenchmarkSingle(benchIdx + 1); };
+
 document.getElementById('btn-view-review').onclick = function () { switchView('review'); };
 document.getElementById('btn-view-decks').onclick = function () { switchView('decks'); };
 document.getElementById('btn-font-down').onclick = function () {
-    fontSize = Math.max(20, fontSize - 2);
-    document.getElementById('btn-font-val').textContent = fontSize + 'px';
+    fontSize = Math.max(24, fontSize - 2);
+    updatePhysicalReadout();
     sendToCard('setConfig', { font_size_px: fontSize });
 };
 document.getElementById('btn-font-up').onclick = function () {
-    fontSize = Math.min(38, fontSize + 2);
-    document.getElementById('btn-font-val').textContent = fontSize + 'px';
+    fontSize = Math.min(48, fontSize + 2);
+    updatePhysicalReadout();
     sendToCard('setConfig', { font_size_px: fontSize });
 };
 document.getElementById('btn-timer-reset').onclick = function () { isFlipped = false; startTimer(); };
@@ -753,6 +912,8 @@ document.querySelectorAll('.zoom-btn').forEach(function (btn) {
     };
 });
 
+updatePhysicalReadout();
+renderDeckBlueprint();
 renderPicker();
 drawDuoTimer();
 </script>
