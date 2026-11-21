@@ -18,7 +18,7 @@
     var activeCardCss = '';
     var prefetchedCardCss = '';
 
-    var fontSizePx = 36;
+    var fontSizePx = 42;
     var mathEngine = 'katex';    // 'katex' or 'mathjax'
     var mathJaxLoaded = false;
     var mathJaxLoading = false;
@@ -82,37 +82,187 @@
         }
     }
 
-    // 4. Card HTML Preprocessor (pure ES5, safe & deterministic)
+    // 4. Anti-Tofu Sanitizer + Unsupported Media Fallback + Unified Monochrome Color Normalizer
+    function sanitizeUnicodeForKindle(str) {
+        if (!str) return '';
+        var out = [];
+        for (var i = 0; i < str.length; i++) {
+            var code = str.charCodeAt(i);
+
+            // Strip invisible bidi / zero-width / BOM / C0 control chars (except \t, \n, \r)
+            if (code === 0x2068 || code === 0x2069 || code === 0xFEFF ||
+                (code >= 0x200B && code <= 0x200F) ||
+                (code < 0x20 && code !== 0x09 && code !== 0x0A && code !== 0x0D)) {
+                continue;
+            }
+
+            // Handle astral-plane Emoji surrogate pairs (U+1F000..U+1FAFF -> tofu on Kindle OS 5.14)
+            if (code >= 0xD83C && code <= 0xDBFF && i + 1 < str.length) {
+                var low = str.charCodeAt(i + 1);
+                if (low >= 0xDC00 && low <= 0xDFFF) {
+                    i++; // consume low surrogate
+                    // Skip trailing variation selector U+FE0F if present
+                    if (i + 1 < str.length && str.charCodeAt(i + 1) === 0xFE0F) i++;
+                    continue;
+                }
+            }
+
+            // Replace common BMP Emoji / Dingbat glyphs missing on Kindle OS 5.14
+            if (code === 0x2705 || code === 0x2714) { out.push('[\u5bf9]'); continue; }
+            if (code === 0x274C || code === 0x2716) { out.push('[\u9519]'); continue; }
+            if (code === 0x26A0) {
+                if (i + 1 < str.length && str.charCodeAt(i + 1) === 0xFE0F) i++;
+                out.push('[!]');
+                continue;
+            }
+            if (code === 0xFE0F) continue;
+            if (code >= 0x2600 && code <= 0x27BF) {
+                // Keep basic geometry/check/star/bullet symbols that exist in standard fonts? No, strip tofu risk
+                continue;
+            }
+
+            out.push(str.charAt(i));
+        }
+        return out.join('');
+    }
+
+    function classifyColorValue(raw) {
+        if (!raw) return 'neutral';
+        var c = String(raw).toLowerCase().replace(/\s+/g, '');
+        if (!c || c === 'inherit' || c === 'initial' || c === 'currentcolor' || c === 'transparent') {
+            return 'neutral';
+        }
+        if (c === 'black' || c === 'gray' || c === 'grey' || c === 'darkgray' || c === 'dimgray' ||
+            c === '#000' || c === '#000000' || c === '#111' || c === '#111111' ||
+            c === '#222' || c === '#222222' || c === '#333' || c === '#333333' ||
+            c === '#444' || c === '#444444' || c === '#555' || c === '#555555' ||
+            c === '#666' || c === '#666666' || c === '#777' || c === '#777777' ||
+            c === '#888' || c === '#888888') {
+            return 'neutral';
+        }
+        // Check hex RGB to distinguish true neutral gray vs warning red/orange vs other hues
+        var hexMatch = c.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/);
+        if (hexMatch) {
+            var h = hexMatch[1];
+            var r, g, b;
+            if (h.length === 3) {
+                r = parseInt(h.charAt(0) + h.charAt(0), 16);
+                g = parseInt(h.charAt(1) + h.charAt(1), 16);
+                b = parseInt(h.charAt(2) + h.charAt(2), 16);
+            } else {
+                r = parseInt(h.substring(0, 2), 16);
+                g = parseInt(h.substring(2, 4), 16);
+                b = parseInt(h.substring(4, 6), 16);
+            }
+            if (Math.abs(r - g) <= 18 && Math.abs(g - b) <= 18 && Math.abs(r - b) <= 18) {
+                return 'neutral';
+            }
+            if (r >= 170 && r > g + 55 && r > b + 55) {
+                return 'red';
+            }
+            return 'color';
+        }
+        var rgbMatch = c.match(/^rgba?\((\d+),(\d+),(\d+)/);
+        if (rgbMatch) {
+            var rr = parseInt(rgbMatch[1], 10);
+            var gg = parseInt(rgbMatch[2], 10);
+            var bb = parseInt(rgbMatch[3], 10);
+            if (Math.abs(rr - gg) <= 18 && Math.abs(gg - bb) <= 18 && Math.abs(rr - bb) <= 18) {
+                return 'neutral';
+            }
+            if (rr >= 170 && rr > gg + 55 && rr > bb + 55) {
+                return 'red';
+            }
+            return 'color';
+        }
+        if (c === 'red' || c === 'crimson' || c === 'firebrick' || c === 'darkred' ||
+            c === 'tomato' || c === 'orangered' || c === 'orange' || c === 'coral' ||
+            c === 'magenta' || c === 'deeppink') {
+            return 'red';
+        }
+        return 'color';
+    }
+
+    function appendClassToOpenTag(openTag, cls) {
+        if (openTag.indexOf(cls) !== -1) return openTag;
+        if (/class\s*=\s*["']/i.test(openTag)) {
+            return openTag.replace(/class\s*=\s*(["'])/i, 'class=$1' + cls + ' ');
+        }
+        return openTag + ' class="' + cls + '"';
+    }
+
     function preprocessCardHtml(html) {
         if (!html) return '';
 
-        // Strip <script> blocks defensively
+        // 1. Strip dangerous/unused executable tags
         var clean = String(html).replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '');
 
-        // Protect existing math delimiters before scanning for bare \ce{...}
+        // 2. Replace unsupported media with clean monochrome notice badges (zero tofu / broken icons)
+        clean = clean.replace(/\[sound:[^\]]+\]/gi, '<span class="eink-unsupported">[\u4e0d\u652f\u6301\u97f3\u9891]</span>');
+        clean = clean.replace(/<audio\b[^>]*>[\s\S]*?<\/audio>/gi, '<span class="eink-unsupported">[\u4e0d\u652f\u6301\u97f3\u9891]</span>');
+        clean = clean.replace(/<audio\b[^>]*\/?>/gi, '<span class="eink-unsupported">[\u4e0d\u652f\u6301\u97f3\u9891]</span>');
+        clean = clean.replace(/<video\b[^>]*>[\s\S]*?<\/video>/gi, '<span class="eink-unsupported">[\u4e0d\u652f\u6301\u89c6\u9891/\u5d4c\u5165\u5185\u5bb9]</span>');
+        clean = clean.replace(/<video\b[^>]*\/?>/gi, '<span class="eink-unsupported">[\u4e0d\u652f\u6301\u89c6\u9891/\u5d4c\u5165\u5185\u5bb9]</span>');
+        clean = clean.replace(/<iframe\b[^>]*>[\s\S]*?<\/iframe>/gi, '<span class="eink-unsupported">[\u4e0d\u652f\u6301\u89c6\u9891/\u5d4c\u5165\u5185\u5bb9]</span>');
+        clean = clean.replace(/<object\b[^>]*>[\s\S]*?<\/object>/gi, '<span class="eink-unsupported">[\u4e0d\u652f\u6301\u89c6\u9891/\u5d4c\u5165\u5185\u5bb9]</span>');
+        clean = clean.replace(/<embed\b[^>]*\/?>/gi, '<span class="eink-unsupported">[\u4e0d\u652f\u6301\u89c6\u9891/\u5d4c\u5165\u5185\u5bb9]</span>');
+        clean = clean.replace(/<img\b[^>]*\/?>/gi, '<span class="eink-unsupported">[\u4e0d\u652f\u6301\u56fe\u7247]</span>');
+
+        // 3. Anti-tofu sanitization (strip invisible control chars & Kindle-unsupported Emoji)
+        clean = sanitizeUnicodeForKindle(clean);
+
+        // 4. Protect existing math delimiters before scanning for bare \ce{...}
         var mathBlocks = [];
         var protectedHtml = clean.replace(/(\$\$[\s\S]*?\$\$|\\\[[\s\S]*?\\\]|\$[\s\S]*?\$|\\\([\s\S]*?\\\))/g, function (match) {
             mathBlocks.push(match);
             return '___RANKI_MATH_' + (mathBlocks.length - 1) + '___';
         });
 
-        // Wrap standalone \ce{...} in inline math delimiters
+        // 5. Wrap standalone \ce{...} in inline math delimiters
         protectedHtml = protectedHtml.replace(/(\\ce\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\})/g, function (match) {
             return '\\(' + match + '\\)';
         });
 
-        // Normalize red-colored spans/fonts to monochrome emphasis class
-        protectedHtml = protectedHtml.replace(
-            /(<(?:span|font)\b[^>]*style\s*=\s*["'][^"']*color\s*:\s*(?:red|#ff0000|rgb\(\s*255\s*,\s*0\s*,\s*0\s*\))[^"']*["'][^>]*)(>)/gi,
-            function (all, openTag, closeBracket) {
-                if (openTag.indexOf('class=') !== -1) {
-                    return openTag.replace(/class=(["'])/i, 'class=$1eink-red ') + closeBracket;
-                }
-                return openTag + ' class="eink-red"' + closeBracket;
-            }
-        );
+        // 6. Unified E-ink Color Normalization for <font color="..."> and inline style="color:...; background-color:..."
+        protectedHtml = protectedHtml.replace(/<font\b([^>]*)>/gi, function (all, attrs) {
+            var m = attrs.match(/\bcolor\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/i);
+            if (!m) return all;
+            var val = m[1] || m[2] || m[3] || '';
+            var kind = classifyColorValue(val);
+            if (kind === 'red') return appendClassToOpenTag('<font' + attrs, 'eink-red') + '>';
+            if (kind === 'color') return appendClassToOpenTag('<font' + attrs, 'eink-color') + '>';
+            return all;
+        });
 
-        // Restore protected math blocks
+        protectedHtml = protectedHtml.replace(/<([a-z][a-z0-9]*)\b([^>]*\bstyle\s*=\s*(?:"[^"]*"|'[^']*')[^>]*)>/gi, function (all, tag, attrs) {
+            var styleMatch = attrs.match(/\bstyle\s*=\s*(?:"([^"]*)"|'([^']*)')/i);
+            if (!styleMatch) return all;
+            var styleText = styleMatch[1] || styleMatch[2] || '';
+            var openTag = '<' + tag + attrs;
+            var changed = false;
+
+            // Match foreground color: (not background-color:)
+            var colorMatch = styleText.match(/(?:^|;)\s*color\s*:\s*([^;]+)/i);
+            if (colorMatch) {
+                var kind = classifyColorValue(colorMatch[1]);
+                if (kind === 'red') { openTag = appendClassToOpenTag(openTag, 'eink-red'); changed = true; }
+                else if (kind === 'color') { openTag = appendClassToOpenTag(openTag, 'eink-color'); changed = true; }
+            }
+
+            // Match non-white/non-transparent highlight background-color:
+            var bgMatch = styleText.match(/(?:^|;)\s*background(?:-color)?\s*:\s*([^;]+)/i);
+            if (bgMatch) {
+                var bgVal = bgMatch[1].toLowerCase().replace(/\s+/g, '');
+                if (bgVal && bgVal !== 'white' && bgVal !== '#fff' && bgVal !== '#ffffff' &&
+                    bgVal !== 'transparent' && bgVal !== 'none' && bgVal !== 'inherit') {
+                    openTag = appendClassToOpenTag(openTag, 'eink-mark');
+                    changed = true;
+                }
+            }
+            return changed ? (openTag + '>') : all;
+        });
+
+        // 7. Restore protected math blocks
         var restored = protectedHtml.replace(/___RANKI_MATH_(\d+)___/g, function (match, idx) {
             return mathBlocks[parseInt(idx, 10)];
         });
@@ -120,12 +270,12 @@
         return restored;
     }
 
-    // 5. Font Size & Dynamic Card Style Management (24..48px, default 36px @ 300 PPI)
+    // 5. Font Size & Dynamic Card Style Management (28..54px, default 42px @ 300 PPI)
     function applyFontSize(px) {
         var clamped = parseInt(px, 10);
-        if (isNaN(clamped)) clamped = 36;
-        if (clamped < 24) clamped = 24;
-        if (clamped > 48) clamped = 48;
+        if (isNaN(clamped)) clamped = 42;
+        if (clamped < 28) clamped = 28;
+        if (clamped > 54) clamped = 54;
         fontSizePx = clamped;
 
         if (fontOverrideEl) {
@@ -189,13 +339,14 @@
             }
         }
 
-        // 2. Red-emphasis math polish: keep dashed underline below fractions too
-        var reds = cardEl.querySelectorAll('font[color], .eink-red');
-        for (var r = 0; r < reds.length; r++) {
-            var rd = reds[r];
+        // 2. Colored-emphasis math polish: keep dashed/dotted underline below fractions too
+        var emphNodes = cardEl.querySelectorAll('font[color], .eink-red, .eink-color');
+        for (var r = 0; r < emphNodes.length; r++) {
+            var rd = emphNodes[r];
             var rdHasMath = rd.querySelectorAll && rd.querySelectorAll('.katex, .MathJax').length > 0;
-            if (rdHasMath && rd.className.indexOf('eink-red-math') === -1) {
-                rd.className = (rd.className ? rd.className + ' ' : '') + 'eink-red-math';
+            if (rdHasMath && rd.className.indexOf('eink-red-math') === -1 && rd.className.indexOf('eink-color-math') === -1) {
+                var cls = (rd.className.indexOf('eink-color') !== -1) ? 'eink-color-math' : 'eink-red-math';
+                rd.className = (rd.className ? rd.className + ' ' : '') + cls;
             }
         }
 

@@ -158,27 +158,27 @@
     }
     .screen-page.visible { display: flex; }
 
-    /* Review Top Bar: 76px (subordinate compact chrome so 36px body dominates) */
+    /* Review Top Bar: 84px (crisp 300 PPI proportions matching 42px book body) */
     .rev-topbar {
-        height: 76px;
+        height: 84px;
         width: 1072px;
         border-bottom: 1.5px solid #000000;
-        padding: 0 20px;
+        padding: 0 22px;
         display: flex;
         align-items: center;
         justify-content: space-between;
         background: #ffffff;
         flex-shrink: 0;
     }
-    .rev-left { display: flex; align-items: center; gap: 14px; }
+    .rev-left { display: flex; align-items: center; gap: 16px; }
     .native-pill {
-        height: 46px;
-        padding: 0 16px;
+        height: 52px;
+        padding: 0 18px;
         border: 1.5px solid #000000;
         border-radius: 8px;
         background: #ffffff;
         color: #000000;
-        font-size: 22px;
+        font-size: 25px;
         font-weight: bold;
         font-family: inherit;
         cursor: pointer;
@@ -187,17 +187,17 @@
         gap: 6px;
     }
     .native-pill:active { background: #000000; color: #ffffff; }
-    .native-pill.ghost { border-color: #cccccc; color: #444444; font-weight: normal; }
+    .native-pill.ghost { border-color: #cccccc; color: #333333; font-weight: normal; }
     .rev-deck-name {
-        font-size: 24px;
+        font-size: 27px;
         font-weight: bold;
-        max-width: 280px;
+        max-width: 270px;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
     }
     .rev-counts {
-        font-size: 23px;
+        font-size: 26px;
         color: #222222;
         letter-spacing: 1px;
     }
@@ -213,30 +213,30 @@
         gap: 12px;
     }
     .page-ind {
-        font-size: 20px;
-        color: #555555;
+        font-size: 23px;
+        color: #444444;
         font-weight: bold;
-        min-width: 48px;
+        min-width: 52px;
         text-align: center;
     }
     #duo-timer-canvas {
-        width: 52px;
-        height: 52px;
+        width: 54px;
+        height: 54px;
         display: block;
     }
 
-    /* Card Canvas Area (1250px) + GDK Zero-Bar Gesture Overlay */
+    /* Card Canvas Area (1236px) + GDK Zero-Bar Gesture Overlay */
     .rev-card-stage {
         position: relative;
         width: 1072px;
-        height: 1250px;
+        height: 1236px;
         flex: 1;
         background: #ffffff;
         overflow: hidden;
     }
     #card-iframe {
         width: 1072px;
-        height: 1250px;
+        height: 1236px;
         border: 0;
         display: block;
         background: #ffffff;
@@ -248,9 +248,9 @@
         cursor: ns-resize;
     }
 
-    /* Bottom 122px Native Rating Bar */
+    /* Bottom 128px Native Rating Bar */
     .rev-bottombar {
-        height: 122px;
+        height: 128px;
         width: 1072px;
         border-top: 1.5px solid #000000;
         padding: 16px 28px;
@@ -262,14 +262,14 @@
     }
     .btn-show-ans {
         width: 100%;
-        height: 88px;
+        height: 92px;
         border: 1.5px solid #000000;
         border-radius: 10px;
         background: #ffffff;
         color: #000000;
-        font-size: 30px;
+        font-size: 34px;
         font-weight: bold;
-        letter-spacing: 6px;
+        letter-spacing: 8px;
         font-family: inherit;
         cursor: pointer;
     }
@@ -282,7 +282,7 @@
     .rating-grid.visible { display: flex; }
     .rate-box {
         flex: 1;
-        height: 88px;
+        height: 92px;
         border: 1.5px solid #000000;
         border-radius: 10px;
         background: #ffffff;
@@ -297,8 +297,8 @@
     }
     .rate-box:active { background: #000000; color: #ffffff; }
     .rate-box:active .rate-int { color: #dddddd; }
-    .rate-int { font-size: 22px; color: #444444; }
-    .rate-lbl { font-size: 30px; font-weight: bold; }
+    .rate-int { font-size: 24px; color: #444444; }
+    .rate-lbl { font-size: 32px; font-weight: bold; }
 
     /* ===== Page 0: Auto-Expanded Minimalist Deck Browser Blueprint ===== */
     .deck-topbar {
@@ -387,17 +387,17 @@
         </div>
 
         <div class="panel">
-            <div class="panel-title">300 PPI 纸书字号校准 (24–48px)</div>
+            <div class="panel-title">300 PPI 纸书字号校准 (28–54px)</div>
             <div class="btn-row">
                 <button id="btn-font-down" class="ctrl-btn">A-</button>
-                <button id="btn-font-val" class="ctrl-btn active" disabled>36px</button>
+                <button id="btn-font-val" class="ctrl-btn active" disabled>42px</button>
                 <button id="btn-font-up" class="ctrl-btn">A+</button>
             </div>
-            <div id="phys-readout" class="phys-readout">KPW3 实测物理字高：3.05 mm（≈ 8.6 pt，约 25 字/行）</div>
+            <div id="phys-readout" class="phys-readout">KPW3 物理字高：3.56 mm（≈ 五号字 10.1 pt，约 21 字/行）</div>
         </div>
 
         <div class="panel">
-            <div class="panel-title">20s 仿 Duo 圆形倒计时</div>
+            <div class="panel-title">20s 仿 Duo 圆形倒计时（内置极简）</div>
             <div class="btn-row">
                 <button id="btn-timer-reset" class="ctrl-btn">重置 20s</button>
                 <button id="btn-timer-zero" class="ctrl-btn">看归零空白环</button>
@@ -406,11 +406,11 @@
         </div>
 
         <div class="panel">
-            <div class="panel-title">桌面屏幕缩放（消除分辨率错觉）</div>
+            <div class="panel-title">桌面视图缩放（含笔记本高分屏适配）</div>
             <div class="btn-row">
-                <button class="ctrl-btn zoom-btn" data-scale="0.36">36% (≈6寸实体)</button>
-                <button class="ctrl-btn zoom-btn active" data-scale="0.48">48%</button>
-                <button class="ctrl-btn zoom-btn" data-scale="0.62">62%</button>
+                <button class="ctrl-btn zoom-btn active" data-scale="0.52">52% (推荐)</button>
+                <button class="ctrl-btn zoom-btn" data-scale="0.65">65%</button>
+                <button class="ctrl-btn zoom-btn" data-scale="0.80">80%</button>
                 <button class="ctrl-btn zoom-btn" data-scale="1.0">100%</button>
             </div>
         </div>
@@ -422,7 +422,7 @@
     </aside>
 
     <main class="stage">
-        <div id="scale-wrap" class="kindle-scale-wrap" style="transform: scale(0.48);">
+        <div id="scale-wrap" class="kindle-scale-wrap" style="transform: scale(0.52);">
             <div class="kindle-bezel">
                 <div class="kpw3-screen">
 
@@ -532,6 +532,14 @@ var SAMPLE_CARDS = [
         css: OFFICIAL_ANKI_CSS,
         q: '<b><u>高阶导数·莱布尼茨公式（长推导测试）</u></b><br><hr><br>设函数 \\(u=u(x)\\) 和 \\(v=v(x)\\) 均具有 \\(n\\) 阶导数，则其乘积 \\(uv\\) 的 \\(n\\) 阶导数为：<br><br><span class="cloze">[...]</span>',
         a: '<b><u>高阶导数·莱布尼茨公式（长推导测试）</u></b><br><hr><br>设函数 \\(u=u(x)\\) 和 \\(v=v(x)\\) 均具有 \\(n\\) 阶导数，则其乘积 \\(uv\\) 的 \\(n\\) 阶导数为：<br><br><span class="cloze">\\((uv)^{(n)} = \\sum_{k=0}^{n} \\mathrm{C}_n^k u^{(n-k)} v^{(k)}\\)</span><br><br>展开为：<br>\\((uv)^{(n)} = u^{(n)}v + n u^{(n-1)}v\' + \\frac{n(n-1)}{2!} u^{(n-2)}v\'\' + \\dots + u v^{(n)}\\)<br><hr id="answer"><cite>数学归纳法完整证明（长卡片翻页实测）：<br><br><b>第一步（基础情形 \\(n=1\\)）：</b><br>由导数乘积法则，\\((uv)\' = u\'v + uv\' = \\mathrm{C}_1^0 u^{(1)}v^{(0)} + \\mathrm{C}_1^1 u^{(0)}v^{(1)}\\)，命题对 \\(n=1\\) 成立。<br><br><b>第二步（归纳假设）：</b><br>假设命题对 \\(n=m\\) 成立，即<br>\\((uv)^{(m)} = \\sum_{k=0}^{m} \\mathrm{C}_m^k u^{(m-k)} v^{(k)}\\)。<br><br><b>第三步（归纳递推 \\(n=m+1\\)）：</b><br>对上式两端再求一次导数：<br>\\((uv)^{(m+1)} = \\sum_{k=0}^{m} \\mathrm{C}_m^k \\left[ u^{(m+1-k)} v^{(k)} + u^{(m-k)} v^{(k+1)} \\right]\\)<br><br>将两项拆分并平移第二个和式的下标 \\(j = k + 1\\)：<br>\\(= u^{(m+1)}v + \\sum_{k=1}^{m} (\\mathrm{C}_m^k + \\mathrm{C}_m^{k-1}) u^{(m+1-k)} v^{(k)} + u v^{(m+1)}\\)<br><br>由组合恒等式 <font color="red">\\(\\mathrm{C}_m^k + \\mathrm{C}_m^{k-1} = \\mathrm{C}_{m+1}^k\\)</font>（帕斯卡法则），立得：<br>\\((uv)^{(m+1)} = \\sum_{k=0}^{m+1} \\mathrm{C}_{m+1}^k u^{(m+1-k)} v^{(k)}\\)。<br><br><b>第四步（记忆参照）：</b><br>形式与二项式定理 \\((a+b)^n = \\sum_{k=0}^n \\mathrm{C}_n^k a^{n-k}b^k\\) 完全一致，只需将幂次替换为导数阶数（0 阶导即函数本身）。</cite>'
+    },
+    {
+        id: 1006,
+        title: '6. 墨水屏多色归一 + 音视频图片兜底 + 防乱码',
+        deck: '兼容性自检',
+        css: OFFICIAL_ANKI_CSS,
+        q: '<b><u>多色文本与媒体防乱码实测</u></b><br><hr><br>红/橙警示：<font color="red">绝对不能漏负号</font>、<span style="color: orange">边界条件</span><br><br>蓝/绿/紫普通彩色：<span style="color: #0066cc">关键定义</span>、<font color="green">守恒量</font>、<span style="color: purple">\\(\\frac{\\mathrm{d}p}{\\mathrm{d}t}=F\\)</span><br><br>高亮底色：<mark>重点结论</mark> / <span style="background-color: yellow">黄色荧光笔</span><br><br>不支持媒体兜底：<br>如图所示：<img src="diagram.png"> · 朗读：[sound:demo_01.mp3] · <video src="clip.mp4"></video><br><br>防乱码净化：✅ 正确 / ❌ 错误 / ⚠️ 陷阱 / 🎉 无豆腐块',
+        a: '<b><u>多色文本与媒体防乱码实测</u></b><br><hr><br>红/橙警示：<font color="red">绝对不能漏负号</font>、<span style="color: orange">边界条件</span><br><br>蓝/绿/紫普通彩色：<span style="color: #0066cc">关键定义</span>、<font color="green">守恒量</font>、<span style="color: purple">\\(\\frac{\\mathrm{d}p}{\\mathrm{d}t}=F\\)</span><br><br>高亮底色：<mark>重点结论</mark> / <span style="background-color: yellow">黄色荧光笔</span><br><br>不支持媒体兜底：<br>如图所示：<img src="diagram.png"> · 朗读：[sound:demo_01.mp3] · <video src="clip.mp4"></video><br><br>防乱码净化：✅ 正确 / ❌ 错误 / ⚠️ 陷阱 / 🎉 无豆腐块<br><hr id="answer"><cite>所有彩色文字在黑白墨水屏上均保持纯黑高对比与清晰语义区分，音视频与图片均转为干净占位提示，零破图、零豆腐块。</cite>'
     }
 ];
 
@@ -592,7 +600,7 @@ function renderDeckBlueprint() {
 }
 
 var currentIdx = 0;
-var fontSize = 36;
+var fontSize = 42;
 var isFlipped = false;
 var benchCases = [];
 var benchIdx = 0;
@@ -727,7 +735,7 @@ function loadBenchmarkAll38() {
             lastCat = bc.cat;
             parts.push('<div style="margin:22px 0 8px 0;font-weight:bold;border-bottom:1px solid #000;display:inline-block;">' + bc.cat + '</div><br>');
         }
-        parts.push('<div style="font-size:0.62em;color:#555;margin-top:14px;">#' + bc.index + ' ' + bc.name + '</div>' + bc.formatted);
+        parts.push('<div style="font-size:0.74em;color:#444;margin-top:16px;">#' + bc.index + ' ' + bc.name + '</div>' + bc.formatted);
     });
     var html = parts.join('');
     sendToCard('renderImmediate', {
@@ -889,12 +897,12 @@ document.getElementById('btn-bench-next').onclick = function () { loadBenchmarkS
 document.getElementById('btn-view-review').onclick = function () { switchView('review'); };
 document.getElementById('btn-view-decks').onclick = function () { switchView('decks'); };
 document.getElementById('btn-font-down').onclick = function () {
-    fontSize = Math.max(24, fontSize - 2);
+    fontSize = Math.max(28, fontSize - 2);
     updatePhysicalReadout();
     sendToCard('setConfig', { font_size_px: fontSize });
 };
 document.getElementById('btn-font-up').onclick = function () {
-    fontSize = Math.min(48, fontSize + 2);
+    fontSize = Math.min(54, fontSize + 2);
     updatePhysicalReadout();
     sendToCard('setConfig', { font_size_px: fontSize });
 };

@@ -132,10 +132,10 @@ Rebuild RAnki for Kindle Paperwhite 3 (DP75SDI) using **Route B**: a pure-Rust d
 ### Phase 2: Rock-Solid `anki-core` & Background Async Sync
 
 #### Task 5: Upgrade Safe Configuration Manager (`src/config.rs`)
-**Description:** Extend `AppConfig` to manage all Route B settings (`collection_dir`, `hkey`, `sync_server`, `font_size_px`, `focus_timer_enabled`, `focus_timer_secs`, `auto_refresh_cards`, `math_engine`) with clamped safe bounds, atomic write-and-rename saving, zero hardcoded secrets, and unit tests.
+**Description:** Extend `AppConfig` to manage minimal Route B settings (`collection_dir`, `hkey`, `sync_server`, `font_size_px`, `math_engine`) with clamped safe bounds, atomic write-and-rename saving, zero hardcoded secrets, and unit tests. (The 20s Duo circular focus timer and 20-card auto GC16 refresh use built-in constants out-of-the-box to stay radically minimalist.)
 **Acceptance criteria:**
-- [ ] Loads legacy `config.ini` cleanly with sensible defaults (`font_size_px=36`, `focus_timer_enabled=true`, `focus_timer_secs=20`, `auto_refresh_cards=20`, `math_engine=katex`).
-- [ ] Clamps invalid values (`font_size_px` 24..=48, `focus_timer_secs` 5..=120) and preserves unknown keys cleanly.
+- [ ] Loads legacy `config.ini` cleanly with sensible defaults (`font_size_px=42`, `math_engine=katex`).
+- [ ] Clamps invalid values (`font_size_px` 28..=54) and preserves unknown keys cleanly.
 - [ ] Unit tests cover parse, clamp, and round-trip save in a temp directory.
 **Verification:**
 - [ ] `cargo test --lib config` passes (in CI / Rust toolchain).
@@ -239,7 +239,7 @@ Rebuild RAnki for Kindle Paperwhite 3 (DP75SDI) using **Route B**: a pure-Rust d
 **Estimated scope:** Medium (1–2 files)
 
 #### Task 12: Native Settings, Login, Sync Dialogs & Full App Wiring (`src/ui/settings_dialog.rs`, `src/ui/mod.rs`, `src/main.rs`)
-**Description:** Build native `GtkDialog` screens for Settings & AnkiWeb Login (`GtkEntry` email, masked password, custom sync server with debounced Kindle LIPC keyboard; Font Size `20–38px`; Focus Timer toggle & duration; Auto Full Refresh interval; Math Engine `KaTeX/MathJax`), non-blocking Sync Progress & `FullSync` choice dialog polled via `g_idle_add`, remove obsolete `src/ipc.rs` / old `views/index.html` SPA coupling, and wire everything in `src/ui/mod.rs` and `src/main.rs` with clean WAL checkpoint on destroy/exit.
+**Description:** Build native `GtkDialog` screens for minimalist Settings & AnkiWeb Login (`GtkEntry` email, masked password, custom sync server with debounced Kindle LIPC keyboard; Font Size `28–54px` default `42px`; Math Engine `KaTeX/MathJax` — keeping 20s focus timer & 20-card GC16 refresh built-in with zero setting clutter), non-blocking Sync Progress & `FullSync` choice dialog polled via `g_idle_add`, remove obsolete `src/ipc.rs` / old `views/index.html` SPA coupling, and wire everything in `src/ui/mod.rs` and `src/main.rs` with clean WAL checkpoint on destroy/exit.
 **Acceptance criteria:**
 - [ ] Clicking Sync/Login opens non-blocking progress dialog, updates UI on completion via `g_idle_add`, and prompts explicitly on `FullSyncRequired`.
 - [ ] Changing font size, timer settings, or math engine persists to `config.ini` and applies immediately without restart.

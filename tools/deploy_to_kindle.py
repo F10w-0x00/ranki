@@ -17,10 +17,7 @@ DEFAULT_CONFIG_INI = (
     "collection_dir=/mnt/us/anki_data_test\n"
     "hkey=\n"
     "sync_server=\n"
-    "font_size_px=36\n"
-    "focus_timer_enabled=true\n"
-    "focus_timer_secs=20\n"
-    "auto_refresh_cards=20\n"
+    "font_size_px=42\n"
     "math_engine=katex\n"
 )
 

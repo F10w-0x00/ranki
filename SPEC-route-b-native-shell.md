@@ -84,13 +84,11 @@ Located alongside executable (`/mnt/us/extensions/ranki-dev/config.ini`) with Wi
 collection_dir=/mnt/us/anki_data_test
 hkey=
 sync_server=
-font_size_px=36
-focus_timer_enabled=true
-focus_timer_secs=20
-auto_refresh_cards=20
+font_size_px=42
 math_engine=katex
 ```
 - **Invariant**: `hkey` is NEVER written by deployment scripts and passwords are NEVER persisted to disk.
+- **Minimalist Defaults**: The 20s Duo circular focus timer (always 20s, zero settings knob) and auto GC16 full refresh (every 20 cards) use built-in defaults out-of-the-box to keep Settings radically simple.
 
 #### Card-ID-Verified Review Pipeline (Fixes Previous Engineer's Silent Desync Bug)
 ```rust
@@ -165,8 +163,14 @@ Loaded **once** at startup into the resident `WebKitWebView` via `file:///.../vi
 - Default card baseline (applied cleanly below card-specific styles, with `.kindle` e-ink refinements):
   - `text-align: center;` (explicit default matching official Anki; lists `ul`/`ol` centered cleanly as inline-block or left-aligned inside a centered readable block — keeping visual balance!).
   - `font-family: 'Anthropic Sans Web', 'SonyReader Ming', serif;`
-  - Calibrated default font size: **`36px`** at 300 PPI (~3.05 mm / 8.6 pt physical height, harmonized between compact paperback and original RAnki's `20px × zoom 2 = 40px`), dynamically updated via `setFontSize(px)` (`24px–48px` in `2px` steps).
-  - `line-height: 1.58; color: #000000; background: #ffffff; padding: 32px 42px 60px 42px;`
+  - Calibrated default font size: **`42px`** at 300 PPI (~3.56 mm / 10.1 pt physical height — matching standard Chinese textbook 五号字 & original RAnki's `20px × zoom 2 = 40px`, ~20–22 CJK chars/line), dynamically updated via `setFontSize(px)` (`28px–54px` in `2px` steps).
+  - `line-height: 1.56; color: #000000; background: #ffffff; padding: 30px 42px 60px 42px;`
+  - **Unified Monochrome Color Normalization & Anti-Tofu / Media Fallback**:
+    - Red/orange/magenta warning text → bold `#000000` + `#E4E4E4` tint + `2px dashed #000000` underline.
+    - Blue/green/purple/cyan & any other non-neutral colored text → bold `#000000` + `1.5px dotted #000000` underline (never washes out to unreadable pale gray!).
+    - Highlighted backgrounds (`<mark>`, colored `background-color`) → `#000000` text on `#E8E8E8` pill.
+    - Unsupported media gracefully replaced with crisp monochrome badges instead of blank gaps or raw `[sound:...]` strings: `[不支持音频]`, `[不支持视频/嵌入内容]`, `[不支持图片]`.
+    - Anti-tofu sanitization strips invisible bidi/control garbage (`\u2068`, `\u2069`, `\u200B`, `\uFEFF`) and maps/sanitizes astral Emoji so Kindle OS 5.14 never shows `□` tofu.
   - **STEM Card Grammar Support** (matching [anki-card-maker/SKILL.md](file:///C:/Users/Felyn/.gemini/config/skills/anki-card-maker/SKILL.md)):
     - `b u`, `u b`: clear header hierarchy with crisp `<hr>` (`1.5px solid #000000`, `margin: 18px auto`).
     - `.cloze`: `font-weight: bold; border-bottom: 2px solid #000000; padding: 0 4px; color: #000000 !important;`
@@ -231,7 +235,7 @@ Loaded **once** at startup into the resident `WebKitWebView` via `file:///.../vi
 #### Native Settings, Login & Kindle Keyboard (`src/ui/settings_dialog.rs`)
 - Real `GtkDialog` (Lab126 dialog title so `awesome`/`pillow` positions it cleanly above the virtual keyboard at top of screen!).
 - Real `GtkEntry` inputs for Email, Password (masked), and Custom Sync Server; `focus-in-event` / `focus-out-event` invokes debounced LIPC `com.lab126.keyboard` (`open "ranki.ranki.ranki:abc:1"` / `close "ranki.ranki.ranki"`), matching upstream RAnki's proven `Lipstick` pattern.
-- Controls for: Font Size (`24–48px`, default `36px`), 20s Focus Timer (On/Off + duration `10/15/20/30/45/60s`), Auto Full Refresh (`Off / 15 / 20 / 30 cards`), Math Engine (`KaTeX / MathJax`).
+- Minimalist controls: Font Size (`28–54px`, default `42px`), Math Engine (`KaTeX / MathJax`). The 20s circular focus timer and 20-card auto GC16 refresh run cleanly with built-in defaults (no duration/interval clutter in Settings).
 
 #### Hardware E-ink Full Refresh (`src/ui/eink.rs`)
 - Exposes `trigger_full_refresh()`: attempts direct KPW3 `mxcfb` ioctl (or `/usr/sbin/eips -f ""` fallback), logged clearly on first call; invoked on manual `刷新` button, deck page turns (optional/clean), and every `auto_refresh_cards` reviews.

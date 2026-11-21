@@ -99,23 +99,31 @@ var envChrome = createMockEnv('Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 
 assert.strictEqual(envChrome.sandbox.__RANKI_WEBKIT1_VLIST_PATCH__, false, 'Expected WebKit 1.0 patch disabled on Chrome');
 console.log('[PASS] Test 1: WebKit 1.0 vlist-t2 auto-detection works cleanly.');
 
-// Test 2: HTML preprocessor (strip scripts, wrap bare \ce, protect math, normalize red, plain text)
+// Test 2: HTML preprocessor (scripts, bare \ce, unified color normalization, media placeholders, anti-tofu)
 var pp = envWk1.engine._preprocessCardHtml;
 assert.strictEqual(pp('<script>alert(1)</script><b>Hi</b>'), '<b>Hi</b>');
 assert.strictEqual(pp('Water \\ce{H2O} and \\(\\ce{Ca^2+}\\)'), 'Water \\(\\ce{H2O}\\) and \\(\\ce{Ca^2+}\\)');
 assert.ok(pp('<span style="color: red">trap</span>').indexOf('class="eink-red"') !== -1);
+assert.ok(pp('<span style="color: #0066cc">blue</span>').indexOf('class="eink-color"') !== -1);
+assert.ok(pp('<font color="green">green</font>').indexOf('class="eink-color"') !== -1);
+assert.ok(pp('<span style="background-color: yellow">hl</span>').indexOf('class="eink-mark"') !== -1);
+assert.strictEqual(pp('<span style="color: #555555">gray</span>').indexOf('eink-color'), -1, 'Neutral gray must not get artificial underline');
+assert.ok(pp('Listen [sound:test_01.mp3]').indexOf('[\u4e0d\u652f\u6301\u97f3\u9891]') !== -1);
+assert.ok(pp('<video src="a.mp4"></video>').indexOf('[\u4e0d\u652f\u6301\u89c6\u9891/\u5d4c\u5165\u5185\u5bb9]') !== -1);
+assert.ok(pp('Figure: <img src="fig1.png">').indexOf('[\u4e0d\u652f\u6301\u56fe\u7247]') !== -1);
+assert.strictEqual(pp('\u2068OK\u2069 \uD83C\uDF89 \u2705 \u274C \u26A0\uFE0F'), 'OK  [\u5bf9] [\u9519] [!]');
 assert.strictEqual(pp('Plain Chinese & English card with no math'), 'Plain Chinese & English card with no math');
-console.log('[PASS] Test 2: HTML preprocessor sanitizes scripts, wraps bare \\ce, preserves math, normalizes red.');
+console.log('[PASS] Test 2: HTML preprocessor handles colors, media placeholders, and anti-tofu sanitization.');
 
-// Test 3: Font clamping [24, 48] with default 36px
-assert.strictEqual(envWk1.engine.getState().fontSizePx, 36);
+// Test 3: Font clamping [28, 54] with default 42px
+assert.strictEqual(envWk1.engine.getState().fontSizePx, 42);
 envWk1.engine.setConfig({ font_size_px: 10 });
-assert.strictEqual(envWk1.engine.getState().fontSizePx, 24);
+assert.strictEqual(envWk1.engine.getState().fontSizePx, 28);
 envWk1.engine.setConfig({ font_size_px: 99 });
-assert.strictEqual(envWk1.engine.getState().fontSizePx, 48);
-envWk1.engine.setConfig({ font_size_px: 36 });
-assert.strictEqual(envWk1.engine.getState().fontSizePx, 36);
-console.log('[PASS] Test 3: Font size defaults to 36px and clamps strictly within [24, 48].');
+assert.strictEqual(envWk1.engine.getState().fontSizePx, 54);
+envWk1.engine.setConfig({ font_size_px: 42 });
+assert.strictEqual(envWk1.engine.getState().fontSizePx, 42);
+console.log('[PASS] Test 3: Font size defaults to 42px and clamps strictly within [28, 54].');
 
 // Test 4: Render immediate, instant flip (flushing queued back), prefetch, and Card-ID verified swap
 envWk1.engine.renderImmediate({
