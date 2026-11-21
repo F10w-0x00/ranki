@@ -15,6 +15,9 @@ pub struct AppConfig {
     pub collection_dir: String,
     pub hkey: String,
     pub sync_server: String,
+    /// Redirected shard endpoint returned by AnkiWeb (analogous to Anki's `currentSyncUrl`).
+    /// Kept separate from user's manual `sync_server` so clearing/changing server resets it cleanly.
+    pub sync_endpoint_cache: String,
     pub font_size_px: u32,
 }
 
@@ -25,6 +28,7 @@ impl AppConfig {
             collection_dir: "/mnt/us/anki_data_test".to_string(),
             hkey: String::new(),
             sync_server: String::new(),
+            sync_endpoint_cache: String::new(),
             font_size_px: DEFAULT_FONT_SIZE_PX,
         }
     }
@@ -54,10 +58,11 @@ impl AppConfig {
         if let Ok(content) = fs::read_to_string(&path) {
             config.parse_ini_str(&content);
             println!(
-                "[CONFIG] Loaded {:?} (hkey_len={}, font_size_px={})",
+                "[CONFIG] Loaded {:?} (hkey_len={}, font_size_px={}, sync_endpoint_cache={:?})",
                 path,
                 config.hkey.len(),
-                config.font_size_px
+                config.font_size_px,
+                config.sync_endpoint_cache
             );
         } else {
             println!("[CONFIG] Config {:?} not found; using safe defaults.", path);
@@ -88,6 +93,9 @@ impl AppConfig {
                     "sync_server" => {
                         self.sync_server = val.to_string();
                     }
+                    "sync_endpoint_cache" => {
+                        self.sync_endpoint_cache = val.to_string();
+                    }
                     "font_size_px" => {
                         if let Ok(px) = val.parse::<u32>() {
                             self.font_size_px = clamp_font_size(px);
@@ -99,16 +107,39 @@ impl AppConfig {
         }
     }
 
+    pub fn effective_sync_server(&self) -> String {
+        let cached = self.sync_endpoint_cache.trim();
+        if !cached.is_empty() {
+            cached.to_string()
+        } else {
+            self.sync_server.trim().to_string()
+        }
+    }
+
+    pub fn set_custom_sync_server(&mut self, server: &str) {
+        let clean = server.trim().to_string();
+        if clean != self.sync_server {
+            self.sync_endpoint_cache.clear();
+            self.sync_server = clean;
+        }
+    }
+
+    pub fn clear_sync_auth(&mut self) {
+        self.hkey.clear();
+        self.sync_endpoint_cache.clear();
+    }
+
     pub fn set_font_size_px(&mut self, px: u32) {
         self.font_size_px = clamp_font_size(px);
     }
 
     pub fn serialize_ini(&self) -> String {
         format!(
-            "[General]\ncollection_dir={}\nhkey={}\nsync_server={}\nfont_size_px={}\n",
+            "[General]\ncollection_dir={}\nhkey={}\nsync_server={}\nsync_endpoint_cache={}\nfont_size_px={}\n",
             self.collection_dir,
             self.hkey,
             self.sync_server,
+            self.sync_endpoint_cache,
             clamp_font_size(self.font_size_px)
         )
     }
@@ -218,6 +249,7 @@ mod tests {
         let mut cfg = AppConfig::default_at(path.clone());
         cfg.hkey = "my_token".to_string();
         cfg.sync_server = "https://anki.local".to_string();
+        cfg.sync_endpoint_cache = "https://sync11.ankiweb.net/".to_string();
         cfg.set_font_size_px(46);
         cfg.save().expect("save should succeed");
 
@@ -225,5 +257,34 @@ mod tests {
         assert_eq!(loaded, cfg);
 
         let _ = fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn sync_endpoint_cache_precedence_and_invalidation() {
+        let mut cfg = AppConfig::default_at(PathBuf::from("test.ini"));
+        assert_eq!(cfg.effective_sync_server(), "");
+
+        cfg.sync_server = "https://custom.local/".to_string();
+        assert_eq!(cfg.effective_sync_server(), "https://custom.local/");
+
+        // Redirected shard cache takes precedence over manual server / default AnkiWeb
+        cfg.sync_endpoint_cache = "https://sync11.ankiweb.net/".to_string();
+        assert_eq!(cfg.effective_sync_server(), "https://sync11.ankiweb.net/");
+
+        // Re-saving identical custom server preserves cache
+        cfg.set_custom_sync_server("https://custom.local/");
+        assert_eq!(cfg.sync_endpoint_cache, "https://sync11.ankiweb.net/");
+
+        // Changing custom server invalidates stale shard cache
+        cfg.set_custom_sync_server("https://other.local/");
+        assert!(cfg.sync_endpoint_cache.is_empty());
+        assert_eq!(cfg.effective_sync_server(), "https://other.local/");
+
+        // Clearing auth clears both hkey and cached shard
+        cfg.hkey = "tok_123".to_string();
+        cfg.sync_endpoint_cache = "https://sync2.ankiweb.net/".to_string();
+        cfg.clear_sync_auth();
+        assert!(cfg.hkey.is_empty());
+        assert!(cfg.sync_endpoint_cache.is_empty());
     }
 }

@@ -618,7 +618,7 @@ fn start_collection_sync(mode: SyncMode) {
             media_dir,
             media_db,
             app.config.hkey.clone(),
-            app.config.sync_server.clone(),
+            app.config.effective_sync_server(),
             mode,
         );
         app.sync_rx = Some(rx);
@@ -1162,7 +1162,7 @@ unsafe extern "C" fn on_settings_save_server_click(_w: *mut GtkWidget, _data: gp
     eink::close_keyboard();
     with_app(|app| {
         let (_, _, srv) = app.settings_view.read_credentials();
-        app.config.sync_server = srv.trim().to_string();
+        app.config.set_custom_sync_server(&srv);
         let _ = app.config.save();
         app.settings_view
             .sync_from_config(&app.config, Some("同步服务器地址已保存。"));
@@ -1172,7 +1172,7 @@ unsafe extern "C" fn on_settings_save_server_click(_w: *mut GtkWidget, _data: gp
 unsafe extern "C" fn on_settings_logout_click(_w: *mut GtkWidget, _data: gpointer) {
     eink::close_keyboard();
     with_app(|app| {
-        app.config.hkey.clear();
+        app.config.clear_sync_auth();
         let _ = app.config.save();
         app.settings_view.clear_password_entry();
         app.settings_view
@@ -1221,7 +1221,8 @@ unsafe extern "C" fn on_login_poll(_data: gpointer) -> gboolean {
         Some(Some(LoginOutcome::Success { hkey, sync_server })) => {
             with_app(|app| {
                 app.config.hkey = hkey;
-                app.config.sync_server = sync_server;
+                app.config.set_custom_sync_server(&sync_server);
+                app.config.sync_endpoint_cache.clear();
                 let _ = app.config.save();
                 app.settings_view.clear_password_entry();
                 app.settings_view.sync_from_config(
@@ -1281,19 +1282,26 @@ unsafe extern "C" fn on_sync_poll(_data: gpointer) -> gboolean {
             });
 
             match res {
-                SyncOutcome::Success(msg) => {
-                    show_deck_banner(&msg, Some(4000));
+                SyncOutcome::Success {
+                    message,
+                    new_endpoint,
+                } => {
+                    persist_redirected_endpoint(new_endpoint);
+                    show_deck_banner(&message, Some(4000));
                 }
                 SyncOutcome::Error(err) => {
                     if !err.is_empty() {
-                        show_deck_banner(&err, Some(5000));
+                        eprintln!("[SYNC] UI banner error: {}", err);
+                        show_deck_banner(&err, Some(6000));
                     }
                 }
                 SyncOutcome::FullSyncRequired {
                     upload_ok,
                     download_ok,
                     server_message,
+                    new_endpoint,
                 } => {
+                    persist_redirected_endpoint(new_endpoint);
                     show_deck_banner("需要全量同步，请选择方向", Some(3000));
                     let parent = with_app_ref(|app| app.window);
                     if let Some(win) = parent {
@@ -1321,6 +1329,21 @@ unsafe extern "C" fn on_sync_poll(_data: gpointer) -> gboolean {
                 }
             }
             FALSE
+        }
+    }
+}
+
+fn persist_redirected_endpoint(new_endpoint: Option<String>) {
+    if let Some(ep) = new_endpoint {
+        let trimmed = ep.trim().to_string();
+        if !trimmed.is_empty() {
+            with_app(|app| {
+                if app.config.sync_endpoint_cache != trimmed {
+                    println!("[SYNC] Persisting redirected sync endpoint: {}", trimmed);
+                    app.config.sync_endpoint_cache = trimmed;
+                    let _ = app.config.save();
+                }
+            });
         }
     }
 }
