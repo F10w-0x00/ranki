@@ -8,7 +8,6 @@ pub const DEFAULT_FONT_SIZE_PX: u32 = 42;
 pub const MIN_FONT_SIZE_PX: u32 = 28;
 pub const MAX_FONT_SIZE_PX: u32 = 54;
 pub const BUILTIN_FOCUS_TIMER_SECS: u32 = 20;
-pub const BUILTIN_AUTO_REFRESH_CARDS: u32 = 8;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AppConfig {
@@ -185,7 +184,6 @@ mod tests {
         assert!(cfg.hkey.is_empty());
         assert_eq!(cfg.font_size_px, 42);
         assert_eq!(BUILTIN_FOCUS_TIMER_SECS, 20);
-        assert_eq!(BUILTIN_AUTO_REFRESH_CARDS, 8);
     }
 
     #[test]

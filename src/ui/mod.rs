@@ -21,9 +21,7 @@ use crate::anki::sync::{
     spawn_collection_sync, spawn_login, LoginOutcome, SyncMode, SyncOutcome,
 };
 use crate::anki::{AdvanceResult, AnkiService};
-use crate::config::{
-    AppConfig, BUILTIN_AUTO_REFRESH_CARDS, MAX_FONT_SIZE_PX, MIN_FONT_SIZE_PX,
-};
+use crate::config::{AppConfig, MAX_FONT_SIZE_PX, MIN_FONT_SIZE_PX};
 use crate::ffi::cairo::*;
 use crate::ffi::gtk::*;
 use crate::ffi::webkit::webkit_web_view_get_title;
@@ -61,7 +59,6 @@ struct AppController {
 
     config: AppConfig,
     anki: AnkiService,
-    reviews_since_refresh: u32,
     needs_clean_refresh: bool,
     pending_refresh_timer: Option<guint>,
     settings_return_page: i32,
@@ -100,7 +97,7 @@ where
 
 pub fn run_application() {
     println!("====================================================");
-    println!(" RAnki Route B — Native GTK2/Cairo + ES5 KaTeX Host ");
+    println!(" RAnki Route B — Native GTK2/Cairo + MathJax Host   ");
     println!(" Target: Kindle Paperwhite 3 (1072x1448 @ 300 PPI)  ");
     println!("====================================================");
 
@@ -218,7 +215,6 @@ pub fn run_application() {
                 settings_view,
                 config,
                 anki,
-                reviews_since_refresh: 0,
                 needs_clean_refresh: false,
                 pending_refresh_timer: None,
                 settings_return_page: PAGE_DECKS,
@@ -231,8 +227,8 @@ pub fn run_application() {
 
         gtk_widget_show_all(window);
         gtk_notebook_set_current_page(notebook, PAGE_DECKS);
-        // Clean cold-start GC16 flash once GTK has painted initial Deck Browser (wipes Kindle Home ghosting)
-        schedule_clean_refresh(350);
+        // Clean cold-start GC16 flash after Xorg settles initial Deck Browser (avoids EPDC collision)
+        schedule_clean_refresh(450);
         println!("[HOST] Native GTK2/Cairo window shown. Entering gtk_main()...");
         gtk_main();
         println!("[HOST] Cleanly exited gtk_main().");
@@ -469,7 +465,6 @@ fn handle_deck_action(action: DeckAction) {
                     return Err("本地数据库未打开，请先同步或检查测试库。".to_string());
                 }
                 app.needs_clean_refresh = true;
-                app.reviews_since_refresh = 0;
                 app.anki.enter_deck(did)
             });
 
@@ -506,7 +501,7 @@ fn handle_review_action(action: ReviewAction) {
                     gtk_notebook_set_current_page(app.notebook, PAGE_DECKS);
                 }
             });
-            schedule_clean_refresh(120);
+            schedule_clean_refresh(450);
         }
         ReviewAction::FlipCard => {
             let wv = with_app(|app| {
@@ -534,14 +529,7 @@ fn handle_review_action(action: ReviewAction) {
             let outcome = with_app(|app| {
                 let cid = app.review_view.active_card_id?;
                 let prefetched = app.review_view.prefetched_card_id;
-                let res = app.anki.rate_card(cid, rating, prefetched);
-                app.reviews_since_refresh += 1;
-                if app.reviews_since_refresh >= BUILTIN_AUTO_REFRESH_CARDS {
-                    app.reviews_since_refresh = 0;
-                    // Defer GC16 flash until AFTER the next card finishes RENDER_DONE!
-                    app.needs_clean_refresh = true;
-                }
-                Some(res)
+                Some(app.anki.rate_card(cid, rating, prefetched))
             })
             .flatten();
 
@@ -586,7 +574,7 @@ fn handle_review_action(action: ReviewAction) {
                             apply_advance_result(adv);
                         }
                     }
-                    RESP_REFRESH => schedule_clean_refresh(120),
+                    RESP_REFRESH => schedule_clean_refresh(450),
                     RESP_SETTINGS => {
                         with_app(|app| unsafe { app.review_view.timer.hide() });
                         open_settings_page(PAGE_REVIEW, None);
@@ -740,9 +728,9 @@ unsafe fn run_choice_dialog(
     ACTIVE_CHOICE_DIALOG.with(|c| c.set(ptr::null_mut()));
     gtk_widget_destroy(dialog);
 
-    // Wipe modal dialog frame ghosting cleanly once GTK repaints the underlying view
+    // Wipe modal dialog frame ghosting cleanly after Xorg finishes repainting underlying view
     if response != RESP_REFRESH {
-        schedule_clean_refresh(120);
+        schedule_clean_refresh(450);
     }
     response
 }
@@ -1028,9 +1016,6 @@ unsafe extern "C" fn on_card_title_notify(
             }
         }
         "PAGE_STATE" | "RENDER_DONE" | "FLIP_DONE" => {
-            if action != "PAGE_STATE" {
-                gtk_widget_queue_draw(web_view);
-            }
             if let Ok(v) = serde_json::from_str::<serde_json::Value>(payload_str) {
                 if action != "PAGE_STATE" {
                     println!(
@@ -1059,7 +1044,7 @@ unsafe extern "C" fn on_card_title_notify(
                 .unwrap_or(false);
 
                 if trigger_clean {
-                    schedule_clean_refresh(100);
+                    schedule_clean_refresh(450);
                 }
             }
         }
@@ -1132,7 +1117,7 @@ unsafe extern "C" fn on_settings_top_release(
             }
             gtk_notebook_set_current_page(app.notebook, ret);
         });
-        schedule_clean_refresh(120);
+        schedule_clean_refresh(450);
     }
     TRUE
 }

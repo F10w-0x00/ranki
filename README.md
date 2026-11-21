@@ -28,7 +28,7 @@
 - **墨水屏专属交互与零残影引擎**：
   - **无翻页条长卡手势翻页**：彻底移除占空间的底部翻页条；由 GTK2/GDK 底层直接拦截触控——**上滑或轻点卡片下缘 35%** 干脆跳转下一屏（85% 屏高），**下滑或轻点卡片上缘 35%** 跳回上一屏；拖动过程 **0 中间帧重绘 = 0 拖影**，多页长卡在顶栏低调显示 `1/2` 页码；
   - **独立 `54×54px` 20 秒圆形专注倒计时**：右上角仿 iPhone Duo 风格纯黑白扇形倒计时，仅在看题面时以 1 Hz 独立局部重绘 `54×54px` 区域（绝不触发 WebView 重排），20 秒归零后呈现干净空白空心圆（不自动翻面），点击「显示答案」立即隐藏；
-  - **单帧原子显隐 + 智能硬件 GC16 清残影**：MathJax 排版完成后才单帧显现卡片（消除“先闪原始 LaTeX 再出公式”的双帧残影）；在冷启动首屏、进退牌组、关闭弹窗、以及每连续复习 8 张卡渲染完成后自动触发硬件级 `eips -f` 全屏 GC16 清残影（也可随时在顶栏一键手动刷新）；
+  - **单帧原子显隐 + 防撞车硬件 GC16 清残影**：MathJax 排版完成后才单帧显现卡片（消除“先闪原始 LaTeX 再出公式”的双帧残影）；在冷启动首屏、进退牌组与关闭弹窗后等待 Xorg 落稳（450 ms）再执行单次硬件级 `eips -f` 全刷，连续复习切卡期间 **0 突然黑闪打断**（也可随时手动一键清残影）；
   - **非阻塞后台 Wi-Fi 同步与原生虚拟键盘**：登录与集合同步运行于独立后台线程（仅同步数据库，**零媒体文件下载**，支持 `FullSync` 全量上传/下载选择）；设置页使用原生 `GtkEntry` 自动唤起 Kindle 系统 LIPC 虚拟键盘。
 
 ---
@@ -78,7 +78,7 @@
 | **同模板切卡耗时** | 每次切卡重写 `<style>` 触发 2012 WebKit 全文档样式重算（耗费 200–1400 ms） | **CSS 指纹缓存 + 4 槽双缓冲预渲染**，同模板切卡与翻面跳过重算，瞬时切换 |
 | **数学与化学公式** | 原版需手动下载 MathJax；早期改用 KaTeX 在 2012 WebKit 1.0 上深度嵌套公式错位或抛 JS 异常 | **内置完整离线 MathJax 2.7.9 + 22 款 WOFF 字体 + `mhchem3` + `\bbox`**，嵌套根式/连分数/化学反应零错位，列表宽公式自动包裹 `.eq-scale-wrap` 不折行 |
 | **长卡翻页体验** | 传统滚动条或底部翻页条遮挡内容、手指拖拽触发连续重绘产生“文字泥潭”残影 | **无翻页条 + GDK 底层拦截滑动/上下缘 35% 轻点**，拖动 0 中间帧，单帧跳 85% 屏高 |
-| **残影控制** | 拖拽残影严重；MathJax 先刷原始 LaTeX 再出公式产生双帧叠影；弹窗关闭后留灰框 | **单帧原子显隐 (`visibility: hidden -> visible`)** + 冷启动/进退牌组/关弹窗/每 8 张卡渲染完成后自动防抖 **GC16 硬件全刷** |
+| **残影控制** | 拖拽残影严重；MathJax 先刷原始 LaTeX 再出公式产生双帧叠影；弹窗关闭后留灰框 | **单帧原子显隐 (`visibility: hidden -> visible`)** + 冷启动/进退牌组/关弹窗 450 ms 稳态防撞车 **GC16 硬件全刷**，连续切卡期间 0 突然闪屏 |
 | **弹窗与输入法** | WebKit 内 `<input>` 在 Kindle 上无法自动弹出系统键盘；GTK 默认横向弹窗按钮溢出屏幕 | **原生 `GtkEntry` 自动联动 Kindle LIPC 键盘**（布局居于上半屏不被键盘遮挡）；弹窗改为**纵向全宽大按钮列表** |
 | **同步与存储安全** | 同步会下载全部音频/图片塞满 Kindle 存储；静态 `sqlite3` 符号外泄易与系统 `libsoup` 冲突崩溃 | **仅同步集合数据库（0 媒体下载）**，支持 `FullSync` 双向选择；链接器重写并隐藏全部 `sqlite3_*` 符号（`.dynsym` 0 泄漏），退出自动 `WAL checkpoint` |
 
@@ -180,7 +180,7 @@ font_size_px=42
 | **长卡片往上翻页** | 在卡片正文区 **向下滑动** 或 **轻点上缘 35% 区域** | 单帧向上跳转 85% 视口高度 |
 | **20s 圆形专注计时** | 进入卡片题面自动开始（右上角 54×54px 圆环） | 20 秒归零变为空心圆；点击「显示答案」立即停止并隐藏 |
 | **撤销 / 搁置 / 暂停** | 复习页顶栏点 `撤销`，或点 `···` 打开纵向操作菜单 | 全部直接写入官方 `anki/rslib` 事务并支持撤销 |
-| **清残影 (GC16)** | 自动（冷启动/进退牌组/关弹窗/每 8 张卡）或手动点 `刷新` | 调用硬件级全屏刷新清除墨水屏电荷残留 |
+| **清残影 (GC16)** | 冷启动/进退牌组/关弹窗自动稳态单刷，复习期间 0 突然黑闪，随时可手动点 `刷新` | 调用硬件级全屏刷新清除墨水屏电荷残留 |
 
 ---
 
@@ -223,7 +223,7 @@ Instead of reimplementing Anki's scheduling algorithm or running a multi-languag
 - **10× Faster Same-Template Card Swaps**: Caches applied notetype CSS so WebKitGTK 1.0 skips redundant full-document style recalculations across pre-rendered slots.
 - **Rock-Solid Nested Math & Chemistry on 2012 WebKit**: Pre-warmed offline **MathJax 2.7.9** renders deep continued fractions, multi-layer radicals, matrices, and `\ce{...}` chemistry with zero misalignment; wide inline equations inside `<li>` lists are wrapped in explicit `.eq-scale-wrap` layout boxes so bullets never break onto a separate line.
 - **Zero-Bar Long-Card Paging**: GDK intercepts swipe-up / tap-bottom-35% (next page) and swipe-down / tap-top-35% (previous page) with zero intermediate drag frames and a subtle `1/2` indicator in the top bar.
-- **Smart Hardware GC16 Ghosting Control**: Atomic single-frame MathJax reveal (`visibility: hidden -> visible`) plus debounced hardware GC16 refreshes (`eips -f`) on cold start, deck entry/exit, dialog close, and every 8 reviewed cards.
+- **Smart Hardware GC16 Ghosting Control**: Atomic single-frame MathJax reveal (`visibility: hidden -> visible`) plus settle-delayed (450 ms, zero EPDC collision) hardware GC16 refreshes (`eips -f`) on cold start, deck entry/exit, and dialog close — zero disruptive mid-review flashes, with manual refresh available anytime.
 - **DB-Only Non-Blocking Wi-Fi Sync**: Runs on a background worker thread with zero UI freeze and **never downloads media files** to preserve Kindle storage.
 
 ### 3. Quick Installation
