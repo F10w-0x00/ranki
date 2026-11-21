@@ -219,4 +219,24 @@ assert.strictEqual(envWk1.elements['slot-finished'].className, 'slot-viewport');
 assert.strictEqual(envWk1.elements['finished-sub'].textContent, 'Done today');
 console.log('[PASS] Test 8: Finished state renders cleanly.');
 
-console.log('=== ALL 8 CARD ENGINE UNIT TESTS PASSED ===');
+// Test 9 (Regression Guard): Never break KaTeX/mhchem transparent \vphantom{X} struts!
+var cardCssCode = fs.readFileSync(path.join(repoRoot, 'views', 'card.css'), 'utf8');
+var cssNoComments = cardCssCode.replace(/\/\*[\s\S]*?\*\//g, '');
+assert.strictEqual(
+    /\.katex\s+\*/.test(cssNoComments),
+    false,
+    'card.css must NEVER contain `.katex *` wildcard rules that override color:transparent on \\vphantom{X} struts!'
+);
+var phantomNode = { style: { color: 'transparent' } };
+var rgbaZeroNode = { style: { color: 'rgba(0, 0, 0, 0)' } };
+var coloredNode = { style: { color: 'yellow' } };
+var mockMathCard = {
+    querySelectorAll: function () { return [phantomNode, rgbaZeroNode, coloredNode]; }
+};
+envWk1.engine._normalizeMathColors(mockMathCard);
+assert.strictEqual(phantomNode.style.color, 'transparent', '\\vphantom transparent strut must stay transparent');
+assert.strictEqual(rgbaZeroNode.style.color, 'rgba(0, 0, 0, 0)', 'rgba(0,0,0,0) strut must stay transparent');
+assert.strictEqual(coloredNode.style.color, '#000000', 'Colored TeX text must normalize to pure black #000000');
+console.log('[PASS] Test 9: KaTeX/mhchem transparent \\vphantom struts are protected while colored TeX normalizes to #000000.');
+
+console.log('=== ALL 9 CARD ENGINE UNIT TESTS PASSED ===');

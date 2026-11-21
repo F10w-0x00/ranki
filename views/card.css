@@ -248,13 +248,12 @@ html, body {
     display: none !important;
 }
 
-/* KaTeX & MathJax Pure-Black Print Tuning (harmonized 1.02em with 42px body) */
-.card.kindle .katex,
-.card.kindle .katex * {
-    color: #000000 !important;
-}
-
+/* KaTeX & MathJax Pure-Black Print Tuning (harmonized 1.02em with 42px body)
+ * CRITICAL: NEVER apply `.katex * { color: #000 !important }` — KaTeX/mhchem rely on
+ * inline `style="color: transparent"` for \vphantom{X} struts! Set color on `.katex` root only.
+ */
 .card.kindle .katex {
+    color: #000000 !important;
     font-size: 1.02em;
     white-space: nowrap;
 }

@@ -290,7 +290,23 @@
         }
     }
 
-    // 6. Auto-scale wide equations via -webkit-transform (centered layout collapse, zero clipping)
+    // 6. Auto-scale wide equations via -webkit-transform & surgical e-ink math color normalization
+    function normalizeMathColors(cardEl) {
+        if (!cardEl || !cardEl.querySelectorAll) return;
+        // Convert explicit colored TeX (\color{yellow}, \textcolor{blue}) to pure #000000
+        // while strictly preserving KaTeX/mhchem `color: transparent` (\vphantom{X}) struts!
+        var styled = cardEl.querySelectorAll('.katex [style], .MathJax [style]');
+        for (var i = 0; i < styled.length; i++) {
+            var el = styled[i];
+            if (!el.style || !el.style.color) continue;
+            var col = String(el.style.color).toLowerCase().replace(/\s+/g, '');
+            if (!col || col === 'transparent' || col === 'rgba(0,0,0,0)' || col === 'inherit') {
+                continue;
+            }
+            el.style.color = '#000000';
+        }
+    }
+
     function scaleEquationNode(target, maxW) {
         if (!target || !target.style) return;
         // Always reset previous scale first so font-size changes never double-scale
@@ -322,6 +338,9 @@
 
     function fitWideEquations(cardEl) {
         if (!cardEl || !cardEl.querySelectorAll) return;
+
+        // 0. Surgically normalize colored LaTeX without ever breaking transparent \vphantom struts
+        normalizeMathColors(cardEl);
 
         // 1. Cloze math polish: inline-block keeps underline cleanly BELOW tall denominators
         var clozes = cardEl.querySelectorAll('.cloze');
@@ -600,6 +619,7 @@
         _preprocessCardHtml: preprocessCardHtml,
         _computePageState: computePageState,
         _scaleEquationNode: scaleEquationNode,
+        _normalizeMathColors: normalizeMathColors,
 
         setConfig: function (cfg) {
             if (!cfg) return;
