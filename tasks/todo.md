@@ -9,7 +9,7 @@
 ### Phase 1: Ultra-Fast Centered Card Renderer (`card-renderer`)
 - [x] **Task 2**: Restore verified ES5 KaTeX bundle (`views/katex/`, 635 KB, 20 WOFF fonts, `vlist-t2` patch) + `tools/test_regression.js` (838/838 formulas PASS)
 - [x] **Task 3**: Build `views/card.html`, `views/card.css`, `views/card.js` (`<div class="card kindle">` official centering, `Anthropic Sans` + `SonyReader Ming`, calibrated `28px` + adjustable `20–38px`, monochrome `<font color="red">`, `<ruby>`, `<cite>`, `\bbox`, Card-ID 4-slot buffer, MathJax 2.7.9 fallback, discrete `±85%` paging)
-- [ ] **Task 4**: Build `tools/preview_cards.html` (`1072×1448` local desktop preview with user's real STEM cards)
+- [x] **Task 4**: Build `tools/preview_cards.html` (`1072×1448` local desktop preview with user's real STEM cards)
 - [ ] **Checkpoint 1**: 838/838 formula regression PASS, `check_es5.js` PASS, human visually approves `1072×1448` centered paper-book typography
 
 ### Phase 2: Rock-Solid `anki-core` & Background Async Sync

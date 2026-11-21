@@ -569,6 +569,17 @@
         });
     }
 
+    // Optional postMessage bridge so local file:// preview_cards.html can drive CardEngine
+    if (typeof window !== 'undefined' && window.addEventListener) {
+        window.addEventListener('message', function (ev) {
+            var msg = ev && ev.data;
+            if (!msg || msg.target !== 'ranki-card' || !msg.method) return;
+            if (typeof CardEngine[msg.method] === 'function') {
+                CardEngine[msg.method](msg.arg);
+            }
+        }, false);
+    }
+
     if (typeof document !== 'undefined') {
         if (document.readyState === 'complete' || document.readyState === 'interactive') {
             initDom();
