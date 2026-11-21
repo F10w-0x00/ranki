@@ -1,194 +1,300 @@
-# RAnki V2 Execution Plan: Anki-Authentic UI & Next-Card Pipeline (tasks/plan.md)
+# Implementation Plan: RAnki Route B — Native GTK2/Cairo Shell + Ultra-Fast Resident Card Engine
 
-> **Authority**: SPEC-v2-anki-ui-and-pipeline-prerender.md (v2.2.0), HANDOFF.md v5.0.0  
-> **Methodology**: Spec-Driven Development, Vertical Slicing, Continuous Gated Verification  
-> **Target Device**: Amazon Kindle Paperwhite 3 (Model DP75SDI, 1072x1448 @ 300 PPI, 90.5mm x 122.0mm active area, WebKitGTK 1.0, Linux 3.0.35)  
-> **Status**: Ready for Human Review  
+Source spec: [SPEC-route-b-native-shell.md](../SPEC-route-b-native-shell.md)
+Intent anchor: [docs/intent/kpw3-anki-daily-driver.md](../docs/intent/kpw3-anki-daily-driver.md)
 
----
+## Overview
 
-## 1. 物理屏幕参数与排版几何标定 (Kindle PW3 300 PPI Calibration)
+Rebuild RAnki for Kindle Paperwhite 3 (DP75SDI) using **Route B**: a pure-Rust direct `anki/rslib` host with a **native GTK2 + PangoCairo minimalist paper-book UI** (paginated Deck Browser, Review Top/Bottom Bars, isolated 52×52px 1 Hz Cairo 20s iPhone Duo-style circular focus timer, GDK-level zero-bar swipe/tap paging, native `GtkDialog`/`GtkEntry` Settings & Login with Kindle LIPC keyboard, non-blocking background Wi-Fi sync), paired with a **card-only resident WebKitGTK 1.0 canvas** running official `<div class="card kindle">` centered typography (`Anthropic Sans` + `SonyReader Ming`) and **ES5 KaTeX (`mhchem` + `\bbox` + `vlist-t2` fix)** with switchable MathJax 2.7.9 fallback and Card-ID-verified pre-rendering.
 
-### 1.1 硬件光学与物理映射公式
-- 屏幕对角线：6.0 英寸（152.4 mm），有效显示幅面 **$90.5\text{ mm} \times 122.0\text{ mm}$**。
-- 物理像素：$1072 \times 1448$ 像素，像素密度 **300 PPI**（每毫米约 $11.81$ 像素点）。
-- 物理换算公式：$\text{物理尺寸(mm)} = \frac{\text{CSS像素(px)}}{300} \times 25.4$。
+## Architecture Decisions
 
-### 1.2 字体字号科学阶梯（对齐实体教科书出版物五号/小四号标准）
-| 界面区域 | 目标 CSS 字号 | 物理高度 (mm) | 出版物对照与视觉效果 | 人机工学与阅读体验设计依据 |
-| :--- | :--- | :--- | :--- | :--- |
-| **卡片正文 (Body)** | **44px** | **3.73 mm** | **标准五号字 (10.5pt)** | 经典出版物标准正文字号。双侧留白 40px 时，单行排布 **22~23 个汉字**，完全落在人眼单次扫视最舒适的黄金阅读区（20-26字/行），彻底消灭阅读串行与疲劳感。 |
-| **正文行高 (Line-height)** | **1.6** (70px) | **5.93 mm** | — | 为公式上下标（如 $\ce{Fe2O3}$、$\frac{U^2}{R}t$）、分式留足垂直呼吸空间，确保公式与文字行间绝不发生碰撞重叠。 |
-| **卡片标题 (Card Title)** | **52px** (加粗) | **4.40 mm** | **小四号/四号字 (12~14pt)** | 题眼、知识点名称一眼醒目定位，层级分明。 |
-| **公式缩放 (MathJax Scale)**| **115%** | 上下标 $\ge 2.6\text{mm}$ | — | 自动平衡 MathJax TeX 符号与 44px 汉字的视觉重心，角标与分母在 300 PPI 墨水屏上清晰可辨，绝不糊成小黑点。 |
-| **评分按键 (Rating Buttons)**| 上行: **24px**<br>下行: **32px** (加粗) | 上: 2.03 mm<br>下: 2.71 mm | — | **方案 A 双行**：上行小字预估间隔（如 `<10m`、`1d`），下行大字评级文字（如 `良好`、`Good`），单键高度 110px，墨水屏触控盲操极准。 |
-| **顶部状态栏 (Header)** | 牌组名: **28px**<br>计数徽章: **26px** | 2.37 mm / 2.20 mm | — | 64px 极简顶栏，右侧显示三色复习数徽章（`[ 0 | 12 | 85 ]`）。 |
+- **Direct `anki/rslib 25.09.02` in Rust**: Preserves 100% authentic SM-2 / FSRS scheduling, Cloze rendering, Undo/Bury/Suspend, and AnkiWeb sync with zero Vala/Protobuf bridge.
+- **Native GTK2 + PangoCairo Chrome + Fontconfig App Fonts**: Eliminates WebKitGTK 1.0 chrome deadlocks, inertial scroll mud, and flaky HTML `<input>` keyboard focus; guarantees 52×52px isolated dirty-rect partial redraw for the 20s Duo circular timer and uniform `Anthropic Sans` + `SonyReader Ming` typography across the entire app.
+- **Card-Only Resident WebView + ES5 KaTeX Primary**: Retains 100% HTML/CSS/`<ruby>`/`\ce`/`\bbox`/`<cite>`/`<font color="red">` fidelity and official `.card` centering while compressing cold formula latency from 500–1500 ms down to ~20–50 ms (and < 5 ms on flip/prefetch hit), with MathJax 2.7.9 kept as a switchable safety net.
+- **GDK-Level Zero-Bar Swipe/Tap Paging**: Intercepts pointer press/motion/release on the read-only card `WebKitWebView` in Rust so finger dragging paints 0 intermediate frames (zero ghosting, zero text selection) and lifts straight into a crisp 85% viewport jump with no paging bar clutter.
+- **Card-ID-Verified Pipeline & Async Sync**: Eliminates silent wrong-card rating bugs on `Again` / buried Cloze siblings / `Undo` / `Bury` / `Suspend`, and runs sync off the GTK main loop with explicit `FullSync` confirmation and zero media downloads.
 
----
+## Dependency Graph
 
-## 2. 纯净字模体系与资产管理 (Anthropic Sans + 索尼明朝体)
-
-### 2.1 严格排除声明 (Strict Exclusions)
-- **坚决彻底排除**：
-  - ❌ 系统官方精修宋体（官方宋体横线过细、弱光易虚化）
-  - ❌ `仓耳今楷01 W03`
-  - ❌ `FZYueKaiZhenS M`（方正字库）
-- **唯一法定正文字体**：
-  - **西文 / 公式 / 数字**：`AnthropicSans_Roman`（**Anthropic Sans Web Text Regular**）+ `AnthropicSans_Italic`（**Anthropic Sans Web Text Regular Italic**）
-  - **中文正文**：严格唯一指定为 **索尼明朝体 (`SonyReader Ming.ttf`)**
-
-### 2.2 字体转码与加载
-- 使用 `fonttools` 将 Anthropic Sans 转为 WOFF 1.0（~146KB）与 TTF（~318KB），存入 `views/fonts/anthropic/`，供 WebKit 1.0 高性能加载。
-- `SonyReader Ming` 通过 `@font-face` 直接挂载设备路径 `file:///mnt/us/fonts/SonyReader%20Ming.ttf` 与 `local("SonyReader Ming")`。
-- CSS 栈纯净定义：
-  ```css
-  font-family: "Anthropic Sans Web", "SonyReader Ming", serif;
-  ```
-
----
-
-## 3. 牌组大厅极仿 Anki 经典居中架构 (Anki-Authentic Deck Browser)
-
-### 3.1 视觉几何与居中布局
-- 居中容器宽度：`width: 940px; margin: 40px auto;`，两端留出平衡美感的呼吸留白。
-- 表头经典四列：`牌组 (Deck)` ── `新卡 (New)` ── `学习 (Learn)` ── `复习 (Due)`。
-- 行高 $\ge 76\text{px}$，树形缩进：`padding-left: depth * 32px`，搭配树形连接符号。
-- 底部居中统计：`今日已复习 N 张卡片` 与优雅胶囊退出按钮。
-- 点击行具备墨水屏黑白即时反色按下态反馈。
-
-### 3.2 树形递归展开
-- 修改 `src/anki/mod.rs`：利用前序递归算法扁平化 `col.deck_tree(None)`，输出包含 `depth`、`full_name` 与三色到期数的 `DeckItem` 列表。
-- 前端自动展开所有层级子牌组，用户可直接点击任意子牌组进入独立复习。
-
----
-
-## 4. Architecture Dependency Graph
-
-```
-[Task 1: 纯净字体转码注入、44px 纸书排版与方案 A 评分栏]
-       │ (Anthropic Sans + SonyReader Ming, 彻底清除官方宋体/楷体, 8px 圆角, 1.5px 边框)
-       ▼
-[Task 2: Rust 递归子牌组展开、流水线协议与 IPC 净化]
-       │ (flatten_deck_tree 递归解开子牌组, SHOW_CARD_PIPELINE, RATE_AND_FETCH_NEXT, 静默 CARD_FLIPPED)
-       ▼
-[Task 3: 极仿 Anki 居中牌组大厅 & WebKit 4-Slot 乒乓缓冲切卡引擎]
-       │ (940px 居中 Anki 表格, 子牌组自动展开, Group A/B DOM 四槽位, MathJax 异步排版, <=5ms 切卡, ES5 门禁)
-       ▼
-[Task 4: CI Build, 4 Automated Gates, Kindle PW3 Deployment & Real-Device Verification]
-         (Local gates, GitHub Actions CI, deploy to D:\extensions\ranki-dev, on-device review)
+```text
+[Phase 0: Task 1 — Security/Tooling Hygiene & Branch]
+         │
+         ├───────────────────────────────────────────┐
+         ▼                                           ▼
+[Phase 1: card-renderer (Local Host Testable)]  [Phase 2: anki-core (Unit Testable)]
+  Task 2: ES5 KaTeX Assets + 838 Regression      Task 5: Safe config.rs + Schema
+         │                                               │
+  Task 3: card.html/css/js (Centered + Slots)    Task 6: Card-ID Pipeline + Undo/Bury/Suspend
+         │                                               │
+  Task 4: 1072x1448 Visual Preview Harness       Task 7: Background Async Sync (Normal + FullSync)
+         │                                               │
+  ★ Checkpoint 1: Visual & Formula Sign-Off      ★ Checkpoint 2: Core CI Tests Pass
+         └───────────────────┬───────────────────────────┘
+                             ▼
+[Phase 3: native-shell (ARMEL Cross-Compile)]
+  Task 8: Thin GTK2/Cairo/Pango/Fontconfig/WebKit FFI + LIPC/GC16
+         │
+  Task 9: PangoCairo Paginated Deck Browser (with Swipe)
+         │
+  Task 10: Isolated 52x52px Cairo 20s Duo Circular Focus Timer
+         │
+  Task 11: Review View (Top/Bottom Bars, GDK Swipe Paging, Card Bridge)
+         │
+  Task 12: Native Settings/Login/Sync Dialogs & App Wiring (main.rs)
+         │
+  ★ Checkpoint 3: ARMEL CI Build & 4 Mechanical Gates Pass
+                             │
+                             ▼
+[Phase 4: KPW3 Hardware Validation]
+  Task 13: Safe Dev Deploy + 3 Hardware Spikes + Stress Acceptance
+         │
+  ★ Checkpoint 4: Real-Device Daily-Driver Sign-Off
 ```
 
 ---
 
-## 5. Detailed Task Breakdown
+## Detailed Task Breakdown
 
-### Task 1: 纯净字体转码注入、44px 纸书排版与方案 A 评分栏
-* **Description**:
-  1. 运行本地转码脚本，将 `C:\Users\Felyn\Documents\Storage\Font` 下的 `AnthropicSans_Roman` 与 `AnthropicSans_Italic` 转为 WOFF 1.0 / TTF 资产并置入 `views/fonts/anthropic/`。
-  2. 重塑 `views/style.css`：
-     - 正文基准字号提升至 **44px**（物理高度 $3.73\text{ mm}$，出版物五号字标准），行高 **1.6**，单行 22~23 字。
-     - 注入 `@font-face` 声明：西文锁定 `Anthropic Sans Web`，中文严格唯一锁定 `SonyReader Ming`（彻底移除系统官方宋体、仓耳今楷与方正字体）。
-     - 边框统一为 `1.5px` 精致黑线，圆角统一为 `border-radius: 8px`，彻底清除 3px 粗重方框。
-     - 顶部 64px 极简顶栏（左侧 `<` 返回，中央牌组名，右侧三色复习计数徽章）。
-     - 底部 110px 方案 A 双行胶囊评分栏（上行 24px 预估时间，下行 32px 评级文字，支持 `:active` 黑白反色）。
-     - 正文卡片加入 `<hr id="answer">` 标准细线与高对比度细滚动条（`::-webkit-scrollbar`）。
-* **Acceptance Criteria**:
-  - [ ] `views/fonts/anthropic/` 包含可被 WebKit 1.0 加载的 WOFF 1.0 / TTF 格式 Anthropic 字体。
-  - [ ] CSS 正文字号严格标定为 44px，行高 1.6，卡片标题 52px。
-  - [ ] 字体栈纯净为 `"Anthropic Sans Web", "SonyReader Ming", serif;`，无任何楷体或官方宋体声明。
-  - [ ] 底部操作栏严格落地方案 A（双行文字：预估时间 + 评级名称），圆角 8px，边框 1.5px。
-  - [ ] 顶部 Header 为 64px 极简条，右侧包含复习徽章。
-* **Verification**:
-  - 本地静态资源检查与字体解析验证。
-* **Dependencies**: None
-* **Files Touched**:
-  - `views/fonts/anthropic/*`
-  - `views/style.css`
-  - `views/index.html`
+### Phase 0: Governance, Security & Tooling Hygiene
+
+#### Task 1: Branch Setup, Secret Removal & Upgraded Mechanical Gates
+**Description:** Create a clean `feat/route-b-native-shell` branch from `refactor/m0-baseline`, remove the hardcoded `hkey` from `tools/deploy_to_kindle.py` (ensuring existing device `config.ini` tokens are preserved), fix `tools/download_artifact.py` to match the CI artifact name `ranki-armel`, and harden `tools/check_es5.js` to catch both ES6+ syntax and post-2012 WebKit 1.0 missing DOM APIs (`.closest(`, `Promise`, `fetch`, `localStorage`, `requestAnimationFrame`) plus Unicode Emoji literals.
+**Acceptance criteria:**
+- [ ] Branch `feat/route-b-native-shell` exists cleanly without modifying `refactor/m0-baseline`.
+- [ ] `tools/deploy_to_kindle.py` contains zero hardcoded `hkey` and preserves existing `config.ini` on device (only writing a default template when missing).
+- [ ] `tools/check_es5.js` rejects ES6+ syntax, `.closest(`, `localStorage`, `Promise`, `fetch`, `requestAnimationFrame`, and Unicode Emoji literals.
+**Verification:**
+- [ ] `python -m py_compile tools/deploy_to_kindle.py tools/download_artifact.py` exits 0.
+- [ ] `node tools/check_es5.js` tested against a synthetic bad snippet (fails) and valid ES5 snippet (passes).
+**Dependencies:** None
+**Files likely touched:**
+- `tools/deploy_to_kindle.py`
+- `tools/download_artifact.py`
+- `tools/check_es5.js`
+**Estimated scope:** Small (3 files)
 
 ---
 
-### Task 2: Rust 递归子牌组展开、流水线协议与 IPC 净化
-* **Description**:
-  1. 递归展开牌组树：在 `src/anki/mod.rs` 中重构 `get_deck_list()`，编写 `flatten_deck_tree` 递归遍历整棵牌组树，输出包含深度 `depth`、`full_name` 与三色到期数的 `DeckItem` 列表，彻底解决子牌组被截断丢失的问题。
-  2. 新增 `SHOW_CARD_PIPELINE` IPC 消息：一次性下发 `current` 卡片、预取 `next` 卡片以及牌组剩余统计（`new_count`, `learn_count`, `review_count`）。
-  3. 新增 `RATE_AND_FETCH_NEXT` IPC 处理分支：原子提交 WAL 事务更新评分，并从调度器中预取下一张新卡片 $N+2$。
-  4. 返回 `PREPARE_NEXT_CARD`：向前端下发后续卡片，通知前端后台离屏填充。
-  5. 牌组结束支持：牌组复习完毕或进入空牌组时，下发 `DECK_FINISHED` 消息，携带已复习张数。
-  6. 日志净化：在 `src/ipc.rs` 中明确吸收 `CARD_FLIPPED` 消息，彻底消除终端 `[IPC] Unhandled action: 'CARD_FLIPPED'` 噪点。
-* **Acceptance Criteria**:
-  - [ ] `get_deck_list()` 递归返回全部层级子牌组（包含正确 depth、full_name、三色计数）。
-  - [ ] `src/ipc.rs` 支持流水线 IPC 协议并静默吸收 `CARD_FLIPPED`。
-  - [ ] 调度器平滑提取下张卡片，SQLite 事务即时原子 Commit。
-  - [ ] 牌组复习完毕时，正确发出 `DECK_FINISHED`，不产生后端恐慌（panic）。
-* **Verification**:
-  - `cargo check --target arm-unknown-linux-gnueabi`（CI/本地容器内）
-* **Dependencies**: Task 1
-* **Files Touched**:
-  - `src/anki/mod.rs`
-  - `src/ipc.rs`
-  - `src/main.rs`
+### Phase 1: Ultra-Fast Centered Card Renderer (`card-renderer`)
+
+#### Task 2: Restore ES5 KaTeX Assets & 838-Formula Regression Harness
+**Description:** Extract the verified ES5-transpiled KaTeX bundle (`katex.min.js` with `vlist-t2` WebKit 1.0 baseline fix, `mhchem.min.js`, `auto-render.min.js`, `katex.min.css`, and all 20 WOFF fonts totaling ~635 KB) from `refactor/katex-single-page` into `views/katex/`, and restore `tools/test_regression.js` + `tools/fixtures/collection_formulas.json` so all 838 real user formulas (including `\ce{}` and `\bbox` -> `\boxed`) are gated continuously.
+**Acceptance criteria:**
+- [ ] `views/katex/` contains `katex.min.js` (with `vlist-t2` patch), `mhchem.min.js`, `auto-render.min.js`, `katex.min.css`, and 20 WOFF fonts (total ≤ 900 KB).
+- [ ] `node tools/test_regression.js` passes **838 / 838 (100%)** with `throwOnError: true`.
+- [ ] All JS files in `views/katex/` pass `node tools/check_es5.js`.
+**Verification:**
+- [ ] `node tools/test_regression.js` exits 0 with 838/838 pass.
+- [ ] `node tools/check_es5.js views/katex/katex.min.js` exits 0.
+**Dependencies:** Task 1
+**Files likely touched:**
+- `views/katex/*`
+- `tools/test_regression.js`
+- `tools/fixtures/collection_formulas.json`
+**Estimated scope:** Small (asset import + 2 test files)
+
+#### Task 3: Build Resident Card Canvas (`views/card.html`, `card.css`, `card.js`)
+**Description:** Create the dedicated resident single-page card canvas loaded once by `WebKitWebView`. Restore `<div class="card kindle">` official Anki centering, calibrated `Anthropic Sans` + `SonyReader Ming` paper-book styling (`28px` default, `setFontSize(20–38)`), crisp monochrome styling for `<font color="red">`, `<ruby>` (including math inside ruby), `<cite>`, `<hr>`, `.cloze`, `\bbox`, long-equation `-webkit-transform` auto-scaling, Card-ID-verified 4-slot pre-render engine, switchable MathJax 2.7.9 fallback, and discrete `±85%` viewport paging (`pageScroll`) reporting `PAGE_STATE` via monotonic `document.title` token.
+**Acceptance criteria:**
+- [ ] Card slots wrap HTML inside `<div class="card kindle">` with `text-align: center` default and zero `-webkit-overflow-scrolling: touch`.
+- [ ] `window.CardEngine` supports `setConfig`, `renderImmediate`, `flipToAnswer`, `swapToPrefetched`, and `pageScroll` with strict `card_id` matching and timing telemetry.
+- [ ] `views/card.js` passes `node tools/check_es5.js views/card.js` with 0 errors and 0 banned APIs/emojis.
+**Verification:**
+- [ ] `node tools/check_es5.js views/card.js` exits 0.
+- [ ] Automated Node/DOM unit check validates `CardEngine` state transitions and `\bbox` / `\ce` preprocessing.
+**Dependencies:** Task 2
+**Files likely touched:**
+- `views/card.html`
+- `views/card.css`
+- `views/card.js`
+**Estimated scope:** Medium (3 files)
+
+#### Task 4: Local 1072×1448 Real-Card Visual Preview Harness
+**Description:** Build a standalone local preview page (`tools/preview_cards.html`) simulating the exact KPW3 `1072×1448` frame (including top bar + 52×52px 20s circular Duo timer mockup + centered `views/card.html` iframe + bottom 4-rating bar) populated with the user's real cards from `高等数学_常用微分规则_anki导入.txt` and `anki-card-maker` examples (`\ce`, `\bbox`, `<ruby>\(\nu\)<rt>nu</rt></ruby>`, `<font color="red">`, `<cite>`, multi-screen long proof).
+**Acceptance criteria:**
+- [ ] Opens cleanly in a desktop browser at 1072×1448 scale with Front/Flip/Next/Font-Size/Long-Card-Page controls.
+- [ ] Renders all STEM card features centered cleanly with paper-book proportions.
+**Verification:**
+- [ ] Open in browser / capture screenshot for human visual sign-off on layout & typography.
+**Dependencies:** Task 3
+**Files likely touched:**
+- `tools/preview_cards.html`
+**Estimated scope:** Small (1 file)
+
+### ★ Checkpoint 1: Card Renderer & Visual Aesthetics Sign-Off
+- [ ] `node tools/test_regression.js` passes 838/838.
+- [ ] `node tools/check_es5.js views/card.js` passes with zero ES6+ / banned WebKit 1.0 APIs.
+- [ ] Human visually reviews `tools/preview_cards.html` at 1072×1448 and approves centered typography, default font size, red-emphasis monochrome style, and 20s Duo circle look.
 
 ---
 
-### Task 3: 极仿 Anki 居中牌组大厅 & WebKit 4-Slot 乒乓缓冲切卡引擎
-* **Description**:
-  1. **极仿 Anki 居中牌组大厅**：
-     - 在 `views/index.html` 与 `views/style.css` 中重构 `#deck-view`：居中 940px 容器，大方优雅。
-     - 呈现 Anki 官方经典的四列结构：`牌组 (Deck)` ── `新卡 (New)` ── `学习 (Learn)` ── `复习 (Due)`。
-     - 自动展开所有多级子牌组，通过层级缩进（`depth * 32px`）清晰展现父子嵌套关系。
-     - 到期数字右对齐，点击行触发墨水屏反色按下态反馈，可直接点击任意子牌组开始复习。
-     - 底部居中展示学习进度统计（`今日已复习 N 张卡片`）与优雅胶囊退出按钮。
-  2. **DOM 4 槽位乒乓缓冲与预排版引擎**：
-     - DOM 维持 4 个物理容器：Group A (`slot-a-front`, `slot-a-back`) 与 Group B (`slot-b-front`, `slot-b-back`)。
-     - 接收 `SHOW_CARD_PIPELINE` 时，Group A 立即展示，Group B 置于离屏（`position: absolute; left: -9999px`）。
-     - `MathJax.Hub.Queue` 后台静默排版 Group B，在用户阅读卡片 $N$ 期间后台 100% 完成排版。
-     - 点击评分瞬间切换活跃 Group 指针（**$\le 5\text{ms}$ 瞬时切卡**，消灭 500ms 等待）。同时向 Rust 发送 `RATE_AND_FETCH_NEXT`。
-     - 接收 `PREPARE_NEXT_CARD` 时，将退回后台的旧 Group 槽位清空并注入新卡，触发后台静默 Typeset。
-     - 牌组结束时：展示“🎉 恭喜完成！今日无更多待复习卡片”结算面板与返回按钮。
-     - 快速翻页手势：点击屏幕上 1/3 向上滚动 200px，点击屏幕下 1/3 向下滚动 200px。
-     - 门禁合规：全量 JavaScript 必须 100% 符合严格 ES5 规范。
-* **Acceptance Criteria**:
-  - [ ] 牌组大厅 940px 居中排布，严格呈现经典 Anki 四列结构（牌组 / 新卡 / 学习 / 复习）。
-  - [ ] 牌组界面全自动展开所有子牌组，缩进与层级层次分明。
-  - [ ] 翻卡与切卡时延均 $\le 5\text{ms}$。
-  - [ ] 时序锁保证：即使极端快速点击评分，若后台预排版未完会自动挂起并在就绪瞬间切出，不白屏、不报错。
-  - [ ] 点击屏幕上/下 1/3 触发长文本顺畅平滑翻页。
-  - [ ] `node tools/check_es5.js` 门禁断言 100% PASS。
-* **Verification**:
-  - `node tools/check_es5.js`
-* **Dependencies**: Task 1, Task 2
-* **Files Touched**:
-  - `views/app.js`
-  - `views/index.html`
-  - `views/style.css`
+### Phase 2: Rock-Solid `anki-core` & Background Async Sync
+
+#### Task 5: Upgrade Safe Configuration Manager (`src/config.rs`)
+**Description:** Extend `AppConfig` to manage all Route B settings (`collection_dir`, `hkey`, `sync_server`, `font_size_px`, `focus_timer_enabled`, `focus_timer_secs`, `auto_refresh_cards`, `math_engine`) with clamped safe bounds, atomic write-and-rename saving, zero hardcoded secrets, and unit tests.
+**Acceptance criteria:**
+- [ ] Loads legacy `config.ini` cleanly with sensible defaults (`font_size_px=28`, `focus_timer_enabled=true`, `focus_timer_secs=20`, `auto_refresh_cards=20`, `math_engine=katex`).
+- [ ] Clamps invalid values (`font_size_px` 20..=38, `focus_timer_secs` 5..=120) and preserves unknown keys cleanly.
+- [ ] Unit tests cover parse, clamp, and round-trip save in a temp directory.
+**Verification:**
+- [ ] `cargo test --lib config` passes (in CI / Rust toolchain).
+**Dependencies:** Task 1
+**Files likely touched:**
+- `src/config.rs`
+**Estimated scope:** Small (1 file)
+
+#### Task 6: Card-ID-Verified Review Pipeline, Deduplicated Deck Counts & Undo/Bury/Suspend (`src/anki/mod.rs`)
+**Description:** Refactor `AnkiService` to implement `AdvanceResult` (`PrefetchHit`, `RenderImmediate`, `DeckFinished`), strict `expected_cid` verification on `rate_card()`, accurate root-only `total_due` computation, `QueueCounts` with `ActiveQueue` (New/Learn/Review underline), native `undo()` (`col.undo()` + `col.undo_status()`), `bury_current()` / `suspend_current()` (`col.bury_or_suspend_cards()`), and WAL checkpointing. Remove unnecessary image media URL rewriting since images are out of scope. Add Rust unit tests against an isolated temporary SQLite collection verifying `Again`, sibling-buried Cloze, `Undo`, `Bury`, and `Suspend` never desync `current_card_id`.
+**Acceptance criteria:**
+- [ ] `get_deck_tree()` returns recursive flattened tree plus accurate deduplicated root `total_due`.
+- [ ] `rate_card(expected_cid, rating, prefetched_cid)` returns `PrefetchHit` only when `next_queued[0].id == prefetched_cid`, and `RenderImmediate` otherwise; rejects mismatched `expected_cid`.
+- [ ] `undo()`, `bury_current()`, and `suspend_current()` update `Collection` atomically and return exact refreshed state.
+**Verification:**
+- [ ] `cargo test --lib anki` passes on isolated temporary Anki collection.
+**Dependencies:** Task 5
+**Files likely touched:**
+- `src/anki/mod.rs`
+- `src/lib.rs` (expose testable core modules)
+**Estimated scope:** Medium (2 files)
+
+#### Task 7: Non-Blocking Background Sync Engine (`src/anki/sync.rs`)
+**Description:** Implement thread-safe background sync worker (`std::thread::spawn` with isolated `tokio` current-thread runtime) supporting `sync_login` (returns `hkey`, clears password memory) and DB-only `normal_sync` (never invokes `sync_media`), explicitly detecting `SyncStatus::FullSync` and supporting user-confirmed `full_download` / `full_upload` with safe `Collection` take-and-reopen semantics. Wire CI `.github/workflows/build-armel.yml` to run host `cargo test --lib` before ARMEL cross-compilation.
+**Acceptance criteria:**
+- [ ] Sync and login never execute on the calling UI thread; progress and results are delivered via `mpsc` channel.
+- [ ] `FullSync` is surfaced as `SyncOutcome::FullSyncRequired` rather than falsely reporting success.
+- [ ] Zero calls to `sync_media` exist anywhere in the codebase.
+**Verification:**
+- [ ] `cargo test --lib` passes in CI (`build-armel.yml` host test step).
+**Dependencies:** Task 6
+**Files likely touched:**
+- `src/anki/sync.rs`
+- `src/anki/mod.rs`
+- `.github/workflows/build-armel.yml`
+**Estimated scope:** Medium (3 files)
+
+### ★ Checkpoint 2: Core Backend Verified
+- [ ] `anki-core` unit tests (config, Card-ID pipeline, Undo/Bury/Suspend, sync state machine) pass 100% in CI.
+- [ ] Zero production DB paths referenced in any test.
 
 ---
 
-### Task 4: CI Build, 4 Automated Gates, Kindle PW3 Deployment & Real-Device Verification
-* **Description**:
-  提交代码至 GitHub 触发 CI 构建，本地执行 4 道自动化门禁，部署至 Kindle PW3 验证：
-  1. 提交至 Git 分支 `refactor/m0-baseline`，触发 GitHub Actions CI 交叉编译构建。
-  2. 本地执行 4 道自动化门禁：
-     - GATE-01: GLIBC 符号天花板 $\le 2.20$（实测 GLIBC_2.18）
-     - GATE-02: DT_NEEDED 动态依赖全部命中 Kindle 16 项白名单
-     - GATE-03: 静态库私有符号泄漏数严格为 0
-     - GATE-04: 前端严格 ES5 验证 100% PASS
-  3. 使用一键部署脚本安全部署至 Kindle `D:\extensions\ranki-dev\`（**绝对红线：严禁触碰生产库 `D:\anki_data\`**）。
-  4. Kindle PW3 真机核验：
-     - 牌组大厅是否完全居中、高度神似 Anki、完整自动展开多级子牌组；
-     - 44px 纸书排版与 Anthropic Sans + 索尼明朝体纯净字形呈现；
-     - 切卡是否达到 $\le 5\text{ms}$ 无缝零等待；
-     - 退出时 WAL 正常 Checkpoint。
-  5. 检查 `D:\ranki_logs\ranki_dev_stdout.log`，确认 0 `Unhandled action` 警告。
-* **Acceptance Criteria**:
-  - [ ] CI 构建流程全绿通过。
-  - [ ] 4 道自动化门禁全部打印 `[PASS]`，退出码均为 0。
-  - [ ] Kindle PW3 实测子牌组完整展开，大厅居中极像 Anki，排版如实体书，切卡无停顿。
-  - [ ] 生产数据库 `D:\anki_data\` 0 字节改动。
-* **Verification**:
-  - 4 道门禁自动化脚本
-  - Kindle 物理日志与现场审查
-* **Dependencies**: Task 1, Task 2, Task 3
-* **Files Touched**:
-  - `D:\extensions\ranki-dev\` (部署目标)
+### Phase 3: Native GTK2/PangoCairo Shell (`native-shell`)
+
+#### Task 8: Minimal GTK2/Cairo/Pango/Fontconfig/WebKit FFI & E-ink Hardware Helpers
+**Description:** Modularize `src/ffi/` into clean thin C-FFI bindings (`gtk.rs`, `cairo.rs`, `webkit.rs`), update `build.rs` to link `gdk-x11-2.0`, `cairo`, `pango-1.0`, `pangocairo-1.0`, `fontconfig` (all Kindle OS whitelisted), implement `src/ui/theme.rs` (300 PPI monochrome layout constants & Fontconfig app-font registration for `Anthropic Sans` + `SonyReader Ming`), and implement `src/ui/eink.rs` (debounced Kindle LIPC keyboard open/close + hardware GC16 full refresh via `mxcfb` ioctl / `eips -f ""` fallback).
+**Acceptance criteria:**
+- [ ] All linked libraries are strictly within `tools/check_dt_needed.py` Kindle OS whitelist.
+- [ ] `FcConfigAppFontAddFile` registers `AnthropicSans-Regular.ttf`, `AnthropicSans-Italic.ttf`, and `/mnt/us/fonts/SonyReader Ming.ttf` gracefully (non-fatal if absent on host).
+- [ ] `eink.rs` provides debounced `open_keyboard`/`close_keyboard` and `trigger_full_refresh()`.
+**Verification:**
+- [ ] ARMEL cross-compile compiles cleanly with 0 warnings; `check_dt_needed.py` & `check_symbols.py` PASS.
+**Dependencies:** Task 7
+**Files likely touched:**
+- `build.rs`
+- `src/ffi/mod.rs`
+- `src/ffi/gtk.rs`
+- `src/ffi/cairo.rs`
+- `src/ffi/webkit.rs`
+- `src/ui/theme.rs`
+- `src/ui/eink.rs`
+**Estimated scope:** Medium-Large (split cleanly into FFI + `eink`/`theme` helpers; keep commit cohesive and thin)
+
+#### Task 9: PangoCairo Minimalist Paginated Deck Browser (`src/ui/deck_view.rs`)
+**Description:** Build Page 0 of the `GtkNotebook` entirely with PangoCairo `GtkDrawingArea`s: 76px header (`RAnki`, deduplicated `待复习 N 张`, crisp vector `同步`/`设置`/`刷新`/`退出` buttons), 960px centered deck list canvas (10 generous rows/page, `#D8D8D8` hairline dividers, `depth * 32px` indent, `▸`/`▾` collapse hit zone, right-aligned `新/学/复` tabular counts, instant monochrome invert tap feedback), 92px footer (`< 上一页  第 X / Y 页  下一页 >` + `studied_today`), and swipe gesture page turning.
+**Acceptance criteria:**
+- [ ] Renders full recursive deck tree with working subdeck collapse/expand and accurate root-only `total_due`.
+- [ ] Supports both footer page buttons and swipe gestures (Up/Down or Left/Right) with zero scrollbars and zero tofu emoji.
+- [ ] Tapping an empty deck shows clean inline/dialog notice without freezing or corrupting UI state.
+**Verification:**
+- [ ] Unit tests for row hit-testing, collapse filtering, and pagination math pass; ARMEL cross-compile succeeds cleanly.
+**Dependencies:** Task 8
+**Files likely touched:**
+- `src/ui/deck_view.rs`
+**Estimated scope:** Small (1 file)
+
+#### Task 10: Isolated 52×52px Cairo 20s iPhone Duo Circular Focus Timer (`src/ui/focus_timer.rs`)
+**Description:** Implement the standalone `52×52px` Cairo `GtkDrawingArea` focus countdown widget: starts on card Front (`remaining = focus_timer_secs`, default 20), ticks via `g_timeout_add(1000)` calling `gtk_widget_queue_draw_area(widget, 0, 0, 52, 52)` ONLY, draws a crisp 1-bit monochrome clockwise-shrinking filled circular sector (18° per second), shows hollow ring + bold center dot at 0s (gentle visual cue, never auto-flips/auto-rates), and stops/hides immediately on Flip or when disabled.
+**Acceptance criteria:**
+- [ ] Timer state transitions (`Hidden` → `Running(20..1)` → `Expired` → `Hidden`) covered by pure-Rust unit tests.
+- [ ] Redraws strictly within its isolated 52×52px widget bounds; removes `g_timeout` source cleanly on Flip/Exit (0% idle CPU).
+**Verification:**
+- [ ] `cargo test --lib focus_timer` passes; ARMEL build succeeds cleanly.
+**Dependencies:** Task 8
+**Files likely touched:**
+- `src/ui/focus_timer.rs`
+**Estimated scope:** Small (1 file)
+
+#### Task 11: Reviewer Chrome, GDK Zero-Bar Swipe/Tap Paging & Card WebView Bridge (`src/ui/review_view.rs`)
+**Description:** Build Page 1 of the `GtkNotebook`: 76px `GtkHBox` Review Top Bar (`< 牌组`, truncated deck name, official Anki `新 + 学 + 复` underlined active queue, `撤销`, compact `···` menu for Bury/Suspend/Refresh/Font-Size, subtle `1/2` long-card indicator + embedded `focus_timer`), resident `WebKitWebView` loading `views/card.html` once with **GDK-level `button-press`/`motion-notify`/`button-release` gesture interception** (zero drag frames, swipe Up/Down or tap bottom/top 35% jumps 85% viewport cleanly with zero paging bar), and 122px PangoCairo Bottom Action Bar (`显示答案` / 4-tier `interval + rating` buttons).
+**Acceptance criteria:**
+- [ ] WebView loads `views/card.html` exactly once at startup and communicates via monotonic-token `notify::title` + `execute_script`.
+- [ ] GDK gesture handler consumes drag motion (0 intermediate repaints) and triggers `CardEngine.pageScroll` cleanly on release/tap.
+- [ ] Undo, Bury, Suspend, Rating, and Flip all update top queue counts, intervals, focus timer, and auto-GC16 counter accurately.
+**Verification:**
+- [ ] Unit tests for GDK swipe/tap gesture classification and button hitboxes pass; ARMEL build succeeds cleanly.
+**Dependencies:** Task 3, Task 6, Task 8, Task 10
+**Files likely touched:**
+- `src/ui/review_view.rs`
+**Estimated scope:** Medium (1–2 files)
+
+#### Task 12: Native Settings, Login, Sync Dialogs & Full App Wiring (`src/ui/settings_dialog.rs`, `src/ui/mod.rs`, `src/main.rs`)
+**Description:** Build native `GtkDialog` screens for Settings & AnkiWeb Login (`GtkEntry` email, masked password, custom sync server with debounced Kindle LIPC keyboard; Font Size `20–38px`; Focus Timer toggle & duration; Auto Full Refresh interval; Math Engine `KaTeX/MathJax`), non-blocking Sync Progress & `FullSync` choice dialog polled via `g_idle_add`, remove obsolete `src/ipc.rs` / old `views/index.html` SPA coupling, and wire everything in `src/ui/mod.rs` and `src/main.rs` with clean WAL checkpoint on destroy/exit.
+**Acceptance criteria:**
+- [ ] Clicking Sync/Login opens non-blocking progress dialog, updates UI on completion via `g_idle_add`, and prompts explicitly on `FullSyncRequired`.
+- [ ] Changing font size, timer settings, or math engine persists to `config.ini` and applies immediately without restart.
+- [ ] Zero references to legacy `views/index.html` or blocking `rt.block_on` on GTK main loop remain.
+**Verification:**
+- [ ] Push to `feat/route-b-native-shell` → GitHub Actions CI passes host unit tests + ARMEL cross-compile + all 4 mechanical gates.
+**Dependencies:** Task 7, Task 9, Task 11
+**Files likely touched:**
+- `src/ui/settings_dialog.rs`
+- `src/ui/mod.rs`
+- `src/main.rs`
+- `src/ipc.rs` (remove obsolete full-SPA IPC)
+**Estimated scope:** Medium (4 files)
+
+### ★ Checkpoint 3: ARMEL CI Binary & 4 Mechanical Gates
+- [ ] GitHub Actions CI passes 100% (`cargo test --lib` + ARMEL cross-compile).
+- [ ] `python tools/check_symbols.py build/ranki-armel` → `[PASS]` (`GLIBC <= 2.18`).
+- [ ] `python tools/check_dt_needed.py build/ranki-armel` → `[PASS]` (100% Kindle OS whitelist).
+- [ ] `python tools/check_dynsym.py build/ranki-armel` → `[PASS]` (0 leaked static symbols).
+- [ ] `node tools/check_es5.js views/card.js` → `[PASS]`.
+- [ ] Binary size ≤ 20 MB.
+
+---
+
+### Phase 4: KPW3 Real-Device Validation (3 Hardware Spikes + Stress Acceptance)
+
+#### Task 13: Safe Dev Deployment & Real-Device Hardware Verification
+**Description:** Download `build/ranki-armel`, deploy safely to `D:\extensions\ranki-dev\` targeting `D:\anki_data_test\` (asserting 0-byte modification to `D:\anki_data\`), and guide/verify the 3 hardware spikes plus daily-driver smoke acceptance on physical KPW3:
+1. **Spike 1**: ES5 KaTeX visual crispness & timing logs (`cold <= 80ms`, `flip <= 5ms`, `hit next <= 5ms`) on real STEM cards;
+2. **Spike 2**: 52×52px Cairo 1 Hz Duo timer partial redraw (zero full-screen flicker/ghosting) + true GC16 full refresh + GDK swipe/tap zero-bar paging feel;
+3. **Spike 3**: Native `GtkEntry` Kindle keyboard + non-blocking Wi-Fi AnkiWeb sync + Undo/Bury/Suspend + 50–100 card VmRSS stability.
+**Acceptance criteria:**
+- [ ] `D:\anki_data\` SHA256 fingerprint unchanged (0 bytes modified).
+- [ ] All 3 hardware spikes verified on physical KPW3 via `/mnt/us/ranki_logs/ranki_dev_stdout.log` and user inspection.
+- [ ] User confirms daily-driver readiness before any switch to production `/mnt/us/anki_data`.
+**Verification:**
+- [ ] `python tools/deploy_to_kindle.py` passes prod-data fingerprint assertion.
+- [ ] Device stdout log telemetry & user physical confirmation.
+**Dependencies:** Task 12
+**Files likely touched:**
+- `docs/refactor/JOURNAL.md` (record verified-device evidence)
+**Estimated scope:** Small (verification & evidence logging)
+
+### ★ Checkpoint 4: Daily-Driver Production Sign-Off
+- [ ] All Success Criteria in [SPEC-route-b-native-shell.md](../SPEC-route-b-native-shell.md) checked off on physical KPW3.
+- [ ] User decides whether to promote config/launcher to production `/mnt/us/anki_data`.
+
+---
+
+## Risks and Mitigations
+
+| Risk | Impact | Mitigation |
+| :--- | :--- | :--- |
+| ES5 KaTeX visual edge case on 2012 WebKitGTK 1.0 (e.g. `<ruby>` wrapping math or deep nested fractions) | High | Verified early in Checkpoint 1 (`1072×1448` preview) & Task 13 Spike 1; switchable MathJax 2.7.9 fallback already built into `card-renderer`. |
+| GTK2/Cairo/Pango FFI struct or signature mismatch on 32-bit `armel` ABI (`c_int`/`c_long` = 32-bit) | High | Use `std::ffi::{c_int, c_uint, c_long, c_double}` strictly, verify exact GTK2 2.24 / Cairo 1.16 / Pango 1.42 C headers inside Debian Buster container, and compile in CI at Task 8 before building higher views. |
+| `mxcfb` ioctl vs `eips -f ""` behavior variance on Kindle OS 5.14.3.0.1 | Medium | Implement safe fallback chain (`eips -f ""` verified shell utility + optional `mxcfb` ioctl) and verify cleanly in Spike 2 without crashing. |
+| Kindle `awesome`/`pillow` window manager covering `GtkDialog` with virtual keyboard | Medium | Use proven Lab126 top-aligned dialog window title (`L:D_N:dialog_ID:ranki.settings_PC:N` / top-positioned dialog) modeled on upstream RAnki's `settings.vala` & verify in Spike 3. |
+| Host Windows machine lacks local `cargo`/`docker` | Low | Local Node 22 + Python 3.13 run all frontend/formula/preview/gate checks instantaneously; GitHub Actions CI (`Dockerfile.armel`) runs `cargo test --lib` + ARMEL cross-compilation cleanly per push. |
