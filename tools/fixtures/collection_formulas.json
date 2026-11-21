@@ -1,0 +1,4708 @@
+{
+  "total_notes": 241,
+  "total_instances": 838,
+  "unique_count": 509,
+  "formulas": [
+    {
+      "note_id": 1752851476004,
+      "delimiter": "\\(",
+      "expr": "y-y_1=k(x-x_1)"
+    },
+    {
+      "note_id": 1752851476004,
+      "delimiter": "\\(",
+      "expr": "y=kx+b"
+    },
+    {
+      "note_id": 1752851476004,
+      "delimiter": "\\(",
+      "expr": "\\frac{y-y_1}{y_2-y_1}=\\frac{x-x_1}{x_2-x_1}"
+    },
+    {
+      "note_id": 1752851476004,
+      "delimiter": "\\(",
+      "expr": "\\frac{x}{a}+\\frac{y}{b}=1"
+    },
+    {
+      "note_id": 1752851476004,
+      "delimiter": "\\(",
+      "expr": "a, b"
+    },
+    {
+      "note_id": 1752851476004,
+      "delimiter": "\\(",
+      "expr": "Ax+By+C=0"
+    },
+    {
+      "note_id": 1752851476004,
+      "delimiter": "\\(",
+      "expr": "A, B"
+    },
+    {
+      "note_id": 1752855968346,
+      "delimiter": "\\(",
+      "expr": "v_\\frac{v+v_0}{2}"
+    },
+    {
+      "note_id": 1752855968346,
+      "delimiter": "\\(",
+      "expr": "v_\\frac{x}{2}"
+    },
+    {
+      "note_id": 1752855968346,
+      "delimiter": "\\(",
+      "expr": "v_\\frac{v+v_0}{2}=\\frac{v+v_0}{2}"
+    },
+    {
+      "note_id": 1752855968346,
+      "delimiter": "\\(",
+      "expr": "v_\\frac{x}{2}=\\sqrt{\\frac{v^2+v_0^2}{2}}"
+    },
+    {
+      "note_id": 1752855968346,
+      "delimiter": "\\(",
+      "expr": "v_\\frac{x}{2}^2-v_\\frac{v+v_0}{2}^2=\\frac{(v_0-v)^2}{4}"
+    },
+    {
+      "note_id": 1752855968346,
+      "delimiter": "\\(",
+      "expr": "v_0-v=at"
+    },
+    {
+      "note_id": 1752855968346,
+      "delimiter": "\\(",
+      "expr": "t"
+    },
+    {
+      "note_id": 1752856244552,
+      "delimiter": "\\(",
+      "expr": "v_\\frac{x}{2}"
+    },
+    {
+      "note_id": 1752856244552,
+      "delimiter": "\\(",
+      "expr": "＞"
+    },
+    {
+      "note_id": 1752856244552,
+      "delimiter": "\\(",
+      "expr": "v_\\frac{v+v_0}{2}"
+    },
+    {
+      "note_id": 1752856244552,
+      "delimiter": "\\(",
+      "expr": "v_\\frac{x}{2}"
+    },
+    {
+      "note_id": 1752856244552,
+      "delimiter": "\\(",
+      "expr": "＞"
+    },
+    {
+      "note_id": 1752856244552,
+      "delimiter": "\\(",
+      "expr": "v_\\frac{v+v_0}{2}"
+    },
+    {
+      "note_id": 1752856244552,
+      "delimiter": "\\(",
+      "expr": "proof:"
+    },
+    {
+      "note_id": 1752856244552,
+      "delimiter": "\\(",
+      "expr": "v_\\frac{x}{2}^2-v_\\frac{v+v_0}{2}^2=\\frac{(v_0-v)^2}{4}"
+    },
+    {
+      "note_id": 1752904478685,
+      "delimiter": "\\(",
+      "expr": "\\Delta U=Q+W"
+    },
+    {
+      "note_id": 1752905265809,
+      "delimiter": "\\(",
+      "expr": "n = \\frac{sin\\theta_1}{sin\\theta_2}"
+    },
+    {
+      "note_id": 1752905265809,
+      "delimiter": "\\(",
+      "expr": "n=\\frac{c}{v}(n>1)"
+    },
+    {
+      "note_id": 1752906838448,
+      "delimiter": "\\(",
+      "expr": "F=BIL(B\\bot I)"
+    },
+    {
+      "note_id": 1752906838448,
+      "delimiter": "\\(",
+      "expr": "F=qvB(v \\bot B)"
+    },
+    {
+      "note_id": 1752939050646,
+      "delimiter": "\\(",
+      "expr": "h\\nu"
+    },
+    {
+      "note_id": 1752939050646,
+      "delimiter": "\\(",
+      "expr": "\\nu"
+    },
+    {
+      "note_id": 1752939050646,
+      "delimiter": "\\(",
+      "expr": "h"
+    },
+    {
+      "note_id": 1752939050646,
+      "delimiter": "\\(",
+      "expr": "W_0"
+    },
+    {
+      "note_id": 1752939050646,
+      "delimiter": "\\(",
+      "expr": "E_k"
+    },
+    {
+      "note_id": 1752939050646,
+      "delimiter": "\\(",
+      "expr": "E_k=h\\nu-W_0"
+    },
+    {
+      "note_id": 1752939050646,
+      "delimiter": "\\(",
+      "expr": "E_k =eU_c (U_c 为遏止电压)"
+    },
+    {
+      "note_id": 1752939050646,
+      "delimiter": "\\(",
+      "expr": "E_k=h\\nu - W_0"
+    },
+    {
+      "note_id": 1752939050646,
+      "delimiter": "\\(",
+      "expr": "U_c = \\frac{h}{e}  v - \\frac{W_0}{e}"
+    },
+    {
+      "note_id": 1752939050646,
+      "delimiter": "\\(",
+      "expr": "h=6.62607015 \\times 10^{-34} J \\cdot s"
+    },
+    {
+      "note_id": 1752940217928,
+      "delimiter": "\\(",
+      "expr": "\\Delta x = \\frac{l}{d} \\lambda"
+    },
+    {
+      "note_id": 1752940217928,
+      "delimiter": "\\(",
+      "expr": "l"
+    },
+    {
+      "note_id": 1752940217928,
+      "delimiter": "\\(",
+      "expr": "d"
+    },
+    {
+      "note_id": 1752940217928,
+      "delimiter": "\\(",
+      "expr": "\\lambda"
+    },
+    {
+      "note_id": 1752943759398,
+      "delimiter": "\\(",
+      "expr": "\\pi ="
+    },
+    {
+      "note_id": 1752943759398,
+      "delimiter": "\\(",
+      "expr": "3.1415926"
+    },
+    {
+      "note_id": 1752943759398,
+      "delimiter": "\\(",
+      "expr": "e ="
+    },
+    {
+      "note_id": 1752943759398,
+      "delimiter": "\\(",
+      "expr": "2.71828"
+    },
+    {
+      "note_id": 1752943759398,
+      "delimiter": "\\(",
+      "expr": "\\sqrt{2} ="
+    },
+    {
+      "note_id": 1752943759398,
+      "delimiter": "\\(",
+      "expr": "1.414"
+    },
+    {
+      "note_id": 1752943759398,
+      "delimiter": "\\(",
+      "expr": "\\sqrt{3} ="
+    },
+    {
+      "note_id": 1752943759398,
+      "delimiter": "\\(",
+      "expr": "1.732"
+    },
+    {
+      "note_id": 1752943759398,
+      "delimiter": "\\(",
+      "expr": "\\sin 0\\degree ="
+    },
+    {
+      "note_id": 1752943759398,
+      "delimiter": "\\(",
+      "expr": "0"
+    },
+    {
+      "note_id": 1752943759398,
+      "delimiter": "\\(",
+      "expr": "\\sin 30\\degree ="
+    },
+    {
+      "note_id": 1752943759398,
+      "delimiter": "\\(",
+      "expr": "\\frac{1}{2}"
+    },
+    {
+      "note_id": 1752943759398,
+      "delimiter": "\\(",
+      "expr": "\\sin 45\\degree ="
+    },
+    {
+      "note_id": 1752943759398,
+      "delimiter": "\\(",
+      "expr": "\\frac{ \\sqrt{2} }{2}"
+    },
+    {
+      "note_id": 1752943759398,
+      "delimiter": "\\(",
+      "expr": "\\sin 60\\degree ="
+    },
+    {
+      "note_id": 1752943759398,
+      "delimiter": "\\(",
+      "expr": "\\frac{\\sqrt{3} }{2}"
+    },
+    {
+      "note_id": 1752943759398,
+      "delimiter": "\\(",
+      "expr": "\\sin 90\\degree ="
+    },
+    {
+      "note_id": 1752943759398,
+      "delimiter": "\\(",
+      "expr": "1"
+    },
+    {
+      "note_id": 1752943759398,
+      "delimiter": "\\(",
+      "expr": "\\cos 0\\degree ="
+    },
+    {
+      "note_id": 1752943759398,
+      "delimiter": "\\(",
+      "expr": "1"
+    },
+    {
+      "note_id": 1752943759398,
+      "delimiter": "\\(",
+      "expr": "\\cos 30\\degree ="
+    },
+    {
+      "note_id": 1752943759398,
+      "delimiter": "\\(",
+      "expr": "\\frac{\\sqrt{3} }{2}"
+    },
+    {
+      "note_id": 1752943759398,
+      "delimiter": "\\(",
+      "expr": "\\cos 45\\degree ="
+    },
+    {
+      "note_id": 1752943759398,
+      "delimiter": "\\(",
+      "expr": "\\frac{\\sqrt{2} }{2}"
+    },
+    {
+      "note_id": 1752943759398,
+      "delimiter": "\\(",
+      "expr": "\\cos 60\\degree ="
+    },
+    {
+      "note_id": 1752943759398,
+      "delimiter": "\\(",
+      "expr": "\\frac{1}{2}"
+    },
+    {
+      "note_id": 1752943759398,
+      "delimiter": "\\(",
+      "expr": "\\cos 90\\degree ="
+    },
+    {
+      "note_id": 1752943759398,
+      "delimiter": "\\(",
+      "expr": "0"
+    },
+    {
+      "note_id": 1752943759398,
+      "delimiter": "\\(",
+      "expr": "\\tan 0\\degree ="
+    },
+    {
+      "note_id": 1752943759398,
+      "delimiter": "\\(",
+      "expr": "0"
+    },
+    {
+      "note_id": 1752943759398,
+      "delimiter": "\\(",
+      "expr": "\\tan 30\\degree ="
+    },
+    {
+      "note_id": 1752943759398,
+      "delimiter": "\\(",
+      "expr": "\\frac{\\sqrt{3} }{3}"
+    },
+    {
+      "note_id": 1752943759398,
+      "delimiter": "\\(",
+      "expr": "\\tan 45\\degree ="
+    },
+    {
+      "note_id": 1752943759398,
+      "delimiter": "\\(",
+      "expr": "1"
+    },
+    {
+      "note_id": 1752943759398,
+      "delimiter": "\\(",
+      "expr": "\\tan 60\\degree ="
+    },
+    {
+      "note_id": 1752943759398,
+      "delimiter": "\\(",
+      "expr": "\\sqrt{3}"
+    },
+    {
+      "note_id": 1752943759398,
+      "delimiter": "\\(",
+      "expr": "\\tan 90\\degree \\to"
+    },
+    {
+      "note_id": 1752943759398,
+      "delimiter": "\\(",
+      "expr": "+ \\infty"
+    },
+    {
+      "note_id": 1752943759398,
+      "delimiter": "\\(",
+      "expr": "\\ln 2="
+    },
+    {
+      "note_id": 1752943759398,
+      "delimiter": "\\(",
+      "expr": "0.693"
+    },
+    {
+      "note_id": 1752943759398,
+      "delimiter": "\\(",
+      "expr": "\\ln 3="
+    },
+    {
+      "note_id": 1752943759398,
+      "delimiter": "\\(",
+      "expr": "1.098"
+    },
+    {
+      "note_id": 1752943759398,
+      "delimiter": "\\(",
+      "expr": "\\lg 2="
+    },
+    {
+      "note_id": 1752943759398,
+      "delimiter": "\\(",
+      "expr": "0.301"
+    },
+    {
+      "note_id": 1752943759398,
+      "delimiter": "\\(",
+      "expr": "\\lg 3="
+    },
+    {
+      "note_id": 1752943759398,
+      "delimiter": "\\(",
+      "expr": "0.477"
+    },
+    {
+      "note_id": 1753114041725,
+      "delimiter": "\\(",
+      "expr": "ax^2 + bx + c = 0 (a, b, c \\in R, a \\neq 0)"
+    },
+    {
+      "note_id": 1753114041725,
+      "delimiter": "\\(",
+      "expr": "x_1, x_2"
+    },
+    {
+      "note_id": 1753114041725,
+      "delimiter": "\\(",
+      "expr": "x_1 +x_2 = -\\frac{b}{a}"
+    },
+    {
+      "note_id": 1753114041725,
+      "delimiter": "\\(",
+      "expr": "x_1 x_2 = \\frac{c}{a}"
+    },
+    {
+      "note_id": 1753114041725,
+      "delimiter": "\\(",
+      "expr": "ax^2 + bx + c = 0"
+    },
+    {
+      "note_id": 1753114041725,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow x^2 + \\frac{b}{a} x + \\frac{c}{a} = 0"
+    },
+    {
+      "note_id": 1753114041725,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow (x - \\frac{b}{2a})^2 = \\frac{b^2 - 4ac}{4a^2}"
+    },
+    {
+      "note_id": 1753114041725,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow x_{1, 2} = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}"
+    },
+    {
+      "note_id": 1753114845259,
+      "delimiter": "\\(",
+      "expr": "p, q"
+    },
+    {
+      "note_id": 1753114845259,
+      "delimiter": "\\(",
+      "expr": "p, q"
+    },
+    {
+      "note_id": 1753114845259,
+      "delimiter": "\\(",
+      "expr": "A, B"
+    },
+    {
+      "note_id": 1753114845259,
+      "delimiter": "\\(",
+      "expr": "p"
+    },
+    {
+      "note_id": 1753114845259,
+      "delimiter": "\\(",
+      "expr": "q"
+    },
+    {
+      "note_id": 1753114845259,
+      "delimiter": "\\(",
+      "expr": "A \\subseteq B"
+    },
+    {
+      "note_id": 1753114845259,
+      "delimiter": "\\(",
+      "expr": "p"
+    },
+    {
+      "note_id": 1753114845259,
+      "delimiter": "\\(",
+      "expr": "q"
+    },
+    {
+      "note_id": 1753114845259,
+      "delimiter": "\\(",
+      "expr": "A \\subsetneq B"
+    },
+    {
+      "note_id": 1753114845259,
+      "delimiter": "\\(",
+      "expr": "p"
+    },
+    {
+      "note_id": 1753114845259,
+      "delimiter": "\\(",
+      "expr": "q"
+    },
+    {
+      "note_id": 1753114845259,
+      "delimiter": "\\(",
+      "expr": "A = B"
+    },
+    {
+      "note_id": 1753114845259,
+      "delimiter": "\\(",
+      "expr": "p"
+    },
+    {
+      "note_id": 1753114845259,
+      "delimiter": "\\(",
+      "expr": "q"
+    },
+    {
+      "note_id": 1753114845259,
+      "delimiter": "\\(",
+      "expr": "A \\cap B = \\varnothing"
+    },
+    {
+      "note_id": 1753115684373,
+      "delimiter": "\\(",
+      "expr": "\\lnot p"
+    },
+    {
+      "note_id": 1753115684373,
+      "delimiter": "\\(",
+      "expr": "\\lnot q"
+    },
+    {
+      "note_id": 1753115684373,
+      "delimiter": "\\(",
+      "expr": "q"
+    },
+    {
+      "note_id": 1753115684373,
+      "delimiter": "\\(",
+      "expr": "p"
+    },
+    {
+      "note_id": 1753116432655,
+      "delimiter": "\\(",
+      "expr": "r"
+    },
+    {
+      "note_id": 1753116432655,
+      "delimiter": "\\(",
+      "expr": "d"
+    },
+    {
+      "note_id": 1753116432655,
+      "delimiter": "\\(",
+      "expr": "e =\\frac{r}{d}"
+    },
+    {
+      "note_id": 1753116432655,
+      "delimiter": "\\(",
+      "expr": "e \\gt 1"
+    },
+    {
+      "note_id": 1753116432655,
+      "delimiter": "\\(",
+      "expr": "e = 1"
+    },
+    {
+      "note_id": 1753116432655,
+      "delimiter": "\\(",
+      "expr": "0 \\lt e \\lt 1"
+    },
+    {
+      "note_id": 1753246654523,
+      "delimiter": "\\(",
+      "expr": "\\frac{2}{\\frac{1}{a} +\\frac{1}{b} }"
+    },
+    {
+      "note_id": 1753246654523,
+      "delimiter": "\\(",
+      "expr": "\\le"
+    },
+    {
+      "note_id": 1753246654523,
+      "delimiter": "\\(",
+      "expr": "\\sqrt{ab}"
+    },
+    {
+      "note_id": 1753246654523,
+      "delimiter": "\\(",
+      "expr": "\\le"
+    },
+    {
+      "note_id": 1753246654523,
+      "delimiter": "\\(",
+      "expr": "\\frac{a + b}{2}"
+    },
+    {
+      "note_id": 1753246654523,
+      "delimiter": "\\(",
+      "expr": "\\le"
+    },
+    {
+      "note_id": 1753246654523,
+      "delimiter": "\\(",
+      "expr": "\\sqrt{ \\frac{a^2+b^2}{2} }"
+    },
+    {
+      "note_id": 1753246654523,
+      "delimiter": "\\(",
+      "expr": "a=b"
+    },
+    {
+      "note_id": 1753282525818,
+      "delimiter": "\\(",
+      "expr": "\\frac{U_1}{U_2} = \\frac{n_1}{n_2} (与副线圈的个数无关，且U_1决定U_2)"
+    },
+    {
+      "note_id": 1753282525818,
+      "delimiter": "\\(",
+      "expr": "\\frac{I_1}{I_2} = \\frac{n_2}{n_1} (I_2 决定 I_1)"
+    },
+    {
+      "note_id": 1753285026295,
+      "delimiter": "\\(",
+      "expr": "a_n=a_1+(n-1)d   (n\\in \\mathrm{Z^+})"
+    },
+    {
+      "note_id": 1753285026295,
+      "delimiter": "\\(",
+      "expr": "S_n=\\frac{n(a_1+a_n)}{2}=na_1+\\frac{n(n-1)d}{2}=\\frac{d}{2} n^2+(a_1-\\frac{1}{2} d)n"
+    },
+    {
+      "note_id": 1753285026295,
+      "delimiter": "\\(",
+      "expr": "a_n=a_1q^{n-1} (n\\in \\mathrm{Z^+})"
+    },
+    {
+      "note_id": 1753285026295,
+      "delimiter": "\\(",
+      "expr": "S_n= \\begin{cases}<br>\\frac{a_1(1-q^n)}{1-q},\\quad &q\\neq1, \\\\<br>na_1,\\quad &q=1<br>\\end{cases}"
+    },
+    {
+      "note_id": 1753418365559,
+      "delimiter": "\\(",
+      "expr": "\\mathrm{S_.+V_.}"
+    },
+    {
+      "note_id": 1753418365559,
+      "delimiter": "\\(",
+      "expr": "\\mathrm{S_.+V_.+O_.}"
+    },
+    {
+      "note_id": 1753418365559,
+      "delimiter": "\\(",
+      "expr": "\\mathrm{S_.+V_.+O_.+O_.}"
+    },
+    {
+      "note_id": 1753418365559,
+      "delimiter": "\\(",
+      "expr": "S_.+Vt_.+O_.O_.C"
+    },
+    {
+      "note_id": 1753424687210,
+      "delimiter": "\\(",
+      "expr": "\\bbox[yellow,5px,border:2px solid red]\n{\n\\mathrm{F=-kx}\n}"
+    },
+    {
+      "note_id": 1753424687210,
+      "delimiter": "\\(",
+      "expr": "\\bbox[yellow,5px,border:2px solid red]\n{\n\\mathrm {x=A\\sin ({\\omega t + \\varphi})}\n(\\varphi 为初相位，\\omega 为圆频率)}"
+    },
+    {
+      "note_id": 1753455844308,
+      "delimiter": "\\(",
+      "expr": "\\mathrm C、H、O、N、P、S、K、Ca、Mg等"
+    },
+    {
+      "note_id": 1753455844308,
+      "delimiter": "\\(",
+      "expr": "\\mathrm Fe、Mn、Zn、Cu、B、"
+    },
+    {
+      "note_id": 1753455844308,
+      "delimiter": "\\(",
+      "expr": "\\mathrm Mo"
+    },
+    {
+      "note_id": 1753540750208,
+      "delimiter": "\\(",
+      "expr": "0  \\sim 0.6 A"
+    },
+    {
+      "note_id": 1753540750208,
+      "delimiter": "\\(",
+      "expr": "0.5 A"
+    },
+    {
+      "note_id": 1753541698709,
+      "delimiter": "\\(",
+      "expr": "I = \\frac{E}{R}"
+    },
+    {
+      "note_id": 1753541698709,
+      "delimiter": "\\(",
+      "expr": "I = \\frac{E}{R_总}"
+    },
+    {
+      "note_id": 1753541698709,
+      "delimiter": "\\(",
+      "expr": "Q_热 = E_{k初} - E_{k末}"
+    },
+    {
+      "note_id": 1753541698709,
+      "delimiter": "\\(",
+      "expr": "Q_{热总} = E_{k初} - E_{k末}"
+    },
+    {
+      "note_id": 1753544798021,
+      "delimiter": "\\(",
+      "expr": "\\varepsilon"
+    },
+    {
+      "note_id": 1753544798021,
+      "delimiter": "\\(",
+      "expr": "p"
+    },
+    {
+      "note_id": 1753544798021,
+      "delimiter": "\\(",
+      "expr": "\\nu"
+    },
+    {
+      "note_id": 1753544798021,
+      "delimiter": "\\(",
+      "expr": "\\lambda"
+    },
+    {
+      "note_id": 1753544798021,
+      "delimiter": "\\(",
+      "expr": "\\nu = \\frac{\\varepsilon}{h}"
+    },
+    {
+      "note_id": 1753544798021,
+      "delimiter": "\\(",
+      "expr": "\\lambda = \\frac{h}{p}"
+    },
+    {
+      "note_id": 1753544798021,
+      "delimiter": "\\(",
+      "expr": "p"
+    },
+    {
+      "note_id": 1753544798021,
+      "delimiter": "\\(",
+      "expr": "\\lambda"
+    },
+    {
+      "note_id": 1753544798021,
+      "delimiter": "\\(",
+      "expr": "h"
+    },
+    {
+      "note_id": 1753544798021,
+      "delimiter": "\\(",
+      "expr": "p=\\frac{h}{\\lambda}"
+    },
+    {
+      "note_id": 1753544852052,
+      "delimiter": "\\(",
+      "expr": "p"
+    },
+    {
+      "note_id": 1753544852052,
+      "delimiter": "\\(",
+      "expr": "\\lambda"
+    },
+    {
+      "note_id": 1753544852052,
+      "delimiter": "\\(",
+      "expr": "h"
+    },
+    {
+      "note_id": 1753544852052,
+      "delimiter": "\\(",
+      "expr": "p=\\frac{h}{\\lambda}"
+    },
+    {
+      "note_id": 1753548766519,
+      "delimiter": "\\(",
+      "expr": "1^2 + 2^2 + 3^2 + \\cdots + n^2 ="
+    },
+    {
+      "note_id": 1753548766519,
+      "delimiter": "\\(",
+      "expr": "\\frac{1}{6}n(n+1)(2n+1)"
+    },
+    {
+      "note_id": 1753623132588,
+      "delimiter": "\\(",
+      "expr": "(ac + bd)^2 \\leq (a^2 + b^2) \\cdot (c^2 + d^2)"
+    },
+    {
+      "note_id": 1753623132588,
+      "delimiter": "\\(",
+      "expr": "\\frac{a}{c} = \\frac{b}{d}"
+    },
+    {
+      "note_id": 1753623689485,
+      "delimiter": "\\(",
+      "expr": "\\frac{(x_1+x_2)^2}{y_1 +y_2} \\leq \\frac{x_1^2}{y_1} + \\frac{x_2^2}{y_2}"
+    },
+    {
+      "note_id": 1753623689485,
+      "delimiter": "\\(",
+      "expr": "\\frac{x_1}{x_2} = \\frac{y_1}{y_2}"
+    },
+    {
+      "note_id": 1753763023362,
+      "delimiter": "\\(",
+      "expr": "m_1v_1+m_2v_2=m_1v_1'+m_2v_2'"
+    },
+    {
+      "note_id": 1753763023362,
+      "delimiter": "\\(",
+      "expr": "\\frac{1}{2}m_1v_1^2+\\frac{1}{2}m_2v_2^2=\\frac{1}{2}m_1v_1'^2+\\frac{1}{2}m_2v_2'^2"
+    },
+    {
+      "note_id": 1753763023362,
+      "delimiter": "\\(",
+      "expr": "v_1'={{c1::\\frac{m_1-m_2}{m_1+m_2} \\cdot v_1+\\frac{2m_2}{m_1+m_2} \\cdot v_2}}"
+    },
+    {
+      "note_id": 1753763023362,
+      "delimiter": "\\(",
+      "expr": "v_2'={{c1::\\frac{2m_1}{m_1+m_2} \\cdot v_1 + \\frac{m_2-m_1}{m_1+m_2} \\cdot v_2}}"
+    },
+    {
+      "note_id": 1753763023362,
+      "delimiter": "\\(",
+      "expr": "\\Delta E={{c1::\\frac{m_1m_2}{2(m_1+m_2)} (v_1-v_2)^2}}"
+    },
+    {
+      "note_id": 1753799528297,
+      "delimiter": "\\[",
+      "expr": "\\ce{MnO4- >Cl2 >Br2 >Fe^3+ >I2}"
+    },
+    {
+      "note_id": 1753799528297,
+      "delimiter": "\\[",
+      "expr": "\\ce{S^2- >SO3^2- >I- >Fe^2+ >Br- >Cl-}"
+    },
+    {
+      "note_id": 1753800164642,
+      "delimiter": "\\[",
+      "expr": "\\ce{Na2S2O3 + H2SO4 = Na2SO4 + SO2 ^ + S v + H2O}"
+    },
+    {
+      "note_id": 1754225422008,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1754225422008,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1754225422008,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1754225422008,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1754225422008,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1754225422008,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1754225422008,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1754225422008,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1754225422008,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1754225422008,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1754225422008,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1754225422008,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1754227348433,
+      "delimiter": "\\(",
+      "expr": "F_1, F_2"
+    },
+    {
+      "note_id": 1754227348433,
+      "delimiter": "\\(",
+      "expr": "\\lvert F_1 - F_2\\rvert"
+    },
+    {
+      "note_id": 1754227348433,
+      "delimiter": "\\(",
+      "expr": "2c"
+    },
+    {
+      "note_id": 1754227348433,
+      "delimiter": "\\(",
+      "expr": "2a"
+    },
+    {
+      "note_id": 1754227348433,
+      "delimiter": "\\(",
+      "expr": "2b"
+    },
+    {
+      "note_id": 1754227348433,
+      "delimiter": "\\(",
+      "expr": "c^2 = a^2 - b^2"
+    },
+    {
+      "note_id": 1754227743281,
+      "delimiter": "\\(",
+      "expr": "F_1, F_2"
+    },
+    {
+      "note_id": 1754227743281,
+      "delimiter": "\\(",
+      "expr": "\\lvert F_1F_2\\rvert"
+    },
+    {
+      "note_id": 1754227743281,
+      "delimiter": "\\(",
+      "expr": "2c"
+    },
+    {
+      "note_id": 1754227743281,
+      "delimiter": "\\(",
+      "expr": "2a"
+    },
+    {
+      "note_id": 1754227743281,
+      "delimiter": "\\(",
+      "expr": "2b"
+    },
+    {
+      "note_id": 1754227743281,
+      "delimiter": "\\(",
+      "expr": "c^2 = a^2 + b^2"
+    },
+    {
+      "note_id": 1754229046530,
+      "delimiter": "\\(",
+      "expr": "ax^2+bx+c=0"
+    },
+    {
+      "note_id": 1754229046530,
+      "delimiter": "\\(",
+      "expr": "x= \\frac{-b \\pm \\sqrt{b^2-4ac} }{2a}"
+    },
+    {
+      "note_id": 1754231882768,
+      "delimiter": "\\(",
+      "expr": "\\triangle ABC"
+    },
+    {
+      "note_id": 1754231882768,
+      "delimiter": "\\(",
+      "expr": "\\cos A = \\frac{b^2+c^2-a^2}{2bc}"
+    },
+    {
+      "note_id": 1754302385091,
+      "delimiter": "\\(",
+      "expr": "ax^2+bx+c=0"
+    },
+    {
+      "note_id": 1754408778280,
+      "delimiter": "\\(",
+      "expr": "\\Delta H"
+    },
+    {
+      "note_id": 1754408778280,
+      "delimiter": "\\(",
+      "expr": "\\Delta H ＞ 0"
+    },
+    {
+      "note_id": 1754408778280,
+      "delimiter": "\\(",
+      "expr": "\\Delta H ＜ 0"
+    },
+    {
+      "note_id": 1754409384712,
+      "delimiter": "\\[",
+      "expr": "\\ce{H2SO4、HNO3、HCl、HBr、HI、HClO4}"
+    },
+    {
+      "note_id": 1754409384712,
+      "delimiter": "\\[",
+      "expr": "\\ce{NaOH、KOH、Ba{(OH)}_2、Ca{(OH)}_2 }"
+    },
+    {
+      "note_id": 1754494672975,
+      "delimiter": "\\[",
+      "expr": "\\ce{{{c1::CH3CHO + 2[Ag{(NH_3)}_2]OH ->[\\Delta]CH3COONH4 + 2Ag v +3NH3 + H2O}}}"
+    },
+    {
+      "note_id": 1754494672975,
+      "delimiter": "\\(",
+      "expr": "\\ce{ 2[Ag{(NH_3)}_2]OH}"
+    },
+    {
+      "note_id": 1754496480910,
+      "delimiter": "\\(",
+      "expr": "\\ce{{{c1::CH3CHO + 2Cu{(OH)}_2 + NaOH ->[\\Delta]CH3COONa + Cu_2O v +3H2O}}}"
+    },
+    {
+      "note_id": 1754496480910,
+      "delimiter": "\\(",
+      "expr": "\\ce{Cu{(OH)}_2}"
+    },
+    {
+      "note_id": 1754496480910,
+      "delimiter": "\\(",
+      "expr": "\\ce{Cu_2O}"
+    },
+    {
+      "note_id": 1754496663766,
+      "delimiter": "\\(",
+      "expr": "\\ce{H}"
+    },
+    {
+      "note_id": 1754496663766,
+      "delimiter": "\\(",
+      "expr": "\\ce{O}"
+    },
+    {
+      "note_id": 1754496663766,
+      "delimiter": "\\(",
+      "expr": "\\ce{O}"
+    },
+    {
+      "note_id": 1754496663766,
+      "delimiter": "\\(",
+      "expr": "\\ce{H}"
+    },
+    {
+      "note_id": 1754497614780,
+      "delimiter": "\\(",
+      "expr": "\\ce{^A_Z{\\overset{\\pm x}{X}}^{m \\pm }_n}"
+    },
+    {
+      "note_id": 1754497614780,
+      "delimiter": "\\(",
+      "expr": "\\ce{A}"
+    },
+    {
+      "note_id": 1754497614780,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1754497614780,
+      "delimiter": "\\(",
+      "expr": "\\ce{Z}"
+    },
+    {
+      "note_id": 1754497614780,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1754497614780,
+      "delimiter": "\\(",
+      "expr": "\\ce{m \\pm}"
+    },
+    {
+      "note_id": 1754497614780,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1754497614780,
+      "delimiter": "\\(",
+      "expr": "\\ce{n}"
+    },
+    {
+      "note_id": 1754497614780,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1754497614780,
+      "delimiter": "\\(",
+      "expr": "\\ce{\\pm X}"
+    },
+    {
+      "note_id": 1754497614780,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1754498594231,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1754498594231,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1754498766992,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1754498766992,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1754499988770,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1754499988770,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1754499988770,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1754499988770,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1754499988770,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1754540612075,
+      "delimiter": "\\(",
+      "expr": "\\mathit Q"
+    },
+    {
+      "note_id": 1754540612075,
+      "delimiter": "\\(",
+      "expr": "\\mathit U"
+    },
+    {
+      "note_id": 1754540612075,
+      "delimiter": "\\(",
+      "expr": "\\mathit C"
+    },
+    {
+      "note_id": 1754540612075,
+      "delimiter": "\\(",
+      "expr": "\\mathit C"
+    },
+    {
+      "note_id": 1754540612075,
+      "delimiter": "\\(",
+      "expr": "\\mathit C = \\frac{Q}{U}"
+    },
+    {
+      "note_id": 1754540612075,
+      "delimiter": "\\(",
+      "expr": "\\mathit C"
+    },
+    {
+      "note_id": 1754540612075,
+      "delimiter": "\\(",
+      "expr": "\\mathit C = \\frac{ \\varepsilon _rS}{4 \\pi k d}"
+    },
+    {
+      "note_id": 1754580027554,
+      "delimiter": "\\(",
+      "expr": "\\ce{Ca^2+}"
+    },
+    {
+      "note_id": 1754580338323,
+      "delimiter": "\\(",
+      "expr": "\\mathit f"
+    },
+    {
+      "note_id": 1754580338323,
+      "delimiter": "\\(",
+      "expr": "\\mathit f"
+    },
+    {
+      "note_id": 1754581150722,
+      "delimiter": "\\(",
+      "expr": "\\varphi"
+    },
+    {
+      "note_id": 1754581150722,
+      "delimiter": "\\(",
+      "expr": "U_{AB} = \\varphi _A - \\varphi _B = \\frac{W_ {AB} }{q}"
+    },
+    {
+      "note_id": 1754581150722,
+      "delimiter": "\\(",
+      "expr": "W_{AB} = E_{pA} - E_{pB}"
+    },
+    {
+      "note_id": 1754586727240,
+      "delimiter": "\\[",
+      "expr": "(x^\\alpha)^{'} =  {{c1::\\alpha x^{\\alpha - 1} }}"
+    },
+    {
+      "note_id": 1754586727240,
+      "delimiter": "\\[",
+      "expr": "( \\sin x )^{'} = {{c1::\\cos x }}，( \\cos x )^{'} = {{c1::- \\sin x }}"
+    },
+    {
+      "note_id": 1754586727240,
+      "delimiter": "\\[",
+      "expr": "(e^x)^{'} = {{c1::e^x}}，(a^x)^{'} = {{c1::a^x \\ln a}}"
+    },
+    {
+      "note_id": 1754586727240,
+      "delimiter": "\\[",
+      "expr": "(\\ln x)^{'} = {{c1::\\frac{1}{x} }}  (x > 0)， (\\log_a x) = {{c1::\\frac{1}{x \\ln a} }}"
+    },
+    {
+      "note_id": 1754586727240,
+      "delimiter": "\\(",
+      "expr": "c^{'} = {{c1::0}}"
+    },
+    {
+      "note_id": 1754586727240,
+      "delimiter": "\\(",
+      "expr": "c"
+    },
+    {
+      "note_id": 1754586727240,
+      "delimiter": "\\(",
+      "expr": "\\alpha \\in \\mathbf R"
+    },
+    {
+      "note_id": 1754586727240,
+      "delimiter": "\\(",
+      "expr": "\\alpha \\neq 0"
+    },
+    {
+      "note_id": 1754586727240,
+      "delimiter": "\\(",
+      "expr": "a > 0"
+    },
+    {
+      "note_id": 1754586727240,
+      "delimiter": "\\(",
+      "expr": "a \\neq 1"
+    },
+    {
+      "note_id": 1754586727240,
+      "delimiter": "\\(",
+      "expr": "x > 0，a > 0"
+    },
+    {
+      "note_id": 1754586727240,
+      "delimiter": "\\(",
+      "expr": "a \\neq 1"
+    },
+    {
+      "note_id": 1754714108966,
+      "delimiter": "\\(",
+      "expr": "\\ tan x"
+    },
+    {
+      "note_id": 1754714108966,
+      "delimiter": "\\(",
+      "expr": "\\{x \\mid x \\in \\mathbb{R}, 且 x \\neq k\\pi + \\frac{\\pi}{2}, k \\in \\mathbb{Z} \\}"
+    },
+    {
+      "note_id": 1754727294224,
+      "delimiter": "\\(",
+      "expr": "\\times"
+    },
+    {
+      "note_id": 1754727294224,
+      "delimiter": "\\(",
+      "expr": "\\times"
+    },
+    {
+      "note_id": 1754727294224,
+      "delimiter": "\\(",
+      "expr": "\\times"
+    },
+    {
+      "note_id": 1754728086025,
+      "delimiter": "\\[",
+      "expr": "若 f(a - x) = f(b + x)，则 f(x) 的图像"
+    },
+    {
+      "note_id": 1754728086025,
+      "delimiter": "\\[",
+      "expr": "若 f(a - x) = - f(b + x)，则 f(x) 的图像"
+    },
+    {
+      "note_id": 1754728086025,
+      "delimiter": "\\[",
+      "expr": "若 f(a - x) + f(b + x) = 2c，则 f(x)的图像"
+    },
+    {
+      "note_id": 1754728086025,
+      "delimiter": "\\(",
+      "expr": "x = \\frac{a + b}{2}"
+    },
+    {
+      "note_id": 1754728086025,
+      "delimiter": "\\(",
+      "expr": "(\\frac{a + b}{2}  , 0)"
+    },
+    {
+      "note_id": 1754728086025,
+      "delimiter": "\\(",
+      "expr": "(\\frac{a + b}{2}  , c)"
+    },
+    {
+      "note_id": 1754736803053,
+      "delimiter": "\\(",
+      "expr": "\\nu"
+    },
+    {
+      "note_id": 1754736803053,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1754736803053,
+      "delimiter": "\\(",
+      "expr": "\\lambda"
+    },
+    {
+      "note_id": 1754736803053,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1754736803053,
+      "delimiter": "\\(",
+      "expr": "f"
+    },
+    {
+      "note_id": 1754736803053,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1754736803053,
+      "delimiter": "\\(",
+      "expr": "T"
+    },
+    {
+      "note_id": 1754736803053,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1754736803053,
+      "delimiter": "\\(",
+      "expr": "\\nu = \\frac{ \\lambda }{ T } = \\lambda f"
+    },
+    {
+      "note_id": 1754737731713,
+      "delimiter": "\\(",
+      "expr": "v"
+    },
+    {
+      "note_id": 1754737731713,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1754737731713,
+      "delimiter": "\\(",
+      "expr": "\\omega"
+    },
+    {
+      "note_id": 1754737731713,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1754737731713,
+      "delimiter": "\\(",
+      "expr": "\\omega = {{c1:: \\frac{\\Delta \\theta}{\\Delta t} }}"
+    },
+    {
+      "note_id": 1754737731713,
+      "delimiter": "\\(",
+      "expr": "v = {{c1:: \\frac{2 \\pi r}{T} }},  \\omega = {{c1:: \\frac{2 \\pi }{ T }  }}, v = {{c1::\\omega r}}"
+    },
+    {
+      "note_id": 1754753532022,
+      "delimiter": "\\[",
+      "expr": "A = i + \\frac{b}{2} - 1"
+    },
+    {
+      "note_id": 1754753532022,
+      "delimiter": "\\(",
+      "expr": "A"
+    },
+    {
+      "note_id": 1754753532022,
+      "delimiter": "\\(",
+      "expr": "i"
+    },
+    {
+      "note_id": 1754753532022,
+      "delimiter": "\\(",
+      "expr": "b"
+    },
+    {
+      "note_id": 1754756843959,
+      "delimiter": "\\(",
+      "expr": "y = f(x)"
+    },
+    {
+      "note_id": 1754756843959,
+      "delimiter": "\\(",
+      "expr": "x"
+    },
+    {
+      "note_id": 1754756843959,
+      "delimiter": "\\(",
+      "expr": "y"
+    },
+    {
+      "note_id": 1754756843959,
+      "delimiter": "\\(",
+      "expr": "x = f(y)"
+    },
+    {
+      "note_id": 1754756843959,
+      "delimiter": "\\(",
+      "expr": "y =x"
+    },
+    {
+      "note_id": 1754761546738,
+      "delimiter": "\\(",
+      "expr": "1km = {{c1::10^3 }}m  = {{c1::10^5}} cm = {{c1::10^6}}mm = {{c1::10^9}} \\mu m = {{c1::10^{12} }} nm"
+    },
+    {
+      "note_id": 1754761546738,
+      "delimiter": "\\(",
+      "expr": "1 m/s = {{c1::3.6}}km/h"
+    },
+    {
+      "note_id": 1754761546738,
+      "delimiter": "\\(",
+      "expr": "1 A = {{c1::10^3}}mA = {{c1::10^6}} \\mu A"
+    },
+    {
+      "note_id": 1754761546738,
+      "delimiter": "\\(",
+      "expr": "1MV = {{c1::10^3}} KV = {{c1::10^6}} V = {{c1::10^9}} mV = {{c1::10^{12} }} \\mu V"
+    },
+    {
+      "note_id": 1754761546738,
+      "delimiter": "\\(",
+      "expr": "1 kWh = {{c1::3.6}} \\times {{c1::10^6}} J"
+    },
+    {
+      "note_id": 1754761546738,
+      "delimiter": "\\(",
+      "expr": "1 F = {{c1::10^3}} mF = {{c1::10^6}} \\mu F = {{c1::10^9}} nF = {{c1::10^{12} }} pF"
+    },
+    {
+      "note_id": 1754837447160,
+      "delimiter": "\\(",
+      "expr": "\\frac{x^2}{a^2} + \\frac{y^2}{b^2} = 1 (a > b > 0)"
+    },
+    {
+      "note_id": 1754837447160,
+      "delimiter": "\\(",
+      "expr": "P(x_0, y_0)"
+    },
+    {
+      "note_id": 1754837447160,
+      "delimiter": "\\(",
+      "expr": "\\frac{x_0 x}{a^2} + \\frac{y_0 y}{b^2} =1"
+    },
+    {
+      "note_id": 1754837447160,
+      "delimiter": "\\(",
+      "expr": "\\frac{x^2}{a^2} + \\frac{y^2}{b^2} = 1 (a > b > 0)"
+    },
+    {
+      "note_id": 1754837447160,
+      "delimiter": "\\(",
+      "expr": "P(x_0, y_0)"
+    },
+    {
+      "note_id": 1754837447160,
+      "delimiter": "\\(",
+      "expr": "\\frac{x_0 x}{a^2} + \\frac{y_0 y}{b^2} =1"
+    },
+    {
+      "note_id": 1754837447160,
+      "delimiter": "\\(",
+      "expr": "\\frac{x^2}{a^2} + \\frac{y^2}{b^2} = 1 (a > b > 0)"
+    },
+    {
+      "note_id": 1754837447160,
+      "delimiter": "\\(",
+      "expr": "Ax + By + C = 0"
+    },
+    {
+      "note_id": 1754837447160,
+      "delimiter": "\\(",
+      "expr": "A^2 a^2 + B^2 b^2 = C^2"
+    },
+    {
+      "note_id": 1754838782366,
+      "delimiter": "\\(",
+      "expr": "\\ce{Na2CO3}"
+    },
+    {
+      "note_id": 1754838782366,
+      "delimiter": "\\(",
+      "expr": "\\iff"
+    },
+    {
+      "note_id": 1754838782366,
+      "delimiter": "\\(",
+      "expr": "\\ce{NaHCO3}"
+    },
+    {
+      "note_id": 1754838782366,
+      "delimiter": "\\(",
+      "expr": "\\iff"
+    },
+    {
+      "note_id": 1754838782366,
+      "delimiter": "\\(",
+      "expr": "\\ce{CuSO4.5H2O}"
+    },
+    {
+      "note_id": 1754838782366,
+      "delimiter": "\\(",
+      "expr": "\\iff"
+    },
+    {
+      "note_id": 1754838782366,
+      "delimiter": "\\(",
+      "expr": "\\ce{FeSO4.7H2O}"
+    },
+    {
+      "note_id": 1754838782366,
+      "delimiter": "\\(",
+      "expr": "\\iff"
+    },
+    {
+      "note_id": 1754838782366,
+      "delimiter": "\\(",
+      "expr": "\\ce{KAl{(SO_4)}2.12H2O}"
+    },
+    {
+      "note_id": 1754838782366,
+      "delimiter": "\\(",
+      "expr": "\\iff"
+    },
+    {
+      "note_id": 1754838782366,
+      "delimiter": "\\(",
+      "expr": "\\ce{CaCO3}"
+    },
+    {
+      "note_id": 1754838782366,
+      "delimiter": "\\(",
+      "expr": "\\iff"
+    },
+    {
+      "note_id": 1754838782366,
+      "delimiter": "\\(",
+      "expr": "\\ce{CaO}"
+    },
+    {
+      "note_id": 1754838782366,
+      "delimiter": "\\(",
+      "expr": "\\iff"
+    },
+    {
+      "note_id": 1754838782366,
+      "delimiter": "\\(",
+      "expr": "\\ce{Ca(OH)2}"
+    },
+    {
+      "note_id": 1754838782366,
+      "delimiter": "\\(",
+      "expr": "\\iff"
+    },
+    {
+      "note_id": 1754838782366,
+      "delimiter": "\\(",
+      "expr": "\\ce{CaSO4.2H2O}"
+    },
+    {
+      "note_id": 1754838782366,
+      "delimiter": "\\(",
+      "expr": "\\iff"
+    },
+    {
+      "note_id": 1754839285483,
+      "delimiter": "\\(",
+      "expr": "\\ce{KOH}"
+    },
+    {
+      "note_id": 1754839285483,
+      "delimiter": "\\(",
+      "expr": "\\iff"
+    },
+    {
+      "note_id": 1754839285483,
+      "delimiter": "\\(",
+      "expr": "\\ce{NaOH}"
+    },
+    {
+      "note_id": 1754839285483,
+      "delimiter": "\\(",
+      "expr": "\\iff"
+    },
+    {
+      "note_id": 1754839285483,
+      "delimiter": "\\(",
+      "expr": "\\ce{KMnO4}"
+    },
+    {
+      "note_id": 1754839285483,
+      "delimiter": "\\(",
+      "expr": "\\iff"
+    },
+    {
+      "note_id": 1754839285483,
+      "delimiter": "\\(",
+      "expr": "\\ce{CO2(固态)}"
+    },
+    {
+      "note_id": 1754839285483,
+      "delimiter": "\\(",
+      "expr": "\\iff"
+    },
+    {
+      "note_id": 1754839285483,
+      "delimiter": "\\(",
+      "expr": "\\ce{CH3CH2OH}"
+    },
+    {
+      "note_id": 1754839285483,
+      "delimiter": "\\(",
+      "expr": "\\iff"
+    },
+    {
+      "note_id": 1754839285483,
+      "delimiter": "\\(",
+      "expr": "\\ce{C6H12O6}"
+    },
+    {
+      "note_id": 1754839285483,
+      "delimiter": "\\(",
+      "expr": "\\iff"
+    },
+    {
+      "note_id": 1754839285483,
+      "delimiter": "\\(",
+      "expr": "\\ce{C12H22O11}"
+    },
+    {
+      "note_id": 1754839285483,
+      "delimiter": "\\(",
+      "expr": "\\iff"
+    },
+    {
+      "note_id": 1754839285483,
+      "delimiter": "\\(",
+      "expr": "\\ce{(C6H10O5)_n}"
+    },
+    {
+      "note_id": 1754839285483,
+      "delimiter": "\\(",
+      "expr": "\\iff"
+    },
+    {
+      "note_id": 1754839285483,
+      "delimiter": "\\(",
+      "expr": "\\ce{CO(NH2)_2}"
+    },
+    {
+      "note_id": 1754839285483,
+      "delimiter": "\\(",
+      "expr": "\\iff"
+    },
+    {
+      "note_id": 1754906942140,
+      "delimiter": "\\[",
+      "expr": "\\bar{x} = \\frac{1}{n} (x_1 + x_2 + \\ldots + x_n)"
+    },
+    {
+      "note_id": 1754906942140,
+      "delimiter": "\\[",
+      "expr": "S = \\sqrt{ \\frac{1}{n} [ (x_1 -<br>\\bar{x} )^2 + (x_2 - \\bar{x})^2 + \\ldots + (x_n - \\bar{x})^2 ] }"
+    },
+    {
+      "note_id": 1754906942140,
+      "delimiter": "\\[",
+      "expr": "S^2 = \\frac{1}{n} [ (x_1 -<br>\\bar{x} )^2 + (x_2 - \\bar{x})^2 + \\ldots + (x_n - \\bar{x})^2 ]"
+    },
+    {
+      "note_id": 1755103651645,
+      "delimiter": "\\(",
+      "expr": "\\ce{0.1 g/mL NaOH}"
+    },
+    {
+      "note_id": 1755103651645,
+      "delimiter": "\\(",
+      "expr": "\\ce{0.05 g/mL CuSO4}"
+    },
+    {
+      "note_id": 1755103651645,
+      "delimiter": "\\(",
+      "expr": "50 \\sim 65 \\degree C"
+    },
+    {
+      "note_id": 1755103651645,
+      "delimiter": "\\(",
+      "expr": "A"
+    },
+    {
+      "note_id": 1755103651645,
+      "delimiter": "\\(",
+      "expr": "\\ce{0.1 g/mL NaOH}"
+    },
+    {
+      "note_id": 1755103651645,
+      "delimiter": "\\(",
+      "expr": "B"
+    },
+    {
+      "note_id": 1755103651645,
+      "delimiter": "\\(",
+      "expr": "\\ce{0.01 g/mL CuSO4}"
+    },
+    {
+      "note_id": 1755103651645,
+      "delimiter": "\\(",
+      "expr": "A"
+    },
+    {
+      "note_id": 1755103651645,
+      "delimiter": "\\(",
+      "expr": "1 mL"
+    },
+    {
+      "note_id": 1755103651645,
+      "delimiter": "\\(",
+      "expr": "B"
+    },
+    {
+      "note_id": 1755103651645,
+      "delimiter": "\\(",
+      "expr": "4"
+    },
+    {
+      "note_id": 1755103917549,
+      "delimiter": "\\(",
+      "expr": "y = \\frac{ Ax + B }{Cx + D }"
+    },
+    {
+      "note_id": 1755103917549,
+      "delimiter": "\\(",
+      "expr": "(- \\frac{D}{C}, \\frac{A}{C})"
+    },
+    {
+      "note_id": 1755262188331,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755262188331,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755262188331,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755262188331,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755262188331,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755262188331,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755262188331,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755262188331,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755262188331,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755262188331,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755262367845,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755262367845,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755262367845,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755262367845,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755262367845,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755262367845,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755262367845,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755262367845,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755262367845,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755262367845,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755262549032,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755262549032,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755262549032,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755262549032,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755262549032,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755262549032,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755262549032,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755262549032,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755262549032,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755262549032,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755262732913,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755262732913,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755262732913,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755262732913,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755262732913,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755262732913,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755262732913,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755262732913,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755262732913,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755262732913,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755262930266,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755262930266,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755262930266,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755262930266,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755262930266,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755262930266,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755262930266,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755262930266,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755262930266,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755262930266,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755263089153,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755263089153,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755263089153,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755263089153,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755263089153,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755263089153,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755263089153,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755263089153,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755263089153,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755263089153,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755263244652,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755263244652,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755263244652,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755263244652,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755263244652,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755263244652,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755263244652,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755263244652,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755263244652,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755263244652,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755263409467,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755263409467,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755263409467,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755263409467,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755263409467,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755263409467,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755263409467,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755263409467,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755263409467,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755263409467,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755263554123,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755263554123,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755263554123,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755263554123,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755263554123,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755263554123,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755263554123,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755263554123,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755263554123,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755263554123,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755263728732,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755263728732,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755263728732,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755263728732,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755263728732,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755263728732,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755263728732,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755263728732,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755263728732,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755263728732,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755268680467,
+      "delimiter": "\\(",
+      "expr": "f(x)"
+    },
+    {
+      "note_id": 1755268680467,
+      "delimiter": "\\(",
+      "expr": "x = a"
+    },
+    {
+      "note_id": 1755268680467,
+      "delimiter": "\\(",
+      "expr": "x = b"
+    },
+    {
+      "note_id": 1755268680467,
+      "delimiter": "\\(",
+      "expr": "T = 2 \\left| a - b \\right|"
+    },
+    {
+      "note_id": 1755268680467,
+      "delimiter": "\\(",
+      "expr": "( a \\neq b)"
+    },
+    {
+      "note_id": 1755268680467,
+      "delimiter": "\\(",
+      "expr": "f(x)"
+    },
+    {
+      "note_id": 1755268680467,
+      "delimiter": "\\(",
+      "expr": "(a, 0)"
+    },
+    {
+      "note_id": 1755268680467,
+      "delimiter": "\\(",
+      "expr": "(b, 0)"
+    },
+    {
+      "note_id": 1755268680467,
+      "delimiter": "\\(",
+      "expr": "T = 2 \\left| a - b \\right|"
+    },
+    {
+      "note_id": 1755268680467,
+      "delimiter": "\\(",
+      "expr": "( a \\neq b)"
+    },
+    {
+      "note_id": 1755268680467,
+      "delimiter": "\\(",
+      "expr": "f(x)"
+    },
+    {
+      "note_id": 1755268680467,
+      "delimiter": "\\(",
+      "expr": "x = a"
+    },
+    {
+      "note_id": 1755268680467,
+      "delimiter": "\\(",
+      "expr": "(b, 0)"
+    },
+    {
+      "note_id": 1755268680467,
+      "delimiter": "\\(",
+      "expr": "T = 4 \\left| a - b \\right|"
+    },
+    {
+      "note_id": 1755268680467,
+      "delimiter": "\\(",
+      "expr": "( a \\neq b)"
+    },
+    {
+      "note_id": 1755269559922,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755269559922,
+      "delimiter": "\\(",
+      "expr": "\\ce{r(阴离子) > r(阳离子)}"
+    },
+    {
+      "note_id": 1755269559922,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755272258139,
+      "delimiter": "\\(",
+      "expr": "\\ce{50ml, 100ml, 250ml, 500ml, 1000ml}"
+    },
+    {
+      "note_id": 1755273075155,
+      "delimiter": "\\[",
+      "expr": "\\ce{FeCl3 + 3H2O \\xlongequal{\\triangle} Fe(OH)3 \\text{(胶体)} + 3HCl}"
+    },
+    {
+      "note_id": 1755273075155,
+      "delimiter": "\\(",
+      "expr": "\\ce{Fe(OH)3}"
+    },
+    {
+      "note_id": 1755273075155,
+      "delimiter": "\\(",
+      "expr": "\\ce{FeCl3}"
+    },
+    {
+      "note_id": 1755358405625,
+      "delimiter": "\\(",
+      "expr": "\\ce{HCl}"
+    },
+    {
+      "note_id": 1755358405625,
+      "delimiter": "\\(",
+      "expr": "\\ce{H2}"
+    },
+    {
+      "note_id": 1755358405625,
+      "delimiter": "\\(",
+      "expr": "\\ce{Cl2}"
+    },
+    {
+      "note_id": 1755359016194,
+      "delimiter": "\\(",
+      "expr": "\\ce{CrO4^2-}"
+    },
+    {
+      "note_id": 1755359016194,
+      "delimiter": "\\(",
+      "expr": "\\ce{Cr2O7^2-}"
+    },
+    {
+      "note_id": 1755359016194,
+      "delimiter": "\\(",
+      "expr": "\\ce{CrO4^2-}"
+    },
+    {
+      "note_id": 1755359016194,
+      "delimiter": "\\(",
+      "expr": "\\ce{Cr2O7^2-}"
+    },
+    {
+      "note_id": 1755359016194,
+      "delimiter": "\\(",
+      "expr": "\\ce{2CrO4^2- + 2H^+ = Cr2O7^2- + H2O}"
+    },
+    {
+      "note_id": 1755404950190,
+      "delimiter": "\\[",
+      "expr": "\\frac{F_1}{ \\sin \\alpha} = \\frac{F_2}{ \\sin \\beta} = \\frac{F_3}{ \\sin \\gamma}"
+    },
+    {
+      "note_id": 1755443341838,
+      "delimiter": "\\(",
+      "expr": "\\theta"
+    },
+    {
+      "note_id": 1755443341838,
+      "delimiter": "\\(",
+      "expr": "\\mu"
+    },
+    {
+      "note_id": 1755443341838,
+      "delimiter": "\\(",
+      "expr": "\\theta"
+    },
+    {
+      "note_id": 1755443341838,
+      "delimiter": "\\(",
+      "expr": "\\mu = \\tan \\theta"
+    },
+    {
+      "note_id": 1755444077388,
+      "delimiter": "\\(",
+      "expr": "1 \\mathrm{rad}"
+    },
+    {
+      "note_id": 1755444077388,
+      "delimiter": "\\(",
+      "expr": "1 \\mathrm{rad}"
+    },
+    {
+      "note_id": 1755444077388,
+      "delimiter": "\\(",
+      "expr": "57.3 \\degree"
+    },
+    {
+      "note_id": 1755444881127,
+      "delimiter": "\\(",
+      "expr": "\\sin x"
+    },
+    {
+      "note_id": 1755444881127,
+      "delimiter": "\\(",
+      "expr": "\\cos x"
+    },
+    {
+      "note_id": 1755444881127,
+      "delimiter": "\\(",
+      "expr": "\\tan x"
+    },
+    {
+      "note_id": 1755444881127,
+      "delimiter": "\\(",
+      "expr": "\\sec x = \\frac{1}{\\cos x}"
+    },
+    {
+      "note_id": 1755444881127,
+      "delimiter": "\\(",
+      "expr": "\\csc x = \\frac{1}{\\sin x}"
+    },
+    {
+      "note_id": 1755444881127,
+      "delimiter": "\\(",
+      "expr": "\\cot x = \\frac{1}{\\tan x}"
+    },
+    {
+      "note_id": 1755446352327,
+      "delimiter": "\\(",
+      "expr": "S ="
+    },
+    {
+      "note_id": 1755446352327,
+      "delimiter": "\\(",
+      "expr": "\\frac{1}{2} a h"
+    },
+    {
+      "note_id": 1755446352327,
+      "delimiter": "\\(",
+      "expr": "S ="
+    },
+    {
+      "note_id": 1755446352327,
+      "delimiter": "\\(",
+      "expr": "\\frac{1}{2} a b \\sin C"
+    },
+    {
+      "note_id": 1755446352327,
+      "delimiter": "\\(",
+      "expr": "S ="
+    },
+    {
+      "note_id": 1755446352327,
+      "delimiter": "\\(",
+      "expr": "\\frac{abc}{4R}"
+    },
+    {
+      "note_id": 1755446352327,
+      "delimiter": "\\(",
+      "expr": "R"
+    },
+    {
+      "note_id": 1755446352327,
+      "delimiter": "\\(",
+      "expr": "S ="
+    },
+    {
+      "note_id": 1755446352327,
+      "delimiter": "\\(",
+      "expr": "rp = \\sqrt{p(p - a)(p - b)(p - c)}"
+    },
+    {
+      "note_id": 1755446352327,
+      "delimiter": "\\(",
+      "expr": "r"
+    },
+    {
+      "note_id": 1755446352327,
+      "delimiter": "\\(",
+      "expr": "p"
+    },
+    {
+      "note_id": 1755446352327,
+      "delimiter": "\\(",
+      "expr": "S ="
+    },
+    {
+      "note_id": 1755446352327,
+      "delimiter": "\\(",
+      "expr": "\\frac{1}{2} \\lvert x_1y_2 - x_2y_1 \\rvert"
+    },
+    {
+      "note_id": 1755446352327,
+      "delimiter": "\\(",
+      "expr": "S ="
+    },
+    {
+      "note_id": 1755446352327,
+      "delimiter": "\\(",
+      "expr": "\\frac{1}{2} \\sqrt{ {\\lvert \\vec{OA} \\rvert}^2 {\\lvert \\vec{OB} \\rvert}^2  - {(\\vec{OA} \\cdot \\vec{OB})^2} }"
+    },
+    {
+      "note_id": 1755533861817,
+      "delimiter": "\\(",
+      "expr": "\\ce{H2O}"
+    },
+    {
+      "note_id": 1755533861817,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755533861817,
+      "delimiter": "\\(",
+      "expr": "\\ce{NaOH}"
+    },
+    {
+      "note_id": 1755533861817,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755533861817,
+      "delimiter": "\\(",
+      "expr": "\\ce{NaCl}"
+    },
+    {
+      "note_id": 1755533861817,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755533861817,
+      "delimiter": "\\(",
+      "expr": "\\ce{H2SO4}"
+    },
+    {
+      "note_id": 1755533861817,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755533861817,
+      "delimiter": "\\(",
+      "expr": "\\ce{CaCO3}"
+    },
+    {
+      "note_id": 1755533861817,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755533861817,
+      "delimiter": "\\(",
+      "expr": "\\ce{BaCO3}"
+    },
+    {
+      "note_id": 1755533861817,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755533861817,
+      "delimiter": "\\(",
+      "expr": "\\ce{BaSO4}"
+    },
+    {
+      "note_id": 1755533861817,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755533861817,
+      "delimiter": "\\(",
+      "expr": "\\ce{CuSO4 * 5H2O}"
+    },
+    {
+      "note_id": 1755533861817,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755534509964,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755534509964,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755534509964,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755534509964,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755535439567,
+      "delimiter": "\\(",
+      "expr": "\\frac{x^2}{a^2} - \\frac{y^2}{b^2} = 1 (a > 0 ， b > 0)"
+    },
+    {
+      "note_id": 1755535439567,
+      "delimiter": "\\(",
+      "expr": "P(x_0, y_0)"
+    },
+    {
+      "note_id": 1755535439567,
+      "delimiter": "\\(",
+      "expr": "\\frac{x_0 x}{a^2} - \\frac{y_0 y}{b^2} =1"
+    },
+    {
+      "note_id": 1755535439567,
+      "delimiter": "\\(",
+      "expr": "\\frac{x^2}{a^2} - \\frac{y^2}{b^2} = 1 (a >0， b > 0)"
+    },
+    {
+      "note_id": 1755535439567,
+      "delimiter": "\\(",
+      "expr": "P(x_0, y_0)"
+    },
+    {
+      "note_id": 1755535439567,
+      "delimiter": "\\(",
+      "expr": "\\frac{x_0 x}{a^2} - \\frac{y_0 y}{b^2} =1"
+    },
+    {
+      "note_id": 1755535439567,
+      "delimiter": "\\(",
+      "expr": "\\frac{x^2}{a^2} - \\frac{y^2}{b^2} = 1 (a > 0， b > 0)"
+    },
+    {
+      "note_id": 1755535439567,
+      "delimiter": "\\(",
+      "expr": "Ax + By + C = 0"
+    },
+    {
+      "note_id": 1755535439567,
+      "delimiter": "\\(",
+      "expr": "A^2 a^2 - B^2 b^2 = C^2"
+    },
+    {
+      "note_id": 1755535809776,
+      "delimiter": "\\(",
+      "expr": "\\pmb{y^2 =2px}"
+    },
+    {
+      "note_id": 1755535809776,
+      "delimiter": "\\(",
+      "expr": "P(x_0, y_0)"
+    },
+    {
+      "note_id": 1755535809776,
+      "delimiter": "\\(",
+      "expr": "y_0 y = p(x + x_0)"
+    },
+    {
+      "note_id": 1755535809776,
+      "delimiter": "\\(",
+      "expr": "\\pmb{y^2 =2px}"
+    },
+    {
+      "note_id": 1755535809776,
+      "delimiter": "\\(",
+      "expr": "P(x_0, y_0)"
+    },
+    {
+      "note_id": 1755535809776,
+      "delimiter": "\\(",
+      "expr": "y_0 y = p(x + x_0)"
+    },
+    {
+      "note_id": 1755535809776,
+      "delimiter": "\\(",
+      "expr": "\\pmb{y^2 =2px}"
+    },
+    {
+      "note_id": 1755535809776,
+      "delimiter": "\\(",
+      "expr": "Ax + By + C = 0"
+    },
+    {
+      "note_id": 1755535809776,
+      "delimiter": "\\(",
+      "expr": "p B^2 = 2 AC"
+    },
+    {
+      "note_id": 1755536386344,
+      "delimiter": "\\(",
+      "expr": "\\pmb{\\frac{x^2}{a^2} - \\frac{y^2}{b^2} = 1}"
+    },
+    {
+      "note_id": 1755536386344,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755536386344,
+      "delimiter": "\\(",
+      "expr": "y = \\pm \\frac{b}{a} x"
+    },
+    {
+      "note_id": 1755536386344,
+      "delimiter": "\\(",
+      "expr": "\\pmb{y = \\pm \\frac{b}{a} x}"
+    },
+    {
+      "note_id": 1755536386344,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755536386344,
+      "delimiter": "\\(",
+      "expr": "\\frac{x^2}{a^2} - \\frac{y^2}{b^2} = \\lambda"
+    },
+    {
+      "note_id": 1755536386344,
+      "delimiter": "\\(",
+      "expr": "\\pmb{\\frac{x^2}{a^2} - \\frac{y^2}{b^2} = 1}"
+    },
+    {
+      "note_id": 1755536386344,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755536386344,
+      "delimiter": "\\(",
+      "expr": "\\frac{x^2}{a^2} - \\frac{y^2}{b^2} = \\lambda  (\\lambda > 0，焦点在 x 轴上；\\lambda < 0，焦点在 y 轴上)"
+    },
+    {
+      "note_id": 1755580490298,
+      "delimiter": "\\(",
+      "expr": "\\ce{H3PO4}"
+    },
+    {
+      "note_id": 1755580490298,
+      "delimiter": "\\(",
+      "expr": "\\ce{H3PO3}"
+    },
+    {
+      "note_id": 1755580490298,
+      "delimiter": "\\(",
+      "expr": "\\ce{H3PO2}"
+    },
+    {
+      "note_id": 1755580490298,
+      "delimiter": "\\(",
+      "expr": "\\ce{HPO3}"
+    },
+    {
+      "note_id": 1755580490298,
+      "delimiter": "\\(",
+      "expr": "\\ce{H4P2O7}"
+    },
+    {
+      "note_id": 1755580741498,
+      "delimiter": "\\(",
+      "expr": "\\ce{Na2O2}"
+    },
+    {
+      "note_id": 1755580741498,
+      "delimiter": "\\(",
+      "expr": "\\ce{Na2O2}"
+    },
+    {
+      "note_id": 1755581511522,
+      "delimiter": "\\[",
+      "expr": "\\ce{TiCl4 + (x + 2)H2O = TiO2 * xH2O v + 4HCl}"
+    },
+    {
+      "note_id": 1755581511522,
+      "delimiter": "\\(",
+      "expr": "\\ce{TiCl4}"
+    },
+    {
+      "note_id": 1755581511522,
+      "delimiter": "\\(",
+      "expr": "\\ce{TiO2}"
+    },
+    {
+      "note_id": 1755581511522,
+      "delimiter": "\\(",
+      "expr": "\\ce{SnO}"
+    },
+    {
+      "note_id": 1755581511522,
+      "delimiter": "\\(",
+      "expr": "\\ce{SnO2}"
+    },
+    {
+      "note_id": 1755581511522,
+      "delimiter": "\\(",
+      "expr": "\\ce{TiO2}"
+    },
+    {
+      "note_id": 1755581922438,
+      "delimiter": "\\(",
+      "expr": "\\ce{Al^3+, Fe^3+}"
+    },
+    {
+      "note_id": 1755581922438,
+      "delimiter": "\\(",
+      "expr": "\\ce{Al^3+}"
+    },
+    {
+      "note_id": 1755581922438,
+      "delimiter": "\\(",
+      "expr": "\\ce{Al(OH)3}"
+    },
+    {
+      "note_id": 1755581922438,
+      "delimiter": "\\(",
+      "expr": "\\ce{Fe^3+}"
+    },
+    {
+      "note_id": 1755581922438,
+      "delimiter": "\\(",
+      "expr": "\\ce{Fe(OH)3}"
+    },
+    {
+      "note_id": 1755582089704,
+      "delimiter": "\\(",
+      "expr": "\\ce{FeCl3}"
+    },
+    {
+      "note_id": 1755582089704,
+      "delimiter": "\\(",
+      "expr": "\\ce{FeCl3}"
+    },
+    {
+      "note_id": 1755623554375,
+      "delimiter": "\\(",
+      "expr": "\\ce{CH4}"
+    },
+    {
+      "note_id": 1755623554375,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755623554375,
+      "delimiter": "\\(",
+      "expr": "\\ce{P4}"
+    },
+    {
+      "note_id": 1755623554375,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755623554375,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755623554375,
+      "delimiter": "\\(",
+      "expr": "\\ce{SiO2}"
+    },
+    {
+      "note_id": 1755623554375,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755623554375,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755623554375,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1755702237643,
+      "delimiter": "\\(",
+      "expr": "\\vec{a} = (x_1, y_1)"
+    },
+    {
+      "note_id": 1755702237643,
+      "delimiter": "\\(",
+      "expr": "\\vec{b} = (x_2, y_2)"
+    },
+    {
+      "note_id": 1755702237643,
+      "delimiter": "\\(",
+      "expr": "\\vec{b} \\neq 0"
+    },
+    {
+      "note_id": 1755702237643,
+      "delimiter": "\\(",
+      "expr": "\\vec{a} \\parallel \\vec{b}"
+    },
+    {
+      "note_id": 1755702237643,
+      "delimiter": "\\(",
+      "expr": "\\Rightarrow"
+    },
+    {
+      "note_id": 1755702237643,
+      "delimiter": "\\(",
+      "expr": "x_1y_2 - x_2y_1 = 0"
+    },
+    {
+      "note_id": 1755702237643,
+      "delimiter": "\\(",
+      "expr": "\\vec{a} \\perp \\vec{b} ( a \\neq 0)"
+    },
+    {
+      "note_id": 1755702237643,
+      "delimiter": "\\(",
+      "expr": "\\Rightarrow"
+    },
+    {
+      "note_id": 1755702237643,
+      "delimiter": "\\(",
+      "expr": "x_1x_2 + y_1y_2 = 0"
+    },
+    {
+      "note_id": 1755704973958,
+      "delimiter": "\\(",
+      "expr": "\\pmb{P - ABC}"
+    },
+    {
+      "note_id": 1755704973958,
+      "delimiter": "\\(",
+      "expr": "a"
+    },
+    {
+      "note_id": 1755704973958,
+      "delimiter": "\\(",
+      "expr": "O"
+    },
+    {
+      "note_id": 1755704973958,
+      "delimiter": "\\(",
+      "expr": "H = \\frac{ \\sqrt{6} }{ 3 } a"
+    },
+    {
+      "note_id": 1755704973958,
+      "delimiter": "\\(",
+      "expr": "R = \\frac{ \\sqrt{6} }{ 4 } a"
+    },
+    {
+      "note_id": 1755704973958,
+      "delimiter": "\\(",
+      "expr": "r = \\frac{ \\sqrt{6} }{ 12 } a"
+    },
+    {
+      "note_id": 1755704973958,
+      "delimiter": "\\(",
+      "expr": "d = \\frac{ \\sqrt{2} }{ 2 } a"
+    },
+    {
+      "note_id": 1755704973958,
+      "delimiter": "\\(",
+      "expr": "S = \\sqrt{3} a^2"
+    },
+    {
+      "note_id": 1755777891049,
+      "delimiter": "\\(",
+      "expr": "\\alpha , \\beta , \\gamma"
+    },
+    {
+      "note_id": 1755777891049,
+      "delimiter": "\\(",
+      "expr": "\\alpha"
+    },
+    {
+      "note_id": 1755777891049,
+      "delimiter": "\\(",
+      "expr": "\\alpha"
+    },
+    {
+      "note_id": 1755777891049,
+      "delimiter": "\\(",
+      "expr": "\\alpha"
+    },
+    {
+      "note_id": 1755777891049,
+      "delimiter": "\\(",
+      "expr": "\\alpha"
+    },
+    {
+      "note_id": 1755777891049,
+      "delimiter": "\\(",
+      "expr": "\\beta"
+    },
+    {
+      "note_id": 1755777891049,
+      "delimiter": "\\(",
+      "expr": "\\beta"
+    },
+    {
+      "note_id": 1755777891049,
+      "delimiter": "\\(",
+      "expr": "\\gamma"
+    },
+    {
+      "note_id": 1755778366627,
+      "delimiter": "\\[",
+      "expr": "\\ce{^238_92U —> ^234_90Th + ^4_2He}"
+    },
+    {
+      "note_id": 1755778366627,
+      "delimiter": "\\[",
+      "expr": "\\ce{^234_90Th —> ^234_91Pa + ^0_{-1}e}"
+    },
+    {
+      "note_id": 1755778366627,
+      "delimiter": "\\[",
+      "expr": "\\ce{^1_0n —> ^1_1H + ^0_{-1}e}"
+    },
+    {
+      "note_id": 1755778366627,
+      "delimiter": "\\(",
+      "expr": "\\alpha"
+    },
+    {
+      "note_id": 1755778366627,
+      "delimiter": "\\(",
+      "expr": "\\beta"
+    },
+    {
+      "note_id": 1755778366627,
+      "delimiter": "\\(",
+      "expr": "\\beta"
+    },
+    {
+      "note_id": 1755781386074,
+      "delimiter": "\\(",
+      "expr": "\\ce{2Al + Fe2O3 \\xlongequal{高温} Al2O3 + 2Fe }"
+    },
+    {
+      "note_id": 1755781893874,
+      "delimiter": "\\(",
+      "expr": "\\ce{K Ca  Na Mg Al Zn Fe Sn Pb H Cu Hg Ag Pt Au }"
+    },
+    {
+      "note_id": 1755781893874,
+      "delimiter": "\\(",
+      "expr": "\\ce{H}"
+    },
+    {
+      "note_id": 1755788443411,
+      "delimiter": "\\(",
+      "expr": "A"
+    },
+    {
+      "note_id": 1755788443411,
+      "delimiter": "\\(",
+      "expr": "n"
+    },
+    {
+      "note_id": 1755788443411,
+      "delimiter": "\\(",
+      "expr": "A"
+    },
+    {
+      "note_id": 1755788443411,
+      "delimiter": "\\(",
+      "expr": "2^n"
+    },
+    {
+      "note_id": 1755788443411,
+      "delimiter": "\\(",
+      "expr": "2^n - 1"
+    },
+    {
+      "note_id": 1755788443411,
+      "delimiter": "\\(",
+      "expr": "2^n - 1"
+    },
+    {
+      "note_id": 1755788443411,
+      "delimiter": "\\(",
+      "expr": "2^n - 2"
+    },
+    {
+      "note_id": 1755789122915,
+      "delimiter": "\\(",
+      "expr": "(u^{'} \\pm v^{'}) ="
+    },
+    {
+      "note_id": 1755789122915,
+      "delimiter": "\\(",
+      "expr": "u^{'} \\pm v^{'}"
+    },
+    {
+      "note_id": 1755789122915,
+      "delimiter": "\\(",
+      "expr": "(u  v)^{'} ="
+    },
+    {
+      "note_id": 1755789122915,
+      "delimiter": "\\(",
+      "expr": "u^{'} v + u v^{'}"
+    },
+    {
+      "note_id": 1755789122915,
+      "delimiter": "\\(",
+      "expr": "(\\frac{u}{v})^{'} ="
+    },
+    {
+      "note_id": 1755789122915,
+      "delimiter": "\\(",
+      "expr": "\\frac{u^{'} v - u v^{'} }{v^2}"
+    },
+    {
+      "note_id": 1755789122915,
+      "delimiter": "\\(",
+      "expr": "(v \\neq 0)"
+    },
+    {
+      "note_id": 1755790554284,
+      "delimiter": "\\(",
+      "expr": "\\pmb{D,E,F}"
+    },
+    {
+      "note_id": 1755790554284,
+      "delimiter": "\\(",
+      "expr": "\\pmb{\\triangle ABC}"
+    },
+    {
+      "note_id": 1755790554284,
+      "delimiter": "\\(",
+      "expr": "\\pmb{D,E,F}"
+    },
+    {
+      "note_id": 1755790554284,
+      "delimiter": "\\(",
+      "expr": "\\frac{BE}{EC} \\cdot \\frac{CD}{DA} \\cdot \\frac{AF}{BF} = 1"
+    },
+    {
+      "note_id": 1755790554284,
+      "delimiter": "\\(",
+      "expr": "\\frac{DA}{AC} \\cdot \\frac{CB}{BE} \\cdot \\frac{FE}{FD} = 1"
+    },
+    {
+      "note_id": 1755790554284,
+      "delimiter": "\\(",
+      "expr": "\\pmb{D,E,F}"
+    },
+    {
+      "note_id": 1755790554284,
+      "delimiter": "\\(",
+      "expr": "\\pmb{\\triangle ABC}"
+    },
+    {
+      "note_id": 1755790554284,
+      "delimiter": "\\(",
+      "expr": "\\frac{BE}{EC} \\cdot \\frac{CD}{DA} \\cdot \\frac{AF}{BF} = 1"
+    },
+    {
+      "note_id": 1755790554284,
+      "delimiter": "\\(",
+      "expr": "\\frac{DA}{AC} \\cdot \\frac{CB}{BE} \\cdot \\frac{FE}{FD} = 1"
+    },
+    {
+      "note_id": 1755790554284,
+      "delimiter": "\\(",
+      "expr": "\\mathrm{D,E,F}"
+    },
+    {
+      "note_id": 1755794792808,
+      "delimiter": "\\(",
+      "expr": "0.1 mL"
+    },
+    {
+      "note_id": 1755794792808,
+      "delimiter": "\\(",
+      "expr": "0.1 g"
+    },
+    {
+      "note_id": 1755794792808,
+      "delimiter": "\\(",
+      "expr": "0.01 ml"
+    },
+    {
+      "note_id": 1755942775328,
+      "delimiter": "\\(",
+      "expr": "\\frac{3}{4}"
+    },
+    {
+      "note_id": 1756097626272,
+      "delimiter": "\\(",
+      "expr": "\\mathit{explicit}"
+    },
+    {
+      "note_id": 1756097717416,
+      "delimiter": "\\(",
+      "expr": "\\mathit{ubiquitous}"
+    },
+    {
+      "note_id": 1756228436723,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1756228436723,
+      "delimiter": "\\(",
+      "expr": "1 nm"
+    },
+    {
+      "note_id": 1756228436723,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1756228436723,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1756228436723,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1756228436723,
+      "delimiter": "\\(",
+      "expr": "1 \\sim 100 nm"
+    },
+    {
+      "note_id": 1756228436723,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1756228436723,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1756228436723,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1756228436723,
+      "delimiter": "\\(",
+      "expr": "100nm"
+    },
+    {
+      "note_id": 1756228436723,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1756228436723,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1756270979143,
+      "delimiter": "\\(",
+      "expr": "A"
+    },
+    {
+      "note_id": 1756270979143,
+      "delimiter": "\\(",
+      "expr": "B"
+    },
+    {
+      "note_id": 1756270979143,
+      "delimiter": "\\(",
+      "expr": "B"
+    },
+    {
+      "note_id": 1756270979143,
+      "delimiter": "\\(",
+      "expr": "A"
+    },
+    {
+      "note_id": 1756271297777,
+      "delimiter": "\\(",
+      "expr": "A"
+    },
+    {
+      "note_id": 1756271297777,
+      "delimiter": "\\(",
+      "expr": "B"
+    },
+    {
+      "note_id": 1756271297777,
+      "delimiter": "\\(",
+      "expr": "m_a"
+    },
+    {
+      "note_id": 1756271297777,
+      "delimiter": "\\(",
+      "expr": "m_b"
+    },
+    {
+      "note_id": 1756271297777,
+      "delimiter": "\\(",
+      "expr": "m_a x = m_b y"
+    },
+    {
+      "note_id": 1756311523261,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1756393561600,
+      "delimiter": "\\(",
+      "expr": "ABCD"
+    },
+    {
+      "note_id": 1756393561600,
+      "delimiter": "\\(",
+      "expr": "AB^2 + BC^2 + CD^2 + DA^2 = AC^2 + BD^2"
+    },
+    {
+      "note_id": 1756393561600,
+      "delimiter": "\\(",
+      "expr": "\\vec{a} + \\vec{b} + \\vec{c} + \\vec{d} = 0"
+    },
+    {
+      "note_id": 1756393561600,
+      "delimiter": "\\(",
+      "expr": "{\\lvert \\vec{a}  \\rvert}^2 + {\\lvert \\vec{b}  \\rvert}^2 + {\\lvert \\vec{c}  \\rvert}^2 + {\\lvert \\vec{d}  \\rvert}^2 = {\\lvert \\vec{a} + \\vec{b} \\rvert}^2 + {\\lvert \\vec{b} + \\vec{c} \\rvert}^2"
+    },
+    {
+      "note_id": 1756393561600,
+      "delimiter": "\\(",
+      "expr": "\\vec{a} + \\vec{b} + \\vec{c} = - \\vec{d}"
+    },
+    {
+      "note_id": 1756393561600,
+      "delimiter": "\\(",
+      "expr": "\\vec{a} = -\\vec{c}"
+    },
+    {
+      "note_id": 1756393561600,
+      "delimiter": "\\(",
+      "expr": "\\vec{b} = -\\vec{d}"
+    },
+    {
+      "note_id": 1756460380672,
+      "delimiter": "\\(",
+      "expr": "\\sigma \\pi"
+    },
+    {
+      "note_id": 1756460380672,
+      "delimiter": "\\(",
+      "expr": "\\sigma"
+    },
+    {
+      "note_id": 1756460380672,
+      "delimiter": "\\(",
+      "expr": "\\pi"
+    },
+    {
+      "note_id": 1756460380672,
+      "delimiter": "\\(",
+      "expr": "\\sigma"
+    },
+    {
+      "note_id": 1756460380672,
+      "delimiter": "\\(",
+      "expr": "\\sigma"
+    },
+    {
+      "note_id": 1756460380672,
+      "delimiter": "\\(",
+      "expr": "\\pi"
+    },
+    {
+      "note_id": 1756460380672,
+      "delimiter": "\\(",
+      "expr": "\\sigma"
+    },
+    {
+      "note_id": 1756460380672,
+      "delimiter": "\\(",
+      "expr": "\\pi"
+    },
+    {
+      "note_id": 1756481938983,
+      "delimiter": "\\(",
+      "expr": "f(x) = x e^x"
+    },
+    {
+      "note_id": 1756481938983,
+      "delimiter": "\\(",
+      "expr": "(- \\infty, -1)"
+    },
+    {
+      "note_id": 1756481938983,
+      "delimiter": "\\(",
+      "expr": "(-1, +\\infty)"
+    },
+    {
+      "note_id": 1756481938983,
+      "delimiter": "\\(",
+      "expr": "f(x) = \\frac{x}{e^x}"
+    },
+    {
+      "note_id": 1756481938983,
+      "delimiter": "\\(",
+      "expr": "(- \\infty, 1)"
+    },
+    {
+      "note_id": 1756481938983,
+      "delimiter": "\\(",
+      "expr": "(1, +\\infty)"
+    },
+    {
+      "note_id": 1756481938983,
+      "delimiter": "\\(",
+      "expr": "f(x) = \\frac{e^x}{x}"
+    },
+    {
+      "note_id": 1756481938983,
+      "delimiter": "\\(",
+      "expr": "(- \\infty, 0), (0,1)"
+    },
+    {
+      "note_id": 1756481938983,
+      "delimiter": "\\(",
+      "expr": "(1, +\\infty)"
+    },
+    {
+      "note_id": 1756605522707,
+      "delimiter": "\\(",
+      "expr": "T =2\\pi \\sqrt{ \\frac{L}{g} }"
+    },
+    {
+      "note_id": 1756605522707,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1756605522707,
+      "delimiter": "\\(",
+      "expr": "\\sin \\theta = \\theta"
+    },
+    {
+      "note_id": 1756605522707,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1756605522707,
+      "delimiter": "\\(",
+      "expr": "F"
+    },
+    {
+      "note_id": 1756605522707,
+      "delimiter": "\\(",
+      "expr": "\\rightarrow"
+    },
+    {
+      "note_id": 1756605522707,
+      "delimiter": "\\(",
+      "expr": "a"
+    },
+    {
+      "note_id": 1756605522707,
+      "delimiter": "\\(",
+      "expr": "a"
+    },
+    {
+      "note_id": 1756747010952,
+      "delimiter": "\\(",
+      "expr": "y=x \\ln x"
+    },
+    {
+      "note_id": 1756747010952,
+      "delimiter": "\\(",
+      "expr": "f(x)"
+    },
+    {
+      "note_id": 1756747010952,
+      "delimiter": "\\(",
+      "expr": "(0,\\frac{1}{e})"
+    },
+    {
+      "note_id": 1756747010952,
+      "delimiter": "\\(",
+      "expr": "(\\frac{1}{e}, + \\infty)"
+    },
+    {
+      "note_id": 1756747010952,
+      "delimiter": "\\(",
+      "expr": "y=\\frac{x}{\\ln x}"
+    },
+    {
+      "note_id": 1756747010952,
+      "delimiter": "\\(",
+      "expr": "f(x)"
+    },
+    {
+      "note_id": 1756747010952,
+      "delimiter": "\\(",
+      "expr": "(0,1), (1, e)"
+    },
+    {
+      "note_id": 1756747010952,
+      "delimiter": "\\(",
+      "expr": "(e,+ \\infty)"
+    },
+    {
+      "note_id": 1756747010952,
+      "delimiter": "\\(",
+      "expr": "y=\\frac{\\ln x}{x}"
+    },
+    {
+      "note_id": 1756747010952,
+      "delimiter": "\\(",
+      "expr": "f(x)"
+    },
+    {
+      "note_id": 1756747010952,
+      "delimiter": "\\(",
+      "expr": "(0,e)"
+    },
+    {
+      "note_id": 1756747010952,
+      "delimiter": "\\(",
+      "expr": "(e, +\\infty)"
+    },
+    {
+      "note_id": 1757411420517,
+      "delimiter": "\\(",
+      "expr": "\\ce{3CH3CH2OH + 2K2Cr2O7 + 8H2SO4 = 3CH3COOH +2K2SO4 + 2Cr2(SO4)3 +11H2O}"
+    },
+    {
+      "note_id": 1757435481044,
+      "delimiter": "\\(",
+      "expr": "\\ce{SiO2}"
+    },
+    {
+      "note_id": 1757513491975,
+      "delimiter": "\\(",
+      "expr": "\\ce{S + 2KNO3 + 3C = K2S + N2 ^ + 3CO2 ^}"
+    },
+    {
+      "note_id": 1757514955153,
+      "delimiter": "\\(",
+      "expr": "S = 4 \\pi r^2"
+    },
+    {
+      "note_id": 1757523881616,
+      "delimiter": "\\(",
+      "expr": "v = v_0 + at"
+    },
+    {
+      "note_id": 1757523881616,
+      "delimiter": "\\(",
+      "expr": "\\bar{v} = v_{\\frac{t}{2}} = \\frac{v_0 + v}{2} = \\frac{x}{t}"
+    },
+    {
+      "note_id": 1757523881616,
+      "delimiter": "\\(",
+      "expr": "x = v_0 t + \\frac{1}{2} at^2"
+    },
+    {
+      "note_id": 1757523881616,
+      "delimiter": "\\(",
+      "expr": "2ax = v^2 - v_0 ^2"
+    },
+    {
+      "note_id": 1757523881616,
+      "delimiter": "\\(",
+      "expr": "\\Delta x = aT^2"
+    },
+    {
+      "note_id": 1757523952596,
+      "delimiter": "\\(",
+      "expr": "v =gt"
+    },
+    {
+      "note_id": 1757523952596,
+      "delimiter": "\\(",
+      "expr": "h =\\frac{1}{2}gt^2"
+    },
+    {
+      "note_id": 1757523952596,
+      "delimiter": "\\(",
+      "expr": "v^2 = 2gh"
+    },
+    {
+      "note_id": 1757524303823,
+      "delimiter": "\\(",
+      "expr": "v = \\frac{\\Delta s}{\\Delta t} = \\frac{2 \\pi r}{T}"
+    },
+    {
+      "note_id": 1757524303823,
+      "delimiter": "\\(",
+      "expr": "\\omega = \\frac{\\Delta \\theta}{\\Delta t} = \\frac{2 \\pi}{T}"
+    },
+    {
+      "note_id": 1757524303823,
+      "delimiter": "\\(",
+      "expr": "a_n = \\frac{v^2}{r} = {\\omega}^2 r = (\\frac{2 \\pi}{T})^2 r"
+    },
+    {
+      "note_id": 1757524303823,
+      "delimiter": "\\(",
+      "expr": "F_n = m a_n"
+    },
+    {
+      "note_id": 1757524509843,
+      "delimiter": "\\(",
+      "expr": "F = - kx"
+    },
+    {
+      "note_id": 1757524509843,
+      "delimiter": "\\(",
+      "expr": "T = 2\\pi \\sqrt{\\frac{L}{g}}"
+    },
+    {
+      "note_id": 1757524509843,
+      "delimiter": "\\(",
+      "expr": "v = \\lambda f = \\frac{\\lambda}{T}"
+    },
+    {
+      "note_id": 1757524869948,
+      "delimiter": "\\(",
+      "expr": "W = Fl \\cos\\alpha"
+    },
+    {
+      "note_id": 1757524869948,
+      "delimiter": "\\(",
+      "expr": "P = \\frac{W}{t} = F v \\cos\\alpha"
+    },
+    {
+      "note_id": 1757524869948,
+      "delimiter": "\\(",
+      "expr": "\\eta = \\frac{W_{有用}}{W_总} \\times 100\\% = \\frac{P_{有用}}{P_总} \\times 100\\%"
+    },
+    {
+      "note_id": 1757525145743,
+      "delimiter": "\\(",
+      "expr": "E_k = \\frac{1}{2} m v^2"
+    },
+    {
+      "note_id": 1757525145743,
+      "delimiter": "\\(",
+      "expr": "E_p = mgh"
+    },
+    {
+      "note_id": 1757525145743,
+      "delimiter": "\\(",
+      "expr": "W_{合} = \\frac{1}{2}mv_{末} ^2 - \\frac{1}{2}mv_{初} ^2"
+    },
+    {
+      "note_id": 1757525145743,
+      "delimiter": "\\(",
+      "expr": "E_1 = E_2"
+    },
+    {
+      "note_id": 1757525145743,
+      "delimiter": "\\(",
+      "expr": "E_{k1} + E_{p1} =E_{k2} + E_{p2}"
+    },
+    {
+      "note_id": 1757525306686,
+      "delimiter": "\\(",
+      "expr": "P=mv"
+    },
+    {
+      "note_id": 1757525306686,
+      "delimiter": "\\(",
+      "expr": "I =F ·\\Delta t"
+    },
+    {
+      "note_id": 1757525306686,
+      "delimiter": "\\(",
+      "expr": "F(t^{'} - t) = mv^{'} - mv"
+    },
+    {
+      "note_id": 1757525306686,
+      "delimiter": "\\(",
+      "expr": "m_1 v_1 + m_2 v_2 = m_1 v_1 ^{'} + m_2 v_2 ^{'}"
+    },
+    {
+      "note_id": 1757525499799,
+      "delimiter": "\\(",
+      "expr": "I = \\frac{q}{t}"
+    },
+    {
+      "note_id": 1757525499799,
+      "delimiter": "\\(",
+      "expr": "I = nesv"
+    },
+    {
+      "note_id": 1757525665683,
+      "delimiter": "\\(",
+      "expr": "R = \\rho \\frac{L}{S}"
+    },
+    {
+      "note_id": 1757525665683,
+      "delimiter": "\\(",
+      "expr": "\\rho"
+    },
+    {
+      "note_id": 1757525824737,
+      "delimiter": "\\(",
+      "expr": "E = \\frac{W_非}{q}"
+    },
+    {
+      "note_id": 1757525824737,
+      "delimiter": "\\(",
+      "expr": "E = U_外 + U_内 = U_外 + Ir"
+    },
+    {
+      "note_id": 1757525908928,
+      "delimiter": "\\(",
+      "expr": "I = \\frac{U}{R}"
+    },
+    {
+      "note_id": 1757525908928,
+      "delimiter": "\\(",
+      "expr": "I = \\frac{E}{R + r}"
+    },
+    {
+      "note_id": 1757526100117,
+      "delimiter": "\\(",
+      "expr": "U = E"
+    },
+    {
+      "note_id": 1757526100117,
+      "delimiter": "\\(",
+      "expr": "U = 0"
+    },
+    {
+      "note_id": 1757526100117,
+      "delimiter": "\\(",
+      "expr": "U = E - Ir"
+    },
+    {
+      "note_id": 1757526648820,
+      "delimiter": "\\(",
+      "expr": "W = UI t = I^2R t = \\frac{U^2}{R}t"
+    },
+    {
+      "note_id": 1757526648820,
+      "delimiter": "\\(",
+      "expr": "P =UI = I^2R = \\frac{U^2}{R}"
+    },
+    {
+      "note_id": 1757526648820,
+      "delimiter": "\\(",
+      "expr": "Q = I^2 R t"
+    },
+    {
+      "note_id": 1757526648820,
+      "delimiter": "\\(",
+      "expr": "P =EI"
+    },
+    {
+      "note_id": 1757526648820,
+      "delimiter": "\\(",
+      "expr": "\\eta = \\frac{P_{出}}{P_总} \\times 100\\% = \\frac{U_{外}}{E} \\times 100\\%"
+    },
+    {
+      "note_id": 1757840335943,
+      "delimiter": "\\(",
+      "expr": "\\ce{C_60}"
+    },
+    {
+      "note_id": 1757840335943,
+      "delimiter": "\\(",
+      "expr": "\\ce{O2}"
+    },
+    {
+      "note_id": 1757840335943,
+      "delimiter": "\\(",
+      "expr": "\\ce{O3}"
+    },
+    {
+      "note_id": 1757840692638,
+      "delimiter": "\\(",
+      "expr": "\\ce{CO2、SO2、SO3、N2O5}"
+    },
+    {
+      "note_id": 1757840692638,
+      "delimiter": "\\(",
+      "expr": "\\ce{FeO、 Fe2O3、CuO、Na2O}"
+    },
+    {
+      "note_id": 1757840692638,
+      "delimiter": "\\(",
+      "expr": "\\ce{Mn2O7}"
+    },
+    {
+      "note_id": 1757840692638,
+      "delimiter": "\\(",
+      "expr": "\\ce{NO、CO}"
+    },
+    {
+      "note_id": 1757860977634,
+      "delimiter": "\\(",
+      "expr": "v_{\\frac{x}{2}} = \\sqrt{  \\frac{v_0 ^2 + v_x ^2}{2}  }"
+    },
+    {
+      "note_id": 1757866744184,
+      "delimiter": "\\(",
+      "expr": "1T"
+    },
+    {
+      "note_id": 1757866744184,
+      "delimiter": "\\(",
+      "expr": "2T"
+    },
+    {
+      "note_id": 1757866744184,
+      "delimiter": "\\(",
+      "expr": "3T"
+    },
+    {
+      "note_id": 1757866744184,
+      "delimiter": "\\(",
+      "expr": "nT"
+    },
+    {
+      "note_id": 1757866744184,
+      "delimiter": "\\(",
+      "expr": "1^2 : 2^2 : 3^2 :···: n^2"
+    },
+    {
+      "note_id": 1757866744184,
+      "delimiter": "\\(",
+      "expr": "1T"
+    },
+    {
+      "note_id": 1757866744184,
+      "delimiter": "\\(",
+      "expr": "2T"
+    },
+    {
+      "note_id": 1757866744184,
+      "delimiter": "\\(",
+      "expr": "3T"
+    },
+    {
+      "note_id": 1757866744184,
+      "delimiter": "\\(",
+      "expr": "nT"
+    },
+    {
+      "note_id": 1757866744184,
+      "delimiter": "\\(",
+      "expr": "1 : 3 : 5 : ···: (2n -1)"
+    },
+    {
+      "note_id": 1757866744184,
+      "delimiter": "\\(",
+      "expr": "x"
+    },
+    {
+      "note_id": 1757866744184,
+      "delimiter": "\\(",
+      "expr": "2x"
+    },
+    {
+      "note_id": 1757866744184,
+      "delimiter": "\\(",
+      "expr": "3x"
+    },
+    {
+      "note_id": 1757866744184,
+      "delimiter": "\\(",
+      "expr": "nx"
+    },
+    {
+      "note_id": 1757866744184,
+      "delimiter": "\\(",
+      "expr": "1 : \\sqrt{2} : \\sqrt{3} : ··· : \\sqrt{n}"
+    },
+    {
+      "note_id": 1757866744184,
+      "delimiter": "\\(",
+      "expr": "1 : (\\sqrt{2} - 1 ) : (\\sqrt{3} - \\sqrt{2}) : ··· : (\\sqrt{n} - \\sqrt{n-1})"
+    },
+    {
+      "note_id": 1757866744184,
+      "delimiter": "\\(",
+      "expr": "1T"
+    },
+    {
+      "note_id": 1757866744184,
+      "delimiter": "\\(",
+      "expr": "2T"
+    },
+    {
+      "note_id": 1757866744184,
+      "delimiter": "\\(",
+      "expr": "3T"
+    },
+    {
+      "note_id": 1757866744184,
+      "delimiter": "\\(",
+      "expr": "nT"
+    },
+    {
+      "note_id": 1757866744184,
+      "delimiter": "\\(",
+      "expr": "1 : 2 : 3 : ···: n"
+    },
+    {
+      "note_id": 1757866744184,
+      "delimiter": "\\(",
+      "expr": "x"
+    },
+    {
+      "note_id": 1757866744184,
+      "delimiter": "\\(",
+      "expr": "2x"
+    },
+    {
+      "note_id": 1757866744184,
+      "delimiter": "\\(",
+      "expr": "3x"
+    },
+    {
+      "note_id": 1757866744184,
+      "delimiter": "\\(",
+      "expr": "nx"
+    },
+    {
+      "note_id": 1757866744184,
+      "delimiter": "\\(",
+      "expr": "1 : \\sqrt{2} : \\sqrt{3} : ··· : \\sqrt{n}"
+    },
+    {
+      "note_id": 1757866854978,
+      "delimiter": "\\(",
+      "expr": "F = kx"
+    },
+    {
+      "note_id": 1757866854978,
+      "delimiter": "\\(",
+      "expr": "\\Delta F = k \\Delta x"
+    },
+    {
+      "note_id": 1758123542012,
+      "delimiter": "\\(",
+      "expr": "\\frac{a^3}{T^2} = k"
+    },
+    {
+      "note_id": 1758123705978,
+      "delimiter": "\\(",
+      "expr": "E = \\frac{F}{q}"
+    },
+    {
+      "note_id": 1758123705978,
+      "delimiter": "\\(",
+      "expr": "E=\\frac{KQ}{r^2}"
+    },
+    {
+      "note_id": 1758123705978,
+      "delimiter": "\\(",
+      "expr": "E=\\frac{U}{d}"
+    },
+    {
+      "note_id": 1758123912345,
+      "delimiter": "\\(",
+      "expr": "\\varphi = \\frac{E_p}{q}"
+    },
+    {
+      "note_id": 1758123912345,
+      "delimiter": "\\(",
+      "expr": "U_{AB} = \\frac{W_ {AB}  }{q} = \\varphi _a - \\varphi _b"
+    },
+    {
+      "note_id": 1758124085113,
+      "delimiter": "\\(",
+      "expr": "W_{AB}  = - \\Delta E_{pAB} =E_{pA} - E_{pB} = qU_{AB}"
+    },
+    {
+      "note_id": 1758124202750,
+      "delimiter": "\\(",
+      "expr": "I = \\frac{q}{t}"
+    },
+    {
+      "note_id": 1758124202750,
+      "delimiter": "\\(",
+      "expr": "I = \\frac{U}{R}"
+    },
+    {
+      "note_id": 1758124202750,
+      "delimiter": "\\(",
+      "expr": "I = nqSv"
+    },
+    {
+      "note_id": 1758124324320,
+      "delimiter": "\\(",
+      "expr": "R = \\frac{mv}{Bq}"
+    },
+    {
+      "note_id": 1758124324320,
+      "delimiter": "\\(",
+      "expr": "T = \\frac{2 \\pi m}{Bq}"
+    },
+    {
+      "note_id": 1758124406390,
+      "delimiter": "\\(",
+      "expr": "E = n \\frac{\\Delta \\phi}{\\Delta t} = BLv"
+    },
+    {
+      "note_id": 1758125495422,
+      "delimiter": "\\(",
+      "expr": "F = \\frac{B^2 L^2 v}{R_总}"
+    },
+    {
+      "note_id": 1758125739828,
+      "delimiter": "\\(",
+      "expr": "E  =   \\frac{E_m}{ \\sqrt{2} }"
+    },
+    {
+      "note_id": 1758125739828,
+      "delimiter": "\\(",
+      "expr": "U  =   \\frac{U_m}{ \\sqrt{2} }"
+    },
+    {
+      "note_id": 1758125739828,
+      "delimiter": "\\(",
+      "expr": "I  =   \\frac{I_m}{ \\sqrt{2} }"
+    },
+    {
+      "note_id": 1758126138621,
+      "delimiter": "\\(",
+      "expr": "p_1 V_1 = p_2 V_2"
+    },
+    {
+      "note_id": 1758126138621,
+      "delimiter": "\\(",
+      "expr": "\\frac{p_1}{T_1}   =   \\frac{p_2}{T_2}"
+    },
+    {
+      "note_id": 1758126138621,
+      "delimiter": "\\(",
+      "expr": "\\frac{V_1}{T_1}   =  \\frac{V_2}{T_2}"
+    },
+    {
+      "note_id": 1758126174972,
+      "delimiter": "\\(",
+      "expr": "\\sin C = \\frac{1}{n}"
+    },
+    {
+      "note_id": 1758126299740,
+      "delimiter": "\\(",
+      "expr": "E_k = h \\nu - W_0"
+    },
+    {
+      "note_id": 1758126299740,
+      "delimiter": "\\(",
+      "expr": "W_0 = h \\nu _0 = h \\frac{c}{\\lambda _0}"
+    }
+  ],
+  "unique_expressions": [
+    "y-y_1=k(x-x_1)",
+    "y=kx+b",
+    "\\frac{y-y_1}{y_2-y_1}=\\frac{x-x_1}{x_2-x_1}",
+    "\\frac{x}{a}+\\frac{y}{b}=1",
+    "a, b",
+    "Ax+By+C=0",
+    "A, B",
+    "v_\\frac{v+v_0}{2}",
+    "v_\\frac{x}{2}",
+    "v_\\frac{v+v_0}{2}=\\frac{v+v_0}{2}",
+    "v_\\frac{x}{2}=\\sqrt{\\frac{v^2+v_0^2}{2}}",
+    "v_\\frac{x}{2}^2-v_\\frac{v+v_0}{2}^2=\\frac{(v_0-v)^2}{4}",
+    "v_0-v=at",
+    "t",
+    "＞",
+    "proof:",
+    "\\Delta U=Q+W",
+    "n = \\frac{sin\\theta_1}{sin\\theta_2}",
+    "n=\\frac{c}{v}(n>1)",
+    "F=BIL(B\\bot I)",
+    "F=qvB(v \\bot B)",
+    "h\\nu",
+    "\\nu",
+    "h",
+    "W_0",
+    "E_k",
+    "E_k=h\\nu-W_0",
+    "E_k =eU_c (U_c 为遏止电压)",
+    "E_k=h\\nu - W_0",
+    "U_c = \\frac{h}{e}  v - \\frac{W_0}{e}",
+    "h=6.62607015 \\times 10^{-34} J \\cdot s",
+    "\\Delta x = \\frac{l}{d} \\lambda",
+    "l",
+    "d",
+    "\\lambda",
+    "\\pi =",
+    "3.1415926",
+    "e =",
+    "2.71828",
+    "\\sqrt{2} =",
+    "1.414",
+    "\\sqrt{3} =",
+    "1.732",
+    "\\sin 0\\degree =",
+    "0",
+    "\\sin 30\\degree =",
+    "\\frac{1}{2}",
+    "\\sin 45\\degree =",
+    "\\frac{ \\sqrt{2} }{2}",
+    "\\sin 60\\degree =",
+    "\\frac{\\sqrt{3} }{2}",
+    "\\sin 90\\degree =",
+    "1",
+    "\\cos 0\\degree =",
+    "\\cos 30\\degree =",
+    "\\cos 45\\degree =",
+    "\\frac{\\sqrt{2} }{2}",
+    "\\cos 60\\degree =",
+    "\\cos 90\\degree =",
+    "\\tan 0\\degree =",
+    "\\tan 30\\degree =",
+    "\\frac{\\sqrt{3} }{3}",
+    "\\tan 45\\degree =",
+    "\\tan 60\\degree =",
+    "\\sqrt{3}",
+    "\\tan 90\\degree \\to",
+    "+ \\infty",
+    "\\ln 2=",
+    "0.693",
+    "\\ln 3=",
+    "1.098",
+    "\\lg 2=",
+    "0.301",
+    "\\lg 3=",
+    "0.477",
+    "ax^2 + bx + c = 0 (a, b, c \\in R, a \\neq 0)",
+    "x_1, x_2",
+    "x_1 +x_2 = -\\frac{b}{a}",
+    "x_1 x_2 = \\frac{c}{a}",
+    "ax^2 + bx + c = 0",
+    "\\rightarrow x^2 + \\frac{b}{a} x + \\frac{c}{a} = 0",
+    "\\rightarrow (x - \\frac{b}{2a})^2 = \\frac{b^2 - 4ac}{4a^2}",
+    "\\rightarrow x_{1, 2} = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}",
+    "p, q",
+    "p",
+    "q",
+    "A \\subseteq B",
+    "A \\subsetneq B",
+    "A = B",
+    "A \\cap B = \\varnothing",
+    "\\lnot p",
+    "\\lnot q",
+    "r",
+    "e =\\frac{r}{d}",
+    "e \\gt 1",
+    "e = 1",
+    "0 \\lt e \\lt 1",
+    "\\frac{2}{\\frac{1}{a} +\\frac{1}{b} }",
+    "\\le",
+    "\\sqrt{ab}",
+    "\\frac{a + b}{2}",
+    "\\sqrt{ \\frac{a^2+b^2}{2} }",
+    "a=b",
+    "\\frac{U_1}{U_2} = \\frac{n_1}{n_2} (与副线圈的个数无关，且U_1决定U_2)",
+    "\\frac{I_1}{I_2} = \\frac{n_2}{n_1} (I_2 决定 I_1)",
+    "a_n=a_1+(n-1)d   (n\\in \\mathrm{Z^+})",
+    "S_n=\\frac{n(a_1+a_n)}{2}=na_1+\\frac{n(n-1)d}{2}=\\frac{d}{2} n^2+(a_1-\\frac{1}{2} d)n",
+    "a_n=a_1q^{n-1} (n\\in \\mathrm{Z^+})",
+    "S_n= \\begin{cases}<br>\\frac{a_1(1-q^n)}{1-q},\\quad &q\\neq1, \\\\<br>na_1,\\quad &q=1<br>\\end{cases}",
+    "\\mathrm{S_.+V_.}",
+    "\\mathrm{S_.+V_.+O_.}",
+    "\\mathrm{S_.+V_.+O_.+O_.}",
+    "S_.+Vt_.+O_.O_.C",
+    "\\bbox[yellow,5px,border:2px solid red]\n{\n\\mathrm{F=-kx}\n}",
+    "\\bbox[yellow,5px,border:2px solid red]\n{\n\\mathrm {x=A\\sin ({\\omega t + \\varphi})}\n(\\varphi 为初相位，\\omega 为圆频率)}",
+    "\\mathrm C、H、O、N、P、S、K、Ca、Mg等",
+    "\\mathrm Fe、Mn、Zn、Cu、B、",
+    "\\mathrm Mo",
+    "0  \\sim 0.6 A",
+    "0.5 A",
+    "I = \\frac{E}{R}",
+    "I = \\frac{E}{R_总}",
+    "Q_热 = E_{k初} - E_{k末}",
+    "Q_{热总} = E_{k初} - E_{k末}",
+    "\\varepsilon",
+    "\\nu = \\frac{\\varepsilon}{h}",
+    "\\lambda = \\frac{h}{p}",
+    "p=\\frac{h}{\\lambda}",
+    "1^2 + 2^2 + 3^2 + \\cdots + n^2 =",
+    "\\frac{1}{6}n(n+1)(2n+1)",
+    "(ac + bd)^2 \\leq (a^2 + b^2) \\cdot (c^2 + d^2)",
+    "\\frac{a}{c} = \\frac{b}{d}",
+    "\\frac{(x_1+x_2)^2}{y_1 +y_2} \\leq \\frac{x_1^2}{y_1} + \\frac{x_2^2}{y_2}",
+    "\\frac{x_1}{x_2} = \\frac{y_1}{y_2}",
+    "m_1v_1+m_2v_2=m_1v_1'+m_2v_2'",
+    "\\frac{1}{2}m_1v_1^2+\\frac{1}{2}m_2v_2^2=\\frac{1}{2}m_1v_1'^2+\\frac{1}{2}m_2v_2'^2",
+    "v_1'={{c1::\\frac{m_1-m_2}{m_1+m_2} \\cdot v_1+\\frac{2m_2}{m_1+m_2} \\cdot v_2}}",
+    "v_2'={{c1::\\frac{2m_1}{m_1+m_2} \\cdot v_1 + \\frac{m_2-m_1}{m_1+m_2} \\cdot v_2}}",
+    "\\Delta E={{c1::\\frac{m_1m_2}{2(m_1+m_2)} (v_1-v_2)^2}}",
+    "\\ce{MnO4- >Cl2 >Br2 >Fe^3+ >I2}",
+    "\\ce{S^2- >SO3^2- >I- >Fe^2+ >Br- >Cl-}",
+    "\\ce{Na2S2O3 + H2SO4 = Na2SO4 + SO2 ^ + S v + H2O}",
+    "\\rightarrow",
+    "F_1, F_2",
+    "\\lvert F_1 - F_2\\rvert",
+    "2c",
+    "2a",
+    "2b",
+    "c^2 = a^2 - b^2",
+    "\\lvert F_1F_2\\rvert",
+    "c^2 = a^2 + b^2",
+    "ax^2+bx+c=0",
+    "x= \\frac{-b \\pm \\sqrt{b^2-4ac} }{2a}",
+    "\\triangle ABC",
+    "\\cos A = \\frac{b^2+c^2-a^2}{2bc}",
+    "\\Delta H",
+    "\\Delta H ＞ 0",
+    "\\Delta H ＜ 0",
+    "\\ce{H2SO4、HNO3、HCl、HBr、HI、HClO4}",
+    "\\ce{NaOH、KOH、Ba{(OH)}_2、Ca{(OH)}_2 }",
+    "\\ce{{{c1::CH3CHO + 2[Ag{(NH_3)}_2]OH ->[\\Delta]CH3COONH4 + 2Ag v +3NH3 + H2O}}}",
+    "\\ce{ 2[Ag{(NH_3)}_2]OH}",
+    "\\ce{{{c1::CH3CHO + 2Cu{(OH)}_2 + NaOH ->[\\Delta]CH3COONa + Cu_2O v +3H2O}}}",
+    "\\ce{Cu{(OH)}_2}",
+    "\\ce{Cu_2O}",
+    "\\ce{H}",
+    "\\ce{O}",
+    "\\ce{^A_Z{\\overset{\\pm x}{X}}^{m \\pm }_n}",
+    "\\ce{A}",
+    "\\ce{Z}",
+    "\\ce{m \\pm}",
+    "\\ce{n}",
+    "\\ce{\\pm X}",
+    "\\mathit Q",
+    "\\mathit U",
+    "\\mathit C",
+    "\\mathit C = \\frac{Q}{U}",
+    "\\mathit C = \\frac{ \\varepsilon _rS}{4 \\pi k d}",
+    "\\ce{Ca^2+}",
+    "\\mathit f",
+    "\\varphi",
+    "U_{AB} = \\varphi _A - \\varphi _B = \\frac{W_ {AB} }{q}",
+    "W_{AB} = E_{pA} - E_{pB}",
+    "(x^\\alpha)^{'} =  {{c1::\\alpha x^{\\alpha - 1} }}",
+    "( \\sin x )^{'} = {{c1::\\cos x }}，( \\cos x )^{'} = {{c1::- \\sin x }}",
+    "(e^x)^{'} = {{c1::e^x}}，(a^x)^{'} = {{c1::a^x \\ln a}}",
+    "(\\ln x)^{'} = {{c1::\\frac{1}{x} }}  (x > 0)， (\\log_a x) = {{c1::\\frac{1}{x \\ln a} }}",
+    "c^{'} = {{c1::0}}",
+    "c",
+    "\\alpha \\in \\mathbf R",
+    "\\alpha \\neq 0",
+    "a > 0",
+    "a \\neq 1",
+    "x > 0，a > 0",
+    "\\ tan x",
+    "\\{x \\mid x \\in \\mathbb{R}, 且 x \\neq k\\pi + \\frac{\\pi}{2}, k \\in \\mathbb{Z} \\}",
+    "\\times",
+    "若 f(a - x) = f(b + x)，则 f(x) 的图像",
+    "若 f(a - x) = - f(b + x)，则 f(x) 的图像",
+    "若 f(a - x) + f(b + x) = 2c，则 f(x)的图像",
+    "x = \\frac{a + b}{2}",
+    "(\\frac{a + b}{2}  , 0)",
+    "(\\frac{a + b}{2}  , c)",
+    "f",
+    "T",
+    "\\nu = \\frac{ \\lambda }{ T } = \\lambda f",
+    "v",
+    "\\omega",
+    "\\omega = {{c1:: \\frac{\\Delta \\theta}{\\Delta t} }}",
+    "v = {{c1:: \\frac{2 \\pi r}{T} }},  \\omega = {{c1:: \\frac{2 \\pi }{ T }  }}, v = {{c1::\\omega r}}",
+    "A = i + \\frac{b}{2} - 1",
+    "A",
+    "i",
+    "b",
+    "y = f(x)",
+    "x",
+    "y",
+    "x = f(y)",
+    "y =x",
+    "1km = {{c1::10^3 }}m  = {{c1::10^5}} cm = {{c1::10^6}}mm = {{c1::10^9}} \\mu m = {{c1::10^{12} }} nm",
+    "1 m/s = {{c1::3.6}}km/h",
+    "1 A = {{c1::10^3}}mA = {{c1::10^6}} \\mu A",
+    "1MV = {{c1::10^3}} KV = {{c1::10^6}} V = {{c1::10^9}} mV = {{c1::10^{12} }} \\mu V",
+    "1 kWh = {{c1::3.6}} \\times {{c1::10^6}} J",
+    "1 F = {{c1::10^3}} mF = {{c1::10^6}} \\mu F = {{c1::10^9}} nF = {{c1::10^{12} }} pF",
+    "\\frac{x^2}{a^2} + \\frac{y^2}{b^2} = 1 (a > b > 0)",
+    "P(x_0, y_0)",
+    "\\frac{x_0 x}{a^2} + \\frac{y_0 y}{b^2} =1",
+    "Ax + By + C = 0",
+    "A^2 a^2 + B^2 b^2 = C^2",
+    "\\ce{Na2CO3}",
+    "\\iff",
+    "\\ce{NaHCO3}",
+    "\\ce{CuSO4.5H2O}",
+    "\\ce{FeSO4.7H2O}",
+    "\\ce{KAl{(SO_4)}2.12H2O}",
+    "\\ce{CaCO3}",
+    "\\ce{CaO}",
+    "\\ce{Ca(OH)2}",
+    "\\ce{CaSO4.2H2O}",
+    "\\ce{KOH}",
+    "\\ce{NaOH}",
+    "\\ce{KMnO4}",
+    "\\ce{CO2(固态)}",
+    "\\ce{CH3CH2OH}",
+    "\\ce{C6H12O6}",
+    "\\ce{C12H22O11}",
+    "\\ce{(C6H10O5)_n}",
+    "\\ce{CO(NH2)_2}",
+    "\\bar{x} = \\frac{1}{n} (x_1 + x_2 + \\ldots + x_n)",
+    "S = \\sqrt{ \\frac{1}{n} [ (x_1 -<br>\\bar{x} )^2 + (x_2 - \\bar{x})^2 + \\ldots + (x_n - \\bar{x})^2 ] }",
+    "S^2 = \\frac{1}{n} [ (x_1 -<br>\\bar{x} )^2 + (x_2 - \\bar{x})^2 + \\ldots + (x_n - \\bar{x})^2 ]",
+    "\\ce{0.1 g/mL NaOH}",
+    "\\ce{0.05 g/mL CuSO4}",
+    "50 \\sim 65 \\degree C",
+    "B",
+    "\\ce{0.01 g/mL CuSO4}",
+    "1 mL",
+    "4",
+    "y = \\frac{ Ax + B }{Cx + D }",
+    "(- \\frac{D}{C}, \\frac{A}{C})",
+    "f(x)",
+    "x = a",
+    "x = b",
+    "T = 2 \\left| a - b \\right|",
+    "( a \\neq b)",
+    "(a, 0)",
+    "(b, 0)",
+    "T = 4 \\left| a - b \\right|",
+    "\\ce{r(阴离子) > r(阳离子)}",
+    "\\ce{50ml, 100ml, 250ml, 500ml, 1000ml}",
+    "\\ce{FeCl3 + 3H2O \\xlongequal{\\triangle} Fe(OH)3 \\text{(胶体)} + 3HCl}",
+    "\\ce{Fe(OH)3}",
+    "\\ce{FeCl3}",
+    "\\ce{HCl}",
+    "\\ce{H2}",
+    "\\ce{Cl2}",
+    "\\ce{CrO4^2-}",
+    "\\ce{Cr2O7^2-}",
+    "\\ce{2CrO4^2- + 2H^+ = Cr2O7^2- + H2O}",
+    "\\frac{F_1}{ \\sin \\alpha} = \\frac{F_2}{ \\sin \\beta} = \\frac{F_3}{ \\sin \\gamma}",
+    "\\theta",
+    "\\mu",
+    "\\mu = \\tan \\theta",
+    "1 \\mathrm{rad}",
+    "57.3 \\degree",
+    "\\sin x",
+    "\\cos x",
+    "\\tan x",
+    "\\sec x = \\frac{1}{\\cos x}",
+    "\\csc x = \\frac{1}{\\sin x}",
+    "\\cot x = \\frac{1}{\\tan x}",
+    "S =",
+    "\\frac{1}{2} a h",
+    "\\frac{1}{2} a b \\sin C",
+    "\\frac{abc}{4R}",
+    "R",
+    "rp = \\sqrt{p(p - a)(p - b)(p - c)}",
+    "\\frac{1}{2} \\lvert x_1y_2 - x_2y_1 \\rvert",
+    "\\frac{1}{2} \\sqrt{ {\\lvert \\vec{OA} \\rvert}^2 {\\lvert \\vec{OB} \\rvert}^2  - {(\\vec{OA} \\cdot \\vec{OB})^2} }",
+    "\\ce{H2O}",
+    "\\ce{NaCl}",
+    "\\ce{H2SO4}",
+    "\\ce{BaCO3}",
+    "\\ce{BaSO4}",
+    "\\ce{CuSO4 * 5H2O}",
+    "\\frac{x^2}{a^2} - \\frac{y^2}{b^2} = 1 (a > 0 ， b > 0)",
+    "\\frac{x_0 x}{a^2} - \\frac{y_0 y}{b^2} =1",
+    "\\frac{x^2}{a^2} - \\frac{y^2}{b^2} = 1 (a >0， b > 0)",
+    "\\frac{x^2}{a^2} - \\frac{y^2}{b^2} = 1 (a > 0， b > 0)",
+    "A^2 a^2 - B^2 b^2 = C^2",
+    "\\pmb{y^2 =2px}",
+    "y_0 y = p(x + x_0)",
+    "p B^2 = 2 AC",
+    "\\pmb{\\frac{x^2}{a^2} - \\frac{y^2}{b^2} = 1}",
+    "y = \\pm \\frac{b}{a} x",
+    "\\pmb{y = \\pm \\frac{b}{a} x}",
+    "\\frac{x^2}{a^2} - \\frac{y^2}{b^2} = \\lambda",
+    "\\frac{x^2}{a^2} - \\frac{y^2}{b^2} = \\lambda  (\\lambda > 0，焦点在 x 轴上；\\lambda < 0，焦点在 y 轴上)",
+    "\\ce{H3PO4}",
+    "\\ce{H3PO3}",
+    "\\ce{H3PO2}",
+    "\\ce{HPO3}",
+    "\\ce{H4P2O7}",
+    "\\ce{Na2O2}",
+    "\\ce{TiCl4 + (x + 2)H2O = TiO2 * xH2O v + 4HCl}",
+    "\\ce{TiCl4}",
+    "\\ce{TiO2}",
+    "\\ce{SnO}",
+    "\\ce{SnO2}",
+    "\\ce{Al^3+, Fe^3+}",
+    "\\ce{Al^3+}",
+    "\\ce{Al(OH)3}",
+    "\\ce{Fe^3+}",
+    "\\ce{CH4}",
+    "\\ce{P4}",
+    "\\ce{SiO2}",
+    "\\vec{a} = (x_1, y_1)",
+    "\\vec{b} = (x_2, y_2)",
+    "\\vec{b} \\neq 0",
+    "\\vec{a} \\parallel \\vec{b}",
+    "\\Rightarrow",
+    "x_1y_2 - x_2y_1 = 0",
+    "\\vec{a} \\perp \\vec{b} ( a \\neq 0)",
+    "x_1x_2 + y_1y_2 = 0",
+    "\\pmb{P - ABC}",
+    "a",
+    "O",
+    "H = \\frac{ \\sqrt{6} }{ 3 } a",
+    "R = \\frac{ \\sqrt{6} }{ 4 } a",
+    "r = \\frac{ \\sqrt{6} }{ 12 } a",
+    "d = \\frac{ \\sqrt{2} }{ 2 } a",
+    "S = \\sqrt{3} a^2",
+    "\\alpha , \\beta , \\gamma",
+    "\\alpha",
+    "\\beta",
+    "\\gamma",
+    "\\ce{^238_92U —> ^234_90Th + ^4_2He}",
+    "\\ce{^234_90Th —> ^234_91Pa + ^0_{-1}e}",
+    "\\ce{^1_0n —> ^1_1H + ^0_{-1}e}",
+    "\\ce{2Al + Fe2O3 \\xlongequal{高温} Al2O3 + 2Fe }",
+    "\\ce{K Ca  Na Mg Al Zn Fe Sn Pb H Cu Hg Ag Pt Au }",
+    "n",
+    "2^n",
+    "2^n - 1",
+    "2^n - 2",
+    "(u^{'} \\pm v^{'}) =",
+    "u^{'} \\pm v^{'}",
+    "(u  v)^{'} =",
+    "u^{'} v + u v^{'}",
+    "(\\frac{u}{v})^{'} =",
+    "\\frac{u^{'} v - u v^{'} }{v^2}",
+    "(v \\neq 0)",
+    "\\pmb{D,E,F}",
+    "\\pmb{\\triangle ABC}",
+    "\\frac{BE}{EC} \\cdot \\frac{CD}{DA} \\cdot \\frac{AF}{BF} = 1",
+    "\\frac{DA}{AC} \\cdot \\frac{CB}{BE} \\cdot \\frac{FE}{FD} = 1",
+    "\\mathrm{D,E,F}",
+    "0.1 mL",
+    "0.1 g",
+    "0.01 ml",
+    "\\frac{3}{4}",
+    "\\mathit{explicit}",
+    "\\mathit{ubiquitous}",
+    "1 nm",
+    "1 \\sim 100 nm",
+    "100nm",
+    "m_a",
+    "m_b",
+    "m_a x = m_b y",
+    "ABCD",
+    "AB^2 + BC^2 + CD^2 + DA^2 = AC^2 + BD^2",
+    "\\vec{a} + \\vec{b} + \\vec{c} + \\vec{d} = 0",
+    "{\\lvert \\vec{a}  \\rvert}^2 + {\\lvert \\vec{b}  \\rvert}^2 + {\\lvert \\vec{c}  \\rvert}^2 + {\\lvert \\vec{d}  \\rvert}^2 = {\\lvert \\vec{a} + \\vec{b} \\rvert}^2 + {\\lvert \\vec{b} + \\vec{c} \\rvert}^2",
+    "\\vec{a} + \\vec{b} + \\vec{c} = - \\vec{d}",
+    "\\vec{a} = -\\vec{c}",
+    "\\vec{b} = -\\vec{d}",
+    "\\sigma \\pi",
+    "\\sigma",
+    "\\pi",
+    "f(x) = x e^x",
+    "(- \\infty, -1)",
+    "(-1, +\\infty)",
+    "f(x) = \\frac{x}{e^x}",
+    "(- \\infty, 1)",
+    "(1, +\\infty)",
+    "f(x) = \\frac{e^x}{x}",
+    "(- \\infty, 0), (0,1)",
+    "T =2\\pi \\sqrt{ \\frac{L}{g} }",
+    "\\sin \\theta = \\theta",
+    "F",
+    "y=x \\ln x",
+    "(0,\\frac{1}{e})",
+    "(\\frac{1}{e}, + \\infty)",
+    "y=\\frac{x}{\\ln x}",
+    "(0,1), (1, e)",
+    "(e,+ \\infty)",
+    "y=\\frac{\\ln x}{x}",
+    "(0,e)",
+    "(e, +\\infty)",
+    "\\ce{3CH3CH2OH + 2K2Cr2O7 + 8H2SO4 = 3CH3COOH +2K2SO4 + 2Cr2(SO4)3 +11H2O}",
+    "\\ce{S + 2KNO3 + 3C = K2S + N2 ^ + 3CO2 ^}",
+    "S = 4 \\pi r^2",
+    "v = v_0 + at",
+    "\\bar{v} = v_{\\frac{t}{2}} = \\frac{v_0 + v}{2} = \\frac{x}{t}",
+    "x = v_0 t + \\frac{1}{2} at^2",
+    "2ax = v^2 - v_0 ^2",
+    "\\Delta x = aT^2",
+    "v =gt",
+    "h =\\frac{1}{2}gt^2",
+    "v^2 = 2gh",
+    "v = \\frac{\\Delta s}{\\Delta t} = \\frac{2 \\pi r}{T}",
+    "\\omega = \\frac{\\Delta \\theta}{\\Delta t} = \\frac{2 \\pi}{T}",
+    "a_n = \\frac{v^2}{r} = {\\omega}^2 r = (\\frac{2 \\pi}{T})^2 r",
+    "F_n = m a_n",
+    "F = - kx",
+    "T = 2\\pi \\sqrt{\\frac{L}{g}}",
+    "v = \\lambda f = \\frac{\\lambda}{T}",
+    "W = Fl \\cos\\alpha",
+    "P = \\frac{W}{t} = F v \\cos\\alpha",
+    "\\eta = \\frac{W_{有用}}{W_总} \\times 100\\% = \\frac{P_{有用}}{P_总} \\times 100\\%",
+    "E_k = \\frac{1}{2} m v^2",
+    "E_p = mgh",
+    "W_{合} = \\frac{1}{2}mv_{末} ^2 - \\frac{1}{2}mv_{初} ^2",
+    "E_1 = E_2",
+    "E_{k1} + E_{p1} =E_{k2} + E_{p2}",
+    "P=mv",
+    "I =F ·\\Delta t",
+    "F(t^{'} - t) = mv^{'} - mv",
+    "m_1 v_1 + m_2 v_2 = m_1 v_1 ^{'} + m_2 v_2 ^{'}",
+    "I = \\frac{q}{t}",
+    "I = nesv",
+    "R = \\rho \\frac{L}{S}",
+    "\\rho",
+    "E = \\frac{W_非}{q}",
+    "E = U_外 + U_内 = U_外 + Ir",
+    "I = \\frac{U}{R}",
+    "I = \\frac{E}{R + r}",
+    "U = E",
+    "U = 0",
+    "U = E - Ir",
+    "W = UI t = I^2R t = \\frac{U^2}{R}t",
+    "P =UI = I^2R = \\frac{U^2}{R}",
+    "Q = I^2 R t",
+    "P =EI",
+    "\\eta = \\frac{P_{出}}{P_总} \\times 100\\% = \\frac{U_{外}}{E} \\times 100\\%",
+    "\\ce{C_60}",
+    "\\ce{O2}",
+    "\\ce{O3}",
+    "\\ce{CO2、SO2、SO3、N2O5}",
+    "\\ce{FeO、 Fe2O3、CuO、Na2O}",
+    "\\ce{Mn2O7}",
+    "\\ce{NO、CO}",
+    "v_{\\frac{x}{2}} = \\sqrt{  \\frac{v_0 ^2 + v_x ^2}{2}  }",
+    "1T",
+    "2T",
+    "3T",
+    "nT",
+    "1^2 : 2^2 : 3^2 :···: n^2",
+    "1 : 3 : 5 : ···: (2n -1)",
+    "2x",
+    "3x",
+    "nx",
+    "1 : \\sqrt{2} : \\sqrt{3} : ··· : \\sqrt{n}",
+    "1 : (\\sqrt{2} - 1 ) : (\\sqrt{3} - \\sqrt{2}) : ··· : (\\sqrt{n} - \\sqrt{n-1})",
+    "1 : 2 : 3 : ···: n",
+    "F = kx",
+    "\\Delta F = k \\Delta x",
+    "\\frac{a^3}{T^2} = k",
+    "E = \\frac{F}{q}",
+    "E=\\frac{KQ}{r^2}",
+    "E=\\frac{U}{d}",
+    "\\varphi = \\frac{E_p}{q}",
+    "U_{AB} = \\frac{W_ {AB}  }{q} = \\varphi _a - \\varphi _b",
+    "W_{AB}  = - \\Delta E_{pAB} =E_{pA} - E_{pB} = qU_{AB}",
+    "I = nqSv",
+    "R = \\frac{mv}{Bq}",
+    "T = \\frac{2 \\pi m}{Bq}",
+    "E = n \\frac{\\Delta \\phi}{\\Delta t} = BLv",
+    "F = \\frac{B^2 L^2 v}{R_总}",
+    "E  =   \\frac{E_m}{ \\sqrt{2} }",
+    "U  =   \\frac{U_m}{ \\sqrt{2} }",
+    "I  =   \\frac{I_m}{ \\sqrt{2} }",
+    "p_1 V_1 = p_2 V_2",
+    "\\frac{p_1}{T_1}   =   \\frac{p_2}{T_2}",
+    "\\frac{V_1}{T_1}   =  \\frac{V_2}{T_2}",
+    "\\sin C = \\frac{1}{n}",
+    "E_k = h \\nu - W_0",
+    "W_0 = h \\nu _0 = h \\frac{c}{\\lambda _0}"
+  ]
+}
