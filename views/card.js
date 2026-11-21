@@ -262,9 +262,14 @@
         }
     }
 
+    var lastAppliedCss = null;
+
     function applyNoteCss(css) {
+        var next = css || '';
+        if (next === lastAppliedCss) return;
+        lastAppliedCss = next;
         if (noteStyleEl) {
-            noteStyleEl.textContent = css || '';
+            noteStyleEl.textContent = next;
         }
     }
 
