@@ -140,9 +140,26 @@
         }
     }
 
-    // 6. Auto-scale wide equations via -webkit-transform (zero horizontal scrollbars)
+    // 6. Auto-scale wide equations via -webkit-transform & polish cloze math boxes
     function fitWideEquations(cardEl) {
         if (!cardEl || !cardEl.querySelectorAll) return;
+
+        // Ensure clozes wrapping tall math formulas never let border-bottom slice through fractions
+        var clozes = cardEl.querySelectorAll('.cloze');
+        for (var c = 0; c < clozes.length; c++) {
+            var cl = clozes[c];
+            var hasMath = cl.querySelectorAll && cl.querySelectorAll('.katex, .MathJax').length > 0;
+            if (hasMath) {
+                if (cl.className.indexOf('cloze-math') === -1) {
+                    cl.className = cl.className + ' cloze-math';
+                }
+                var hasBox = cl.querySelectorAll('.fbox, .fcolorbox').length > 0;
+                if (hasBox && cl.className.indexOf('cloze-boxed') === -1) {
+                    cl.className = cl.className + ' cloze-boxed';
+                }
+            }
+        }
+
         var maxW = cardEl.clientWidth - 96; // account for 48px horizontal padding each side
         if (maxW <= 100) maxW = 860;
 
@@ -563,6 +580,16 @@
         fontOverrideEl = document.getElementById('card-font-override');
 
         applyFontSize(fontSizePx);
+
+        // Only mount Kindle file:// system font path when running from file:// (avoids browser HTTP security error)
+        if (typeof window !== 'undefined' && window.location && window.location.protocol === 'file:') {
+            var kFontStyle = document.createElement('style');
+            kFontStyle.textContent =
+                "@font-face { font-family: 'SonyReader Ming'; src: local('SonyReader Ming'), url('file:///mnt/us/fonts/SonyReader%20Ming.ttf') format('truetype'); font-weight: normal; font-style: normal; }";
+            var head = document.getElementsByTagName('head')[0];
+            if (head) head.appendChild(kFontStyle);
+        }
+
         notifyHost('CARD_READY', {
             webkit1_patch: window.__RANKI_WEBKIT1_VLIST_PATCH__,
             katex_ready: typeof window.renderMathInElement === 'function'

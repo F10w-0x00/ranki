@@ -18,9 +18,7 @@
 
 @font-face {
     font-family: 'SonyReader Ming';
-    src: local('SonyReader Ming'),
-         url('file:///mnt/us/fonts/SonyReader%20Ming.ttf') format('truetype'),
-         url('file:///D:/fonts/SonyReader%20Ming.ttf') format('truetype');
+    src: local('SonyReader Ming');
     font-weight: normal;
     font-style: normal;
 }
@@ -144,6 +142,21 @@ html, body {
     border-radius: 3px;
 }
 
+/* Tall math inside cloze uses inline-block so underline sits cleanly BELOW fractions/roots */
+.card.kindle .cloze.cloze-math {
+    display: inline-block;
+    vertical-align: middle;
+    padding: 4px 8px;
+    margin: 2px 0;
+}
+
+/* When a cloze wraps an explicit \bbox frame, avoid double-border clutter */
+.card.kindle .cloze.cloze-boxed {
+    background-color: transparent;
+    border-bottom: 0;
+    padding: 2px 4px;
+}
+
 /* Monochrome High-Contrast Red Emphasis (<font color="red"> traps/contrasts) */
 .card.kindle font[color="red"],
 .card.kindle font[color="RED"],
@@ -209,12 +222,16 @@ html, body {
     display: inline-block;
 }
 
-/* Highlighted formula boxes (\bbox -> \boxed) */
+/* Highlighted formula boxes (\bbox -> \boxed): MUST stay transparent so KaTeX overlay never obscures glyphs */
 .card.kindle .katex .fbox,
 .card.kindle .katex .fcolorbox {
     border: 1.5px solid #000000 !important;
-    background-color: #f0f0f0;
-    padding: 2px 5px;
+    background-color: transparent !important;
+}
+
+.card.kindle .katex-error {
+    color: #000000 !important;
+    border-bottom: 1px dotted #000000;
 }
 
 /* MathJax Fallback Styling */
