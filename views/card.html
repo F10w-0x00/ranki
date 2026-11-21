@@ -8,6 +8,49 @@
     <link rel="stylesheet" href="card.css">
     <style id="card-note-style"></style>
     <style id="card-font-override"></style>
+    <!-- Primary Battle-Tested Math Engine for Kindle WebKitGTK 1.0: MathJax 2.7.9 -->
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({
+            showProcessingMessages: false,
+            messageStyle: "none",
+            skipStartupTypeset: true,
+            extensions: ["tex2jax.js"],
+            jax: ["input/TeX", "output/HTML-CSS"],
+            tex2jax: {
+                inlineMath: [["$", "$"], ["\\(", "\\)"]],
+                displayMath: [["$$", "$$"], ["\\[", "\\]"]],
+                processEscapes: true
+            },
+            TeX: {
+                mhchem: { legacy: false },
+                extensions: [
+                    "AMSmath.js",
+                    "AMSsymbols.js",
+                    "mhchem.js",
+                    "extpfeil.js",
+                    "color.js",
+                    "bbox.js",
+                    "cancel.js",
+                    "enclose.js",
+                    "newcommand.js",
+                    "noErrors.js",
+                    "noUndefined.js"
+                ],
+                noErrors: { disabled: false },
+                noUndefined: { disabled: false }
+            },
+            "HTML-CSS": {
+                scale: 105,
+                availableFonts: ["TeX"],
+                preferredFont: "TeX",
+                webFont: "TeX",
+                imageFont: null,
+                matchFontHeight: false,
+                linebreaks: { automatic: false }
+            }
+        });
+    </script>
+    <script src="mathjax/MathJax.js?config=TeX-AMS_HTML"></script>
 </head>
 <body>
     <!-- Group A: 2 Slots (Front / Back) -->
@@ -43,7 +86,7 @@
         </div>
     </div>
 
-    <!-- Primary Ultra-Fast ES5 Math Engine: KaTeX + mhchem + auto-render -->
+    <!-- Optional Switchable Engine: ES5 KaTeX + mhchem + auto-render -->
     <script src="katex/katex.min.js"></script>
     <script src="katex/mhchem.min.js"></script>
     <script src="katex/auto-render.min.js"></script>

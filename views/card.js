@@ -19,10 +19,17 @@
     var prefetchedCardCss = '';
 
     var fontSizePx = 42;
-    var mathEngine = 'katex';    // 'katex' or 'mathjax'
+    var mathEngine = 'mathjax';  // 'mathjax' (default, battle-tested on KPW3) or 'katex'
     var mathJaxLoaded = false;
     var mathJaxLoading = false;
+    var mathJaxHooked = false;
     var mathJaxWaiters = [];
+
+    var renderGen = 1;
+    var activeFrontRaw = '';
+    var activeBackRaw = '';
+    var prefetchedFrontRaw = '';
+    var prefetchedBackRaw = '';
 
     var pendingBackRender = null;
     var pendingPrefetchTimer = null;
@@ -291,19 +298,47 @@
     }
 
     // 6. Auto-scale wide equations via -webkit-transform & surgical e-ink math color normalization
+    function isNeutralOrTransparent(val) {
+        if (!val) return true;
+        var s = String(val).toLowerCase().replace(/\s+/g, '');
+        return !s || s === 'transparent' || s === 'none' || s === 'inherit' ||
+            s === 'initial' || s === 'currentcolor' || s === 'rgba(0,0,0,0)';
+    }
+
+    function isPureBlackOrWhite(val) {
+        var s = String(val).toLowerCase().replace(/\s+/g, '');
+        return s === 'black' || s === '#000' || s === '#000000' || s === 'rgb(0,0,0)' ||
+            s === 'white' || s === '#fff' || s === '#ffffff' || s === 'rgb(255,255,255)';
+    }
+
     function normalizeMathColors(cardEl) {
         if (!cardEl || !cardEl.querySelectorAll) return;
-        // Convert explicit colored TeX (\color{yellow}, \textcolor{blue}) to pure #000000
-        // while strictly preserving KaTeX/mhchem `color: transparent` (\vphantom{X}) struts!
+        // Convert explicit colored TeX (\color{yellow}, \textcolor{blue}, \bbox[yellow, border:2px solid red])
+        // to crisp monochrome while strictly preserving transparent struts (\vphantom{X}, MathJax spacers)!
         var styled = cardEl.querySelectorAll('.katex [style], .MathJax [style]');
         for (var i = 0; i < styled.length; i++) {
             var el = styled[i];
-            if (!el.style || !el.style.color) continue;
-            var col = String(el.style.color).toLowerCase().replace(/\s+/g, '');
-            if (!col || col === 'transparent' || col === 'rgba(0,0,0,0)' || col === 'inherit') {
-                continue;
+            if (!el.style) continue;
+
+            if (el.style.color && !isNeutralOrTransparent(el.style.color)) {
+                el.style.color = '#000000';
             }
-            el.style.color = '#000000';
+
+            if (el.style.backgroundColor && !isNeutralOrTransparent(el.style.backgroundColor)) {
+                var bgLow = String(el.style.backgroundColor).toLowerCase().replace(/\s+/g, '');
+                if (bgLow !== 'white' && bgLow !== '#fff' && bgLow !== '#ffffff' &&
+                    bgLow !== 'rgb(255,255,255)' && bgLow !== '#e6e6e6' && bgLow !== 'rgb(230,230,230)') {
+                    el.style.backgroundColor = '#e6e6e6';
+                }
+            }
+
+            var bProps = ['borderColor', 'borderTopColor', 'borderRightColor', 'borderBottomColor', 'borderLeftColor'];
+            for (var b = 0; b < bProps.length; b++) {
+                var bp = bProps[b];
+                if (el.style[bp] && !isNeutralOrTransparent(el.style[bp]) && !isPureBlackOrWhite(el.style[bp])) {
+                    el.style[bp] = '#000000';
+                }
+            }
         }
     }
 
@@ -352,6 +387,16 @@
                     cl.className = cl.className + ' cloze-math';
                 }
                 var hasBox = cl.querySelectorAll('.fbox, .fcolorbox').length > 0;
+                if (!hasBox) {
+                    var mjStyled = cl.querySelectorAll('.MathJax [style]');
+                    for (var m = 0; m < mjStyled.length; m++) {
+                        if (mjStyled[m].style && mjStyled[m].style.borderWidth &&
+                            mjStyled[m].style.borderStyle && mjStyled[m].style.borderStyle !== 'none') {
+                            hasBox = true;
+                            break;
+                        }
+                    }
+                }
                 if (hasBox && cl.className.indexOf('cloze-boxed') === -1) {
                     cl.className = cl.className + ' cloze-boxed';
                 }
@@ -373,10 +418,10 @@
         var maxW = (cardEl.clientWidth || 960) - 84;
         if (maxW <= 120) maxW = 860;
 
-        // Scale display math inner .katex (keeps parent .katex-display centering exact!)
-        var dispNodes = cardEl.querySelectorAll('.katex-display');
+        // Scale display math inner .katex / .MathJax (keeps parent display block centering exact!)
+        var dispNodes = cardEl.querySelectorAll('.katex-display, .MathJax_Display');
         for (var d = 0; d < dispNodes.length; d++) {
-            var inner = dispNodes[d].querySelectorAll ? dispNodes[d].querySelectorAll('.katex') : [];
+            var inner = dispNodes[d].querySelectorAll ? dispNodes[d].querySelectorAll('.katex, .MathJax') : [];
             if (inner.length > 0) {
                 scaleEquationNode(inner[0], maxW);
             } else {
@@ -384,24 +429,45 @@
             }
         }
 
-        // Scale standalone inline .katex (skipping those inside .katex-display)
-        var inlineNodes = cardEl.querySelectorAll('.katex, .MathJax_Display');
+        // Scale standalone inline .katex / .MathJax (skipping those inside display wrappers)
+        var inlineNodes = cardEl.querySelectorAll('.katex, .MathJax');
         for (var i = 0; i < inlineNodes.length; i++) {
             var el = inlineNodes[i];
-            if (el.parentNode && el.parentNode.className &&
-                el.parentNode.className.indexOf('katex-display') !== -1) {
+            var p = el.parentNode;
+            if (p && p.className &&
+                (p.className.indexOf('katex-display') !== -1 || p.className.indexOf('MathJax_Display') !== -1)) {
                 continue;
             }
             scaleEquationNode(el, maxW);
         }
     }
 
-    // 7. Lazy MathJax 2.7.9 Fallback Loader (only loaded when mathEngine === 'mathjax')
+    // 7. Primary MathJax 2.7.9 Ready Hook (attaches to preloaded MathJax in card.html or loads dynamically)
+    function flushMathJaxWaiters() {
+        mathJaxLoaded = true;
+        mathJaxLoading = false;
+        var list = mathJaxWaiters.slice(0);
+        mathJaxWaiters = [];
+        for (var i = 0; i < list.length; i++) {
+            list[i]();
+        }
+    }
+
     function ensureMathJaxLoaded(cb) {
-        if (mathJaxLoaded && window.MathJax && window.MathJax.Hub) {
-            cb();
+        if (window.MathJax && window.MathJax.Hub) {
+            if (mathJaxLoaded || window.MathJax.isReady) {
+                mathJaxLoaded = true;
+                cb();
+                return;
+            }
+            mathJaxWaiters.push(cb);
+            if (!mathJaxHooked) {
+                mathJaxHooked = true;
+                window.MathJax.Hub.Register.StartupHook('End', flushMathJaxWaiters);
+            }
             return;
         }
+
         mathJaxWaiters.push(cb);
         if (mathJaxLoading) return;
         mathJaxLoading = true;
@@ -418,29 +484,25 @@
                 processEscapes: true
             },
             TeX: {
+                mhchem: { legacy: false },
                 extensions: [
                     'AMSmath.js', 'AMSsymbols.js', 'mhchem.js', 'extpfeil.js',
-                    'color.js', 'bbox.js', 'newcommand.js', 'noErrors.js', 'noUndefined.js'
+                    'color.js', 'bbox.js', 'cancel.js', 'enclose.js',
+                    'newcommand.js', 'noErrors.js', 'noUndefined.js'
                 ]
             },
             'HTML-CSS': {
-                scale: 108,
+                scale: 105,
                 availableFonts: ['TeX'],
                 preferredFont: 'TeX',
                 webFont: 'TeX',
                 imageFont: null,
-                matchFontHeight: false
+                matchFontHeight: false,
+                linebreaks: { automatic: false }
             },
             AuthorInit: function () {
-                window.MathJax.Hub.Register.StartupHook('End', function () {
-                    mathJaxLoaded = true;
-                    mathJaxLoading = false;
-                    var list = mathJaxWaiters.slice(0);
-                    mathJaxWaiters = [];
-                    for (var i = 0; i < list.length; i++) {
-                        list[i]();
-                    }
-                });
+                mathJaxHooked = true;
+                window.MathJax.Hub.Register.StartupHook('End', flushMathJaxWaiters);
             }
         };
 
@@ -450,14 +512,16 @@
         document.getElementsByTagName('head')[0].appendChild(script);
     }
 
-    // 8. Core Typesetting Function (KaTeX synchronous ~20-40ms or MathJax fallback)
-    function renderIntoElement(cardEl, rawHtml, onDone) {
+    // 8. Core Typesetting Function (MathJax 2.7.9 primary or optional KaTeX)
+    function renderIntoElement(cardEl, rawHtml, expectedGen, onDone) {
         var t0 = nowMs();
         cardEl.innerHTML = preprocessCardHtml(rawHtml);
 
         if (mathEngine === 'mathjax') {
             ensureMathJaxLoaded(function () {
+                if (expectedGen && expectedGen !== renderGen) return;
                 window.MathJax.Hub.Queue(['Typeset', window.MathJax.Hub, cardEl], function () {
+                    if (expectedGen && expectedGen !== renderGen) return;
                     fitWideEquations(cardEl);
                     if (onDone) onDone(nowMs() - t0);
                 });
@@ -465,7 +529,7 @@
             return;
         }
 
-        // Primary: Ultra-Fast ES5 KaTeX synchronous rendering
+        // Optional Switchable Engine: ES5 KaTeX synchronous rendering
         if (typeof window.renderMathInElement === 'function') {
             try {
                 window.renderMathInElement(cardEl, {
@@ -580,7 +644,7 @@
         }
     }
 
-    function schedulePrefetch(nextCard) {
+    function schedulePrefetch(nextCard, gen) {
         cancelBackgroundWork();
         var inactiveGroup = (activeGroup === 'A') ? 'B' : 'A';
         var bg = getGroupSlots(inactiveGroup);
@@ -588,6 +652,8 @@
         if (!nextCard) {
             prefetchedCardId = 0;
             prefetchedCardCss = '';
+            prefetchedFrontRaw = '';
+            prefetchedBackRaw = '';
             if (bg.frontCard) bg.frontCard.innerHTML = '';
             if (bg.backCard) bg.backCard.innerHTML = '';
             return;
@@ -595,11 +661,17 @@
 
         prefetchedCardId = 0; // Only mark ready after both sides finish rendering
         prefetchedCardCss = nextCard.css || '';
+        prefetchedFrontRaw = nextCard.question_html || '';
+        prefetchedBackRaw = nextCard.answer_html || '';
+        var expectedGen = gen || renderGen;
 
         pendingPrefetchTimer = setTimeout(function () {
             pendingPrefetchTimer = null;
-            renderIntoElement(bg.frontCard, nextCard.question_html || '', function () {
-                renderIntoElement(bg.backCard, nextCard.answer_html || '', function () {
+            if (expectedGen !== renderGen) return;
+            renderIntoElement(bg.frontCard, prefetchedFrontRaw, expectedGen, function () {
+                if (expectedGen !== renderGen) return;
+                renderIntoElement(bg.backCard, prefetchedBackRaw, expectedGen, function () {
+                    if (expectedGen !== renderGen) return;
                     prefetchedCardId = nextCard.card_id || 0;
                 });
             });
@@ -623,11 +695,32 @@
 
         setConfig: function (cfg) {
             if (!cfg) return;
+            var engineChanged = false;
             if (typeof cfg.font_size_px === 'number') {
                 applyFontSize(cfg.font_size_px);
             }
-            if (cfg.math_engine === 'katex' || cfg.math_engine === 'mathjax') {
+            if ((cfg.math_engine === 'katex' || cfg.math_engine === 'mathjax') && cfg.math_engine !== mathEngine) {
                 mathEngine = cfg.math_engine;
+                engineChanged = true;
+            }
+            // If engine switched while viewing a card, immediately re-typeset active card & clear stale prefetch
+            if (engineChanged && activeCardId !== 0) {
+                renderGen++;
+                var myGen = renderGen;
+                cancelBackgroundWork();
+                pendingBackRender = null;
+                prefetchedCardId = 0;
+                var gSwitch = getGroupSlots(activeGroup);
+                var targetCard = isFlipped ? gSwitch.backCard : gSwitch.frontCard;
+                var targetRaw = isFlipped ? activeBackRaw : activeFrontRaw;
+                var otherCard = isFlipped ? gSwitch.frontCard : gSwitch.backCard;
+                var otherRaw = isFlipped ? activeFrontRaw : activeBackRaw;
+                renderIntoElement(targetCard, targetRaw, myGen, function () {
+                    if (myGen !== renderGen) return;
+                    emitPageState();
+                    renderIntoElement(otherCard, otherRaw, myGen, null);
+                });
+                return;
             }
             // Refit active viewport & report updated pagination after font change
             var vp = getActiveViewport();
@@ -639,6 +732,8 @@
         },
 
         renderImmediate: function (payload) {
+            renderGen++;
+            var myGen = renderGen;
             cancelBackgroundWork();
             pendingBackRender = null;
 
@@ -654,6 +749,9 @@
             isFlipped = false;
             activeCardId = cur.card_id || 0;
             activeCardCss = cur.css || '';
+            activeFrontRaw = cur.question_html || '';
+            activeBackRaw = cur.answer_html || '';
+            prefetchedCardId = 0;
             applyNoteCss(activeCardCss);
 
             var g = getGroupSlots('A');
@@ -662,23 +760,29 @@
             setVisibleSlot(g.frontView);
 
             // Render visible Front immediately
-            renderIntoElement(g.frontCard, cur.question_html || '', function (elapsedMs) {
+            renderIntoElement(g.frontCard, activeFrontRaw, myGen, function (elapsedMs) {
+                if (myGen !== renderGen) return;
                 var st = emitPageState();
                 notifyHost('RENDER_DONE', {
                     card_id: activeCardId,
                     mode: 'immediate',
+                    engine: mathEngine,
                     ms: elapsedMs,
                     page: st.page,
                     total: st.total
                 });
 
                 // Render Back cleanly right after Front paints, then prefetch Next
-                var backHtml = cur.answer_html || '';
+                var backHtml = activeBackRaw;
                 var backCid = activeCardId;
                 pendingBackRender = function () {
-                    if (activeCardId !== backCid) return;
-                    renderIntoElement(g.backCard, backHtml, function () {
-                        schedulePrefetch(next);
+                    if (myGen !== renderGen || activeCardId !== backCid) return;
+                    renderIntoElement(g.backCard, backHtml, myGen, function () {
+                        if (myGen !== renderGen || activeCardId !== backCid) return;
+                        if (isFlipped) {
+                            emitPageState();
+                        }
+                        schedulePrefetch(next, myGen);
                     });
                 };
                 setTimeout(function () {
@@ -722,6 +826,8 @@
                 return false;
             }
 
+            renderGen++;
+            var myGen = renderGen;
             cancelBackgroundWork();
             pendingBackRender = null;
 
@@ -729,6 +835,8 @@
             isFlipped = false;
             activeCardId = expectedId;
             activeCardCss = prefetchedCardCss;
+            activeFrontRaw = prefetchedFrontRaw;
+            activeBackRaw = prefetchedBackRaw;
             applyNoteCss(activeCardCss);
 
             var g = getGroupSlots(activeGroup);
@@ -740,22 +848,26 @@
             notifyHost('RENDER_DONE', {
                 card_id: activeCardId,
                 mode: 'prefetch_hit',
+                engine: mathEngine,
                 ms: nowMs() - t0,
                 page: st.page,
                 total: st.total
             });
 
-            schedulePrefetch(payload.prefetch_next || null);
+            schedulePrefetch(payload.prefetch_next || null, myGen);
             return true;
         },
 
         pageScroll: pageScroll,
 
         showFinished: function (subtitle) {
+            renderGen++;
             cancelBackgroundWork();
             pendingBackRender = null;
             activeCardId = 0;
             prefetchedCardId = 0;
+            activeFrontRaw = '';
+            activeBackRaw = '';
             isFlipped = false;
             var subEl = document.getElementById('finished-sub');
             if (subEl && subtitle) {
@@ -804,6 +916,8 @@
         }
 
         notifyHost('CARD_READY', {
+            default_engine: mathEngine,
+            mathjax_present: !!(window.MathJax && window.MathJax.Hub),
             webkit1_patch: window.__RANKI_WEBKIT1_VLIST_PATCH__,
             katex_ready: typeof window.renderMathInElement === 'function'
         });

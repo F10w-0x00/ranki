@@ -12,7 +12,7 @@ use anki::collection::{Collection, CollectionBuilder};
 use anki::decks::DeckId;
 use anki::scheduler::answering::{CardAnswer, Rating};
 use anki::scheduler::states::SchedulingStates;
-use anki::timestamp::TimestampMillis;
+use anki::timestamp::{TimestampMillis, TimestampSecs};
 use anki_proto::scheduler::bury_or_suspend_cards_request::Mode as BuryOrSuspendMode;
 use serde::{Deserialize, Serialize};
 
@@ -202,7 +202,7 @@ impl AnkiService {
     pub fn get_deck_list_data(&mut self) -> Result<DeckListData, String> {
         let col = self.col.as_mut().ok_or("Collection not open")?;
         let tree = col
-            .deck_tree(None)
+            .deck_tree(Some(TimestampSecs::now()))
             .map_err(|e| format!("Failed to get deck tree: {:?}", e))?;
 
         // Root nodes already aggregate child counts in Anki's deck_tree; sum ONLY roots!

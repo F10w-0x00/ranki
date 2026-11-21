@@ -119,10 +119,10 @@ impl SettingsView {
         gtk_box_pack_start(font_row, btn_font_up, FALSE, FALSE, 0);
         gtk_box_pack_start(form, font_row, FALSE, FALSE, 4);
 
-        // Math engine switch (KaTeX primary / MathJax fallback)
+        // Math engine switch (MathJax 2.7.9 primary / KaTeX experimental)
         let math_row = gtk_hbox_new(FALSE, 18);
         let lbl_math = make_label("公式渲染引擎:", f_label);
-        let btn_math_engine = make_button("KaTeX 极速 (推荐)", f_btn, on_math_toggle_click);
+        let btn_math_engine = make_button("MathJax 2.7.9 (推荐)", f_btn, on_math_toggle_click);
         gtk_widget_set_size_request(btn_math_engine, 320, 60);
         gtk_box_pack_start(math_row, lbl_math, TRUE, TRUE, 0);
         gtk_box_pack_end(math_row, btn_math_engine, FALSE, FALSE, 0);
@@ -173,10 +173,10 @@ impl SettingsView {
     pub unsafe fn sync_reading_controls(&self, cfg: &AppConfig) {
         set_label_text(self.label_font_val, &format!("{} px", cfg.font_size_px));
 
-        let engine_label = if cfg.math_engine == "mathjax" {
-            "MathJax 2.7.9 兼容"
+        let engine_label = if cfg.math_engine == "katex" {
+            "KaTeX (极速实验)"
         } else {
-            "KaTeX 极速 (推荐)"
+            "MathJax 2.7.9 (推荐)"
         };
         set_button_label(self.btn_math_engine, engine_label);
     }

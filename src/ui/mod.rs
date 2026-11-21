@@ -1143,10 +1143,10 @@ unsafe extern "C" fn on_settings_font_up_click(_w: *mut GtkWidget, _data: gpoint
 
 unsafe extern "C" fn on_settings_math_toggle_click(_w: *mut GtkWidget, _data: gpointer) {
     with_app(|app| {
-        let next = if app.config.math_engine == "mathjax" {
-            "katex"
-        } else {
+        let next = if app.config.math_engine == "katex" {
             "mathjax"
+        } else {
+            "katex"
         };
         app.config.set_math_engine(next);
         let _ = app.config.save();

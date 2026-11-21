@@ -215,11 +215,12 @@ html, body {
 /* Ruby Annotations (Greek symbols, chemistry elements, rare characters) */
 .card.kindle ruby {
     ruby-align: center;
+    line-height: 1.0;
 }
 
 .card.kindle rt {
     font-size: 0.48em;
-    line-height: 1.15;
+    line-height: 1.05;
     color: #222222;
     font-weight: normal;
 }
@@ -282,12 +283,23 @@ html, body {
     border-bottom: 1px dotted #000000;
 }
 
-/* MathJax Fallback Styling */
+/* MathJax 2.7.9 Primary Engine Print Tuning (battle-tested on 2012 WebKitGTK 1.0) */
 .card.kindle .MathJax,
 .card.kindle .MathJax_Display,
 .card.kindle .mjx-chtml {
     color: #000000 !important;
     outline: 0 !important;
+}
+
+.card.kindle .MathJax_Display {
+    margin: 0.55em 0 !important;
+    text-align: center !important;
+    overflow: visible;
+}
+
+.card.kindle .MathJax_Display > .MathJax {
+    display: inline-block;
+    vertical-align: top;
 }
 
 #MathJax_Message {

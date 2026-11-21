@@ -28,7 +28,7 @@ impl AppConfig {
             hkey: String::new(),
             sync_server: String::new(),
             font_size_px: DEFAULT_FONT_SIZE_PX,
-            math_engine: "katex".to_string(),
+            math_engine: "mathjax".to_string(),
         }
     }
 
@@ -186,10 +186,10 @@ pub fn clamp_font_size(px: u32) -> u32 {
 }
 
 pub fn normalize_math_engine(raw: &str) -> &'static str {
-    if raw.eq_ignore_ascii_case("mathjax") {
-        "mathjax"
-    } else {
+    if raw.eq_ignore_ascii_case("katex") {
         "katex"
+    } else {
+        "mathjax"
     }
 }
 
@@ -203,7 +203,7 @@ mod tests {
         assert_eq!(cfg.collection_dir, "/mnt/us/anki_data_test");
         assert!(cfg.hkey.is_empty());
         assert_eq!(cfg.font_size_px, 42);
-        assert_eq!(cfg.math_engine, "katex");
+        assert_eq!(cfg.math_engine, "mathjax");
         assert_eq!(BUILTIN_FOCUS_TIMER_SECS, 20);
         assert_eq!(BUILTIN_AUTO_REFRESH_CARDS, 20);
     }
@@ -217,17 +217,17 @@ mod tests {
              hkey=tok_abc123\n\
              sync_server=https://sync.example.com/\n\
              font_size_px=12\n\
-             math_engine=MATHJAX\n\
+             math_engine=KATEX\n\
              scale=1.2\n",
         );
         assert_eq!(cfg.hkey, "tok_abc123");
         assert_eq!(cfg.sync_server, "https://sync.example.com/");
         assert_eq!(cfg.font_size_px, MIN_FONT_SIZE_PX);
-        assert_eq!(cfg.math_engine, "mathjax");
+        assert_eq!(cfg.math_engine, "katex");
 
         cfg.parse_ini_str("font_size_px=999\nmath_engine=unknown\n");
         assert_eq!(cfg.font_size_px, MAX_FONT_SIZE_PX);
-        assert_eq!(cfg.math_engine, "katex");
+        assert_eq!(cfg.math_engine, "mathjax");
     }
 
     #[test]
@@ -243,7 +243,7 @@ mod tests {
         cfg.hkey = "my_token".to_string();
         cfg.sync_server = "https://anki.local".to_string();
         cfg.set_font_size_px(46);
-        cfg.set_math_engine("katex");
+        cfg.set_math_engine("mathjax");
         cfg.save().expect("save should succeed");
 
         let loaded = AppConfig::load_from_path(path);

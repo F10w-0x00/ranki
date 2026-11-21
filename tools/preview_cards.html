@@ -751,12 +751,15 @@ function runOverflowAudit() {
         var activeCard = idoc.querySelector('.slot-viewport:not(.offscreen) .card.kindle');
         if (!activeCard) { logTelemetry('[AUDIT] No active card'); return; }
         var cardRect = activeCard.getBoundingClientRect();
-        var eqs = activeCard.querySelectorAll('.katex-display, .katex');
+        var eqs = activeCard.querySelectorAll('.MathJax_Display, .MathJax, .katex-display, .katex');
         var checked = 0, clipped = 0;
         var worst = '';
         for (var i = 0; i < eqs.length; i++) {
             var el = eqs[i];
-            if (el.className.indexOf('katex-display') === -1 && el.parentNode && el.parentNode.className.indexOf('katex-display') !== -1) continue;
+            var cls = el.className || '';
+            var pCls = (el.parentNode && el.parentNode.className) ? el.parentNode.className : '';
+            if (cls.indexOf('katex-display') === -1 && pCls.indexOf('katex-display') !== -1) continue;
+            if (cls.indexOf('MathJax_Display') === -1 && pCls.indexOf('MathJax_Display') !== -1) continue;
             var r = el.getBoundingClientRect();
             if (r.width === 0) continue;
             checked++;
@@ -853,13 +856,13 @@ window.addEventListener('message', function (ev) {
     var msg = ev && ev.data;
     if (!msg || msg.source !== 'ranki-card') return;
     if (msg.action === 'CARD_READY') {
-        telemetryEl.textContent = '[CARD_READY] katex=' + msg.payload.katex_ready + ' webkit1_patch=' + msg.payload.webkit1_patch;
-        sendToCard('setConfig', { font_size_px: fontSize, math_engine: 'katex' });
+        telemetryEl.textContent = '[CARD_READY] engine=' + (msg.payload.default_engine || 'mathjax') + ' mathjax=' + msg.payload.mathjax_present + ' katex=' + msg.payload.katex_ready;
+        sendToCard('setConfig', { font_size_px: fontSize, math_engine: 'mathjax' });
         loadCard(0);
     } else if (msg.action === 'PAGE_STATE') {
         pageIndEl.textContent = (msg.payload.total > 1) ? (msg.payload.page + '/' + msg.payload.total) : '';
     } else if (msg.action === 'RENDER_DONE') {
-        logTelemetry('[' + msg.payload.mode + '] cid=' + msg.payload.card_id + ' in ' + msg.payload.ms + 'ms (' + msg.payload.page + '/' + msg.payload.total + ')');
+        logTelemetry('[' + msg.payload.mode + ':' + (msg.payload.engine || 'mj') + '] cid=' + msg.payload.card_id + ' in ' + msg.payload.ms + 'ms (' + msg.payload.page + '/' + msg.payload.total + ')');
         pageIndEl.textContent = (msg.payload.total > 1) ? (msg.payload.page + '/' + msg.payload.total) : '';
     } else if (msg.action === 'FLIP_DONE') {
         logTelemetry('[FLIP] cid=' + msg.payload.card_id + ' in ' + msg.payload.ms + 'ms (' + msg.payload.page + '/' + msg.payload.total + ')');

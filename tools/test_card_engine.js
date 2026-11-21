@@ -58,6 +58,18 @@ function createMockEnv(userAgent) {
         document: doc,
         navigator: { userAgent: userAgent || 'Mozilla/5.0 AppleWebKit/537.6 (KHTML, like Gecko) Kindle' },
         console: console,
+        MathJax: {
+            isReady: true,
+            Hub: {
+                Register: {
+                    StartupHook: function (_evt, fn) { fn(); }
+                },
+                Queue: function (task, cb) {
+                    if (task && task[2]) task[2]._mathJaxRendered = true;
+                    if (typeof cb === 'function') cb();
+                }
+            }
+        },
         renderMathInElement: function (el) { el._mathRendered = true; },
         setTimeout: function (fn, delay) {
             var id = nextTimerId++;
@@ -115,15 +127,18 @@ assert.strictEqual(pp('\u2068OK\u2069 \uD83C\uDF89 \u2705 \u274C \u26A0\uFE0F'),
 assert.strictEqual(pp('Plain Chinese & English card with no math'), 'Plain Chinese & English card with no math');
 console.log('[PASS] Test 2: HTML preprocessor handles colors, media placeholders, and anti-tofu sanitization.');
 
-// Test 3: Font clamping [28, 54] with default 42px
+// Test 3: Default engine is MathJax 2.7.9 & font clamps strictly within [28, 54] (default 42px)
+assert.strictEqual(envWk1.engine.getState().mathEngine, 'mathjax', 'Default math engine must be mathjax');
 assert.strictEqual(envWk1.engine.getState().fontSizePx, 42);
 envWk1.engine.setConfig({ font_size_px: 10 });
 assert.strictEqual(envWk1.engine.getState().fontSizePx, 28);
 envWk1.engine.setConfig({ font_size_px: 99 });
 assert.strictEqual(envWk1.engine.getState().fontSizePx, 54);
-envWk1.engine.setConfig({ font_size_px: 42 });
-assert.strictEqual(envWk1.engine.getState().fontSizePx, 42);
-console.log('[PASS] Test 3: Font size defaults to 42px and clamps strictly within [28, 54].');
+envWk1.engine.setConfig({ font_size_px: 42, math_engine: 'katex' });
+assert.strictEqual(envWk1.engine.getState().mathEngine, 'katex');
+envWk1.engine.setConfig({ math_engine: 'mathjax' });
+assert.strictEqual(envWk1.engine.getState().mathEngine, 'mathjax');
+console.log('[PASS] Test 3: Default engine is MathJax 2.7.9 and font size defaults to 42px clamped [28, 54].');
 
 // Test 4: Render immediate, instant flip (flushing queued back), prefetch, and Card-ID verified swap
 envWk1.engine.renderImmediate({
@@ -227,16 +242,19 @@ assert.strictEqual(
     false,
     'card.css must NEVER contain `.katex *` wildcard rules that override color:transparent on \\vphantom{X} struts!'
 );
-var phantomNode = { style: { color: 'transparent' } };
+var phantomNode = { style: { color: 'transparent', borderColor: 'transparent' } };
 var rgbaZeroNode = { style: { color: 'rgba(0, 0, 0, 0)' } };
-var coloredNode = { style: { color: 'yellow' } };
+var coloredNode = { style: { color: 'yellow', backgroundColor: 'yellow', borderColor: 'red' } };
 var mockMathCard = {
     querySelectorAll: function () { return [phantomNode, rgbaZeroNode, coloredNode]; }
 };
 envWk1.engine._normalizeMathColors(mockMathCard);
 assert.strictEqual(phantomNode.style.color, 'transparent', '\\vphantom transparent strut must stay transparent');
+assert.strictEqual(phantomNode.style.borderColor, 'transparent', 'MathJax transparent spacer border must stay transparent');
 assert.strictEqual(rgbaZeroNode.style.color, 'rgba(0, 0, 0, 0)', 'rgba(0,0,0,0) strut must stay transparent');
 assert.strictEqual(coloredNode.style.color, '#000000', 'Colored TeX text must normalize to pure black #000000');
-console.log('[PASS] Test 9: KaTeX/mhchem transparent \\vphantom struts are protected while colored TeX normalizes to #000000.');
+assert.strictEqual(coloredNode.style.backgroundColor, '#e6e6e6', 'Colored MathJax \\bbox highlight must normalize to #e6e6e6');
+assert.strictEqual(coloredNode.style.borderColor, '#000000', 'Colored MathJax \\bbox border must normalize to #000000');
+console.log('[PASS] Test 9: MathJax \\bbox & KaTeX \\vphantom struts are cleanly monochrome-normalized without regressions.');
 
 console.log('=== ALL 9 CARD ENGINE UNIT TESTS PASSED ===');

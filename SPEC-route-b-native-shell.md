@@ -181,8 +181,8 @@ Loaded **once** at startup into the resident `WebKitWebView` via `file:///.../vi
     - Long equations: horizontal overflow auto-scaled via `-webkit-transform: scale(...)` (measured with `scrollWidth / clientWidth` per Phase 1 hardware probe) so equations NEVER clip or spawn horizontal scrollbars.
 
 #### Math Rendering & Slot Protocol
-- **Primary Engine (`katex`)**: ES5-transpiled KaTeX + `mhchem` + `auto-render` + `vlist-t2` WebKit 1.0 baseline fix (`commit 89fda9d`) + `\bbox` macro + 20 WOFF fonts (635 KB). Synchronous render, ~20–50 ms cold.
-- **Fallback Engine (`mathjax`)**: Local MathJax 2.7.9 (`views/mathjax/`) loaded lazily ONLY if `math_engine=mathjax` in config.
+- **Primary Default Engine (`mathjax`)**: Local **MathJax 2.7.9** (`views/mathjax/`, `TeX-AMS_HTML` + `mhchem3` (`legacy: false`) + `bbox` + `AMSmath`/`AMSsymbols` + `cancel` + `enclose` + 22 local TeX WOFF fonts), pre-warmed in `<head>` while browsing decks so nested fractions, nested radicals, matrices, and chemical equations render with zero misalignment on Kindle OS 5.14 WebKitGTK 1.0 — paired with the Card-ID-verified 4-slot double buffer (`< 10 ms` flip / instant prefetch swap).
+- **Optional Switchable Engine (`katex`)**: ES5-transpiled KaTeX + `mhchem` + `auto-render` + conditional `vlist-t2` patch + `\bbox` macro + 20 WOFF fonts (631 KB), selectable via Settings (`math_engine=katex`).
 - **Host → WebView API (`window.CardEngine`)**:
   - `setConfig({ fontSizePx, mathEngine })`
   - `renderImmediate({ current, next })` — renders `current` (Front visible, Back offscreen) and schedules `next` (Front & Back offscreen) via `setTimeout(..., 20)` so Front paints immediately before background prefetch runs!

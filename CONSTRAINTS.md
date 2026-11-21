@@ -44,7 +44,7 @@
 | :--- | :--- | :--- | :--- |
 | **时延** | 题面 $\to$ 答案感知时延 | $\le 5\text{ms}$ | Card-ID 双缓冲原地 DOM 切换埋点日志 |
 | **时延** | 预渲染命中切卡时延 | $\le 5\text{ms}$ | Card-ID 命中原地切换埋点日志 |
-| **时延** | 冷启动首卡 / 未命中切卡耗时 | $\le 80\text{ms}$ | ES5 KaTeX 同步渲染计时（MathJax 兜底模式不适用此项） |
+| **时延** | 冷启动首卡 / 未命中切卡耗时 | 预热 MathJax 单卡流畅渲染（切卡由 4 槽预渲染隐藏耗时） | MathJax 2.7.9 默认主力渲染 + 后台预渲染计时 |
 | **能耗** | 无交互空闲 CPU 占用率 | **0.0%** | GTK/WebKit 事件主循环阻塞在 `epoll`（20s 计时仅看题时 1Hz 唤醒） |
 | **内存** | 连续翻卡 100 张 VmRSS 净增 | $\le 5\text{MB}$ | `/proc/<pid>/status` 采样，无单调递增趋势 |
 | **体积** | 单一二进制文件体积 | $\le 20\text{MB}$ | 纯 Rust Fat LTO + `arm-linux-gnueabi-strip` |
@@ -61,7 +61,7 @@
    - 卡片内容必须包裹在 `<div class="card kindle">` 内，严格保持官方 Anki **居中对齐**；
    - 正文与公式锁定纯黑 `#000000`（杜绝灰阶发虚），字体锁定 `Anthropic Sans` + `SonyReader Ming`，默认 `42px`（300 PPI 下约 3.56 mm ≈ 五号字 10.1 pt，支持 `28px–54px` 调节），行高 `1.56`；
    - 彩色文本统一做高对比黑白语义映射（红/橙警示虚线底纹、其他彩色粗体点线、高亮底色浅灰），音视频/图片统一显示简洁 `[不支持...]` 占位提示，防乱码过滤不可见控制符与 Emoji；
-   - 主力公式引擎采用 ES5 KaTeX（20 款 WOFF 矢量字模 + `mhchem` + `\bbox` 宏 + `vlist-t2` WebKit 1.0 基线修复），保留常驻 MathJax 2.7.9 可切换兜底；
+   - 默认主力公式引擎采用 **MathJax 2.7.9**（`TeX-AMS_HTML` + `mhchem3` + `bbox` + `AMSmath`/`AMSsymbols` + 22 款本地 WOFF 字模，KPW3 WebKitGTK 1.0 嵌套公式零错位），启动于牌组大厅即后台预热，配合 Card-ID 4 槽预渲染消除切卡/翻面等待；保留 ES5 KaTeX 作为设置页可选切换引擎；
    - 超长公式通过 `-webkit-transform` 自适应等比缩放，严禁横向滚动条撑爆页面；
    - 全面禁用 Unicode Emoji，全界面零豆腐块 `□`。
 3. **墨水屏人机工学与零残影翻页**：
