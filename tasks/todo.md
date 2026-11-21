@@ -4,7 +4,7 @@
 > Source Spec: `SPEC-route-b-native-shell.md` | Plan: `tasks/plan.md` | Intent: `docs/intent/kpw3-anki-daily-driver.md`
 
 ### Phase 0: Governance, Security & Tooling Hygiene
-- [ ] **Task 1**: Branch `feat/route-b-native-shell`, remove hardcoded `hkey` from `tools/deploy_to_kindle.py`, fix `tools/download_artifact.py` artifact name, harden `tools/check_es5.js` (ES5 + banned WebKit 1.0 APIs + zero Emoji)
+- [x] **Task 1**: Branch `feat/route-b-native-shell`, remove hardcoded `hkey` from `tools/deploy_to_kindle.py`, fix `tools/download_artifact.py` artifact name, harden `tools/check_es5.js` (ES5 + banned WebKit 1.0 APIs + zero Emoji)
 
 ### Phase 1: Ultra-Fast Centered Card Renderer (`card-renderer`)
 - [ ] **Task 2**: Restore verified ES5 KaTeX bundle (`views/katex/`, 635 KB, 20 WOFF fonts, `vlist-t2` patch) + `tools/test_regression.js` (838/838 formulas PASS)
