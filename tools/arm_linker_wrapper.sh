@@ -24,10 +24,10 @@ for arg in "$@"; do
     fi
 done
 
-# Also discover any rlibs, static libs, or CGU object files in /tmp or target
+# Also discover any rlibs, static libs, or CGU object files in /tmp or target/arm-unknown-linux-gnueabi
 while IFS= read -r f; do
     add_object "$f"
-done < <(find /tmp target -type f \( -name "*.rlib" -o -name "*.a" -o -name "*.o" \) 2>/dev/null || true)
+done < <(find /tmp target/arm-unknown-linux-gnueabi -type f \( -name "*.rlib" -o -name "*.a" -o -name "*.o" \) 2>/dev/null || true)
 
 echo "[LINKER WRAPPER] Discovered ${#OBJECTS[@]} objects and archives to inspect."
 

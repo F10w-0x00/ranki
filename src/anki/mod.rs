@@ -338,6 +338,11 @@ impl AnkiService {
         self.advance_after_mutation(None)
     }
 
+    /// Force an immediate re-render of the head of the current queue (self-healing PREFETCH_MISS).
+    pub fn refresh_current_immediate(&mut self) -> Result<AdvanceResult, String> {
+        self.advance_after_mutation(None)
+    }
+
     fn advance_after_mutation(
         &mut self,
         prefetched_cid: Option<i64>,
@@ -347,7 +352,7 @@ impl AnkiService {
 
         let deck_name = col
             .get_current_deck()
-            .map(|d| short_deck_name(&d.name))
+            .map(|d| short_deck_name(&d.name.human_name()))
             .unwrap_or_else(|_| "复习".to_string());
 
         let queued = col
@@ -444,7 +449,7 @@ fn render_card_content(
     })
 }
 
-fn extract_intervals(col: &Collection, states: &SchedulingStates) -> [String; 4] {
+fn extract_intervals(col: &mut Collection, states: &SchedulingStates) -> [String; 4] {
     let raw = col
         .describe_next_states(states)
         .unwrap_or_else(|_| vec!["<10m".into(), "1d".into(), "3d".into(), "5d".into()]);
@@ -531,7 +536,10 @@ mod tests {
             let nts = col.get_all_notetypes().unwrap();
             let basic = nts
                 .iter()
-                .find(|nt| !nt.is_cloze() && nt.fields.len() >= 2)
+                .find(|nt| {
+                    matches!(nt.config.kind(), anki::notetype::NotetypeKind::Normal)
+                        && nt.fields.len() >= 2
+                })
                 .cloned()
                 .expect("basic notetype");
 
