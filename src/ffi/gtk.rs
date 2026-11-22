@@ -132,11 +132,13 @@ extern "C" {
     pub fn gtk_window_set_decorated(window: *mut GtkWidget, setting: gboolean);
     pub fn gtk_window_set_transient_for(window: *mut GtkWidget, parent: *mut GtkWidget);
     pub fn gtk_window_set_position(window: *mut GtkWidget, position: c_int);
+    pub fn gtk_window_set_focus(window: *mut GtkWidget, focus: *mut GtkWidget);
 
     // GtkWidget
     pub fn gtk_widget_show_all(widget: *mut GtkWidget);
     pub fn gtk_widget_show(widget: *mut GtkWidget);
     pub fn gtk_widget_hide(widget: *mut GtkWidget);
+    pub fn gtk_widget_set_no_show_all(widget: *mut GtkWidget, no_show_all: gboolean);
     pub fn gtk_widget_destroy(widget: *mut GtkWidget);
     pub fn gtk_widget_set_size_request(widget: *mut GtkWidget, width: c_int, height: c_int);
     pub fn gtk_widget_add_events(widget: *mut GtkWidget, events: c_int);
@@ -208,6 +210,8 @@ extern "C" {
     // GtkDialog
     pub fn gtk_dialog_new() -> *mut GtkWidget;
     pub fn gtk_dialog_get_content_area(dialog: *mut GtkWidget) -> *mut GtkWidget;
+    pub fn gtk_dialog_get_action_area(dialog: *mut GtkWidget) -> *mut GtkWidget;
+    pub fn gtk_dialog_set_has_separator(dialog: *mut GtkWidget, setting: gboolean);
     pub fn gtk_dialog_add_button(
         dialog: *mut GtkWidget,
         button_text: *const c_char,

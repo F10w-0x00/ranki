@@ -8,7 +8,7 @@ pub mod review_view;
 pub mod settings_view;
 pub mod theme;
 
-use std::cell::{Cell, RefCell};
+use std::cell::RefCell;
 use std::ffi::{CStr, CString};
 use std::path::PathBuf;
 use std::ptr;
@@ -25,11 +25,15 @@ use crate::config::{AppConfig, MAX_FONT_SIZE_PX, MIN_FONT_SIZE_PX};
 use crate::ffi::cairo::*;
 use crate::ffi::gtk::*;
 use crate::ffi::webkit::webkit_web_view_get_title;
+use crate::i18n::UiLang;
 use crate::logic::CardGesture;
 use crate::ui::deck_view::{DeckAction, DeckView};
 use crate::ui::review_view::{exec_card_script, ReviewAction, ReviewStage, ReviewView};
-use crate::ui::settings_view::SettingsView;
-use crate::ui::theme::{make_font_desc, register_app_fonts, SCREEN_H, SCREEN_W};
+use crate::ui::settings_view::{SettingsAction, SettingsView};
+use crate::ui::theme::{
+    draw_hline, draw_pill_button, draw_text_wrapped, fill_white, register_app_fonts, Rect,
+    SCREEN_H, SCREEN_W,
+};
 
 const PAGE_DECKS: i32 = 0;
 const PAGE_REVIEW: i32 = 1;
@@ -45,9 +49,22 @@ const RESP_FULL_UPLOAD: i32 = 11;
 
 static LAST_CARD_TOKEN: AtomicU64 = AtomicU64::new(0);
 
+struct ChoiceDialogState {
+    dialog: *mut GtkWidget,
+    area: *mut GtkWidget,
+    title: String,
+    message: String,
+    buttons: Vec<(String, i32)>,
+    button_rects: Vec<Rect>,
+    pressed_idx: Option<usize>,
+    lang: UiLang,
+    width: f64,
+    height: f64,
+}
+
 thread_local! {
     static APP: RefCell<Option<AppController>> = const { RefCell::new(None) };
-    static ACTIVE_CHOICE_DIALOG: Cell<*mut GtkWidget> = const { Cell::new(ptr::null_mut()) };
+    static CHOICE_DIALOG: RefCell<Option<ChoiceDialogState>> = const { RefCell::new(None) };
 }
 
 struct AppController {
@@ -181,17 +198,15 @@ pub fn run_application() {
             on_review_bottom_release,
         );
 
-        let settings_view = SettingsView::new(
+        let mut settings_view = SettingsView::new(
             on_settings_top_expose,
             on_settings_top_press,
             on_settings_top_release,
             on_entry_focus_in,
             on_entry_focus_out,
-            on_settings_login_click,
-            on_settings_save_server_click,
-            on_settings_logout_click,
-            on_settings_font_down_click,
-            on_settings_font_up_click,
+            on_settings_ctrl_expose,
+            on_settings_ctrl_press,
+            on_settings_ctrl_release,
         );
 
         if anki.is_open() {
@@ -276,7 +291,8 @@ fn run_card_js(script: &str) {
 fn push_card_config_to_webview() {
     let info = with_app_ref(|app| {
         let json = serde_json::json!({
-            "font_size_px": app.config.font_size_px
+            "font_size_px": app.config.font_size_px,
+            "lang": app.config.language.as_code()
         })
         .to_string();
         let script = format!("if(window.CardEngine){{window.CardEngine.setConfig({});}}", json);
@@ -411,7 +427,9 @@ fn apply_advance_result(res: AdvanceResult) {
                     gtk_notebook_set_current_page(app.notebook, PAGE_REVIEW);
                 }
 
-                let msg_json = serde_json::to_string(&studied_today).unwrap_or_else(|_| "\"今日复习已完成\"".to_string());
+                let fallback_msg = app.config.language.studied_today_fallback();
+                let msg_json = serde_json::to_string(&studied_today)
+                    .unwrap_or_else(|_| format!("{:?}", fallback_msg));
                 Some(format!(
                     "if(window.CardEngine){{window.CardEngine.showFinished({});}}",
                     msg_json
@@ -460,9 +478,10 @@ fn handle_deck_action(action: DeckAction) {
             });
         }
         DeckAction::SelectDeck(did) => {
+            let lang = with_app_ref(|app| app.config.language).unwrap_or_default();
             let result = with_app(|app| {
                 if !app.anki.is_open() {
-                    return Err("本地数据库未打开，请先同步或检查测试库。".to_string());
+                    return Err(app.config.language.banner_db_not_open().to_string());
                 }
                 app.needs_clean_refresh = true;
                 app.anki.enter_deck(did)
@@ -470,7 +489,7 @@ fn handle_deck_action(action: DeckAction) {
 
             match result {
                 Some(Ok(AdvanceResult::DeckFinished { .. })) => {
-                    show_deck_banner("该牌组今日待复习卡片已全部完成", Some(3000));
+                    show_deck_banner(lang.banner_deck_done(), Some(3000));
                 }
                 Some(Ok(adv)) => {
                     apply_advance_result(adv);
@@ -547,19 +566,20 @@ fn handle_review_action(action: ReviewAction) {
             }
         }
         ReviewAction::OpenMenu => {
-            let parent = with_app_ref(|app| app.window);
-            if let Some(win) = parent {
+            let ctx = with_app_ref(|app| (app.window, app.config.language));
+            if let Some((win, lang)) = ctx {
                 let choice = unsafe {
                     run_choice_dialog(
                         win,
-                        "当前卡片与操作",
-                        "请选择要执行的操作：",
+                        lang,
+                        lang.menu_title(),
+                        lang.menu_subtitle(),
                         &[
-                            ("搁置此卡 (今日跳过)", RESP_BURY),
-                            ("暂停此卡 (永久移出复习)", RESP_SUSPEND),
-                            ("全屏清残影 (GC16 刷新)", RESP_REFRESH),
-                            ("字号与账号设置", RESP_SETTINGS),
-                            ("取消", RESP_CANCEL),
+                            (lang.menu_bury(), RESP_BURY),
+                            (lang.menu_suspend(), RESP_SUSPEND),
+                            (lang.menu_refresh(), RESP_REFRESH),
+                            (lang.menu_settings(), RESP_SETTINGS),
+                            (lang.btn_cancel(), RESP_CANCEL),
                         ],
                     )
                 };
@@ -592,19 +612,20 @@ fn open_settings_page(return_page: i32, custom_status: Option<&str>) {
         unsafe {
             app.settings_view.sync_from_config(&app.config, custom_status);
             gtk_notebook_set_current_page(app.notebook, PAGE_SETTINGS);
-            // Focus a non-entry button initially so Kindle keyboard only opens when user taps an entry
-            gtk_widget_grab_focus(app.settings_view.btn_font_down);
+            // Clear initial entry focus so Kindle virtual keyboard only opens when tapping an input box
+            gtk_window_set_focus(app.window, ptr::null_mut());
         }
     });
 }
 
 fn start_collection_sync(mode: SyncMode) {
     let prep = with_app(|app| {
+        let lang = app.config.language;
         if app.sync_rx.is_some() {
             return Err(None); // Already syncing
         }
         if app.config.hkey.trim().is_empty() {
-            return Err(Some("尚未登录 AnkiWeb，请先输入账号密码登录"));
+            return Err(Some(lang.msg_login_required()));
         }
         let (col_path, media_dir, media_db) = app.config.get_resolved_collection_paths();
         if let Some(parent) = col_path.parent() {
@@ -620,20 +641,21 @@ fn start_collection_sync(mode: SyncMode) {
             app.config.hkey.clone(),
             app.config.effective_sync_server(),
             mode,
+            lang,
         );
         app.sync_rx = Some(rx);
         unsafe {
             g_timeout_add(120, on_sync_poll, ptr::null_mut());
         }
-        Ok(())
+        Ok(lang)
     });
 
     match prep {
-        Some(Ok(())) => {
+        Some(Ok(lang)) => {
             let banner = match mode {
-                SyncMode::Normal => "正在与云端同步集合（不下载媒体）...",
-                SyncMode::FullDownload => "正在从云端完整下载最新集合...",
-                SyncMode::FullUpload => "正在上传本地集合至云端...",
+                SyncMode::Normal => lang.banner_syncing_normal(),
+                SyncMode::FullDownload => lang.banner_syncing_download(),
+                SyncMode::FullUpload => lang.banner_syncing_upload(),
             };
             show_deck_banner(banner, None);
         }
@@ -642,27 +664,176 @@ fn start_collection_sync(mode: SyncMode) {
     }
 }
 
-unsafe extern "C" fn on_choice_btn_clicked(_btn: *mut GtkWidget, data: gpointer) {
-    let resp_id = data as isize as i32;
-    let dlg = ACTIVE_CHOICE_DIALOG.with(|c| c.get());
-    if !dlg.is_null() {
-        gtk_dialog_response(dlg, resp_id);
+fn estimate_wrapped_lines(text: &str, max_w: f64, font_px: f64) -> usize {
+    let chars_per_line = (max_w / font_px).max(8.0);
+    let mut lines: usize = 0;
+    for para in text.split('\n') {
+        let units: f64 = para
+            .chars()
+            .map(|c| if c.is_ascii() { 0.58 } else { 1.05 })
+            .sum();
+        let n = (units / chars_per_line).ceil() as usize;
+        lines += n.max(1);
     }
+    lines.max(1)
 }
 
-/// Vertical full-width e-ink action sheet dialog (avoids GTK2's horizontal GtkHButtonBox overflow!).
+unsafe extern "C" fn on_choice_expose(
+    _w: *mut GtkWidget,
+    event: *mut GdkEventExpose,
+    _data: gpointer,
+) -> gboolean {
+    let cr = gdk_cairo_create((*event).window);
+    CHOICE_DIALOG.with(|cell| {
+        if let Ok(mut guard) = cell.try_borrow_mut() {
+            if let Some(st) = guard.as_mut() {
+                let pad_x = 36.0;
+                let pad_y = 30.0;
+                let inner_w = st.width - pad_x * 2.0;
+
+                // Pure white paper canvas + crisp 2px pure-black outer frame (zero GTK2 gray dither!)
+                fill_white(cr);
+                cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
+                cairo_set_line_width(cr, 2.0);
+                cairo_rectangle(cr, 1.0, 1.0, st.width - 2.0, st.height - 2.0);
+                cairo_stroke(cr);
+
+                let title_bold = !st.lang.is_cjk();
+                let title_h = draw_text_wrapped(
+                    cr, pad_x, pad_y, inner_w, &st.title, 32.0, title_bold, 0.0,
+                ) as f64;
+
+                let msg_y = pad_y + title_h + 10.0;
+                let msg_h = if st.message.trim().is_empty() {
+                    0.0
+                } else {
+                    draw_text_wrapped(cr, pad_x, msg_y, inner_w, &st.message, 25.0, false, 0.18)
+                        as f64
+                };
+
+                let sep_y = msg_y + msg_h + 18.0;
+                draw_hline(cr, pad_x, st.width - pad_x, sep_y, 1.5, 0.82);
+
+                let btn_h = 78.0;
+                let btn_gap = 14.0;
+                let mut cur_y = sep_y + 20.0;
+                st.button_rects.clear();
+                for (i, (label, resp_id)) in st.buttons.iter().enumerate() {
+                    let r = Rect::new(pad_x, cur_y, inner_w, btn_h);
+                    st.button_rects.push(r);
+                    let pressed = st.pressed_idx == Some(i);
+                    let is_cancel = *resp_id == RESP_CANCEL;
+                    // Use Regular weight for CJK to eliminate FreeType fake-bold blur; static Bold for EN primary!
+                    let btn_bold = !is_cancel && !st.lang.is_cjk();
+                    let border_gray = if is_cancel { 0.55 } else { 0.0 };
+                    let text_gray = if is_cancel { 0.15 } else { 0.0 };
+                    let font_px = if is_cancel { 28.0 } else { 30.0 };
+                    draw_pill_button(
+                        cr,
+                        r,
+                        label,
+                        font_px,
+                        btn_bold,
+                        border_gray,
+                        text_gray,
+                        pressed,
+                    );
+                    cur_y += btn_h + btn_gap;
+                }
+            }
+        }
+    });
+    cairo_destroy(cr);
+    TRUE
+}
+
+unsafe extern "C" fn on_choice_press(
+    _w: *mut GtkWidget,
+    event: *mut GdkEventButton,
+    _data: gpointer,
+) -> gboolean {
+    let x = (*event).x;
+    let y = (*event).y;
+    CHOICE_DIALOG.with(|cell| {
+        if let Ok(mut guard) = cell.try_borrow_mut() {
+            if let Some(st) = guard.as_mut() {
+                st.pressed_idx = st.button_rects.iter().position(|r| r.contains(x, y));
+                if st.pressed_idx.is_some() {
+                    gtk_widget_queue_draw(st.area);
+                }
+            }
+        }
+    });
+    TRUE
+}
+
+unsafe extern "C" fn on_choice_release(
+    _w: *mut GtkWidget,
+    event: *mut GdkEventButton,
+    _data: gpointer,
+) -> gboolean {
+    let x = (*event).x;
+    let y = (*event).y;
+    let picked: Option<(*mut GtkWidget, i32)> = CHOICE_DIALOG.with(|cell| {
+        if let Ok(mut guard) = cell.try_borrow_mut() {
+            if let Some(st) = guard.as_mut() {
+                let was = st.pressed_idx.take();
+                gtk_widget_queue_draw(st.area);
+                if let Some(idx) = was {
+                    if st.button_rects.get(idx).map(|r| r.contains(x, y)).unwrap_or(false) {
+                        if let Some((_, resp_id)) = st.buttons.get(idx) {
+                            return Some((st.dialog, *resp_id));
+                        }
+                    }
+                }
+            }
+        }
+        None
+    });
+    if let Some((dlg, resp_id)) = picked {
+        gtk_dialog_response(dlg, resp_id);
+    }
+    TRUE
+}
+
+/// Pure PangoCairo paper-book modal action sheet (zero GTK2 gray button theme dithering,
+/// zero FreeType CJK fake-bold blur, dynamic wrapped message layout).
 unsafe fn run_choice_dialog(
     parent: *mut GtkWidget,
+    lang: UiLang,
     title: &str,
     message: &str,
     buttons: &[(&str, i32)],
 ) -> i32 {
+    let dlg_w: f64 = 760.0;
+    let inner_w: f64 = dlg_w - 72.0;
+    let msg_lines = if message.trim().is_empty() {
+        0
+    } else {
+        estimate_wrapped_lines(message, inner_w, 25.0)
+    };
+    let est_h = (30.0
+        + 46.0
+        + 10.0
+        + (msg_lines as f64) * 38.0
+        + 38.0
+        + (buttons.len() as f64) * 92.0
+        + 26.0)
+        .min((SCREEN_H - 120) as f64);
+
     let dialog = gtk_dialog_new();
     let d_title = CString::new("L:D_N:dialog_ID:ranki.ranki.ranki_PC:N").unwrap();
     gtk_window_set_title(dialog, d_title.as_ptr());
     gtk_window_set_transient_for(dialog, parent);
     gtk_window_set_position(dialog, GTK_WIN_POS_CENTER_ON_PARENT);
-    gtk_widget_set_size_request(dialog, 720, -1);
+    gtk_container_set_border_width(dialog, 0);
+    gtk_dialog_set_has_separator(dialog, FALSE);
+
+    let action_area = gtk_dialog_get_action_area(dialog);
+    if !action_area.is_null() {
+        gtk_widget_set_no_show_all(action_area, TRUE);
+        gtk_widget_hide(action_area);
+    }
 
     let white = GdkColor {
         pixel: 0,
@@ -672,60 +843,61 @@ unsafe fn run_choice_dialog(
     };
     gtk_widget_modify_bg(dialog, GTK_STATE_NORMAL, &white);
 
-    let area = gtk_dialog_get_content_area(dialog);
-    let vbox = gtk_vbox_new(FALSE, 14);
-    gtk_container_set_border_width(vbox, 32);
+    let draw_area = gtk_drawing_area_new();
+    gtk_widget_set_size_request(draw_area, dlg_w as i32, est_h as i32);
+    gtk_widget_add_events(draw_area, GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK);
 
-    let f_title = make_font_desc(30.0, true);
-    let f_msg = make_font_desc(24.0, false);
-    let f_btn = make_font_desc(26.0, true);
+    let sig_exp = CString::new("expose-event").unwrap();
+    g_signal_connect_data(
+        draw_area as gpointer,
+        sig_exp.as_ptr(),
+        Some(std::mem::transmute(on_choice_expose as usize)),
+        ptr::null_mut(),
+        None,
+        0,
+    );
+    let sig_p = CString::new("button-press-event").unwrap();
+    g_signal_connect_data(
+        draw_area as gpointer,
+        sig_p.as_ptr(),
+        Some(std::mem::transmute(on_choice_press as usize)),
+        ptr::null_mut(),
+        None,
+        0,
+    );
+    let sig_r = CString::new("button-release-event").unwrap();
+    g_signal_connect_data(
+        draw_area as gpointer,
+        sig_r.as_ptr(),
+        Some(std::mem::transmute(on_choice_release as usize)),
+        ptr::null_mut(),
+        None,
+        0,
+    );
 
-    if let Ok(ct) = CString::new(title) {
-        let lt = gtk_label_new(ct.as_ptr());
-        gtk_misc_set_alignment(lt, 0.0, 0.5);
-        gtk_widget_modify_font(lt, f_title as *mut std::ffi::c_void);
-        gtk_box_pack_start(vbox, lt, FALSE, FALSE, 0);
-    }
-    if let Ok(cm) = CString::new(message) {
-        let lm = gtk_label_new(cm.as_ptr());
-        gtk_misc_set_alignment(lm, 0.0, 0.5);
-        gtk_label_set_line_wrap(lm, TRUE);
-        gtk_widget_modify_font(lm, f_msg as *mut std::ffi::c_void);
-        gtk_box_pack_start(vbox, lm, FALSE, FALSE, 6);
-    }
+    let content = gtk_dialog_get_content_area(dialog);
+    gtk_box_pack_start(content, draw_area, TRUE, TRUE, 0);
 
-    let sig_clicked = CString::new("clicked").unwrap();
-    for &(label, resp_id) in buttons {
-        if let Ok(cl) = CString::new(label) {
-            let btn = gtk_button_new_with_label(cl.as_ptr());
-            gtk_widget_set_size_request(btn, 640, 68);
-            gtk_widget_modify_font(btn, f_btn as *mut std::ffi::c_void);
-            let child = gtk_bin_get_child(btn);
-            if !child.is_null() {
-                gtk_widget_modify_font(child, f_btn as *mut std::ffi::c_void);
-            }
-            g_signal_connect_data(
-                btn as gpointer,
-                sig_clicked.as_ptr(),
-                Some(std::mem::transmute(on_choice_btn_clicked as usize)),
-                resp_id as isize as gpointer,
-                None,
-                0,
-            );
-            gtk_box_pack_start(vbox, btn, FALSE, FALSE, 0);
-        }
-    }
+    CHOICE_DIALOG.with(|cell| {
+        *cell.borrow_mut() = Some(ChoiceDialogState {
+            dialog,
+            area: draw_area,
+            title: title.to_string(),
+            message: message.to_string(),
+            buttons: buttons.iter().map(|&(l, id)| (l.to_string(), id)).collect(),
+            button_rects: Vec::with_capacity(buttons.len()),
+            pressed_idx: None,
+            lang,
+            width: dlg_w,
+            height: est_h,
+        });
+    });
 
-    gtk_box_pack_start(area, vbox, TRUE, TRUE, 0);
-
-    pango_font_description_free(f_title);
-    pango_font_description_free(f_msg);
-    pango_font_description_free(f_btn);
-
-    ACTIVE_CHOICE_DIALOG.with(|c| c.set(dialog));
     gtk_widget_show_all(dialog);
     let response = gtk_dialog_run(dialog);
-    ACTIVE_CHOICE_DIALOG.with(|c| c.set(ptr::null_mut()));
+    CHOICE_DIALOG.with(|cell| {
+        *cell.borrow_mut() = None;
+    });
     gtk_widget_destroy(dialog);
 
     // Wipe modal dialog frame ghosting cleanly after Xorg finishes repainting underlying view
@@ -784,7 +956,7 @@ unsafe extern "C" fn on_deck_top_expose(
     _data: gpointer,
 ) -> gboolean {
     let cr = gdk_cairo_create((*event).window);
-    with_app_ref(|app| app.deck_view.draw_top(cr));
+    with_app_ref(|app| app.deck_view.draw_top(cr, app.config.language));
     cairo_destroy(cr);
     TRUE
 }
@@ -815,7 +987,7 @@ unsafe extern "C" fn on_deck_list_expose(
     _data: gpointer,
 ) -> gboolean {
     let cr = gdk_cairo_create((*event).window);
-    with_app_ref(|app| app.deck_view.draw_list(cr));
+    with_app_ref(|app| app.deck_view.draw_list(cr, app.config.language));
     cairo_destroy(cr);
     TRUE
 }
@@ -846,7 +1018,7 @@ unsafe extern "C" fn on_deck_footer_expose(
     _data: gpointer,
 ) -> gboolean {
     let cr = gdk_cairo_create((*event).window);
-    with_app_ref(|app| app.deck_view.draw_footer(cr));
+    with_app_ref(|app| app.deck_view.draw_footer(cr, app.config.language));
     cairo_destroy(cr);
     TRUE
 }
@@ -879,7 +1051,7 @@ unsafe extern "C" fn on_review_top_expose(
     _data: gpointer,
 ) -> gboolean {
     let cr = gdk_cairo_create((*event).window);
-    with_app_ref(|app| app.review_view.draw_top(cr));
+    with_app_ref(|app| app.review_view.draw_top(cr, app.config.language));
     cairo_destroy(cr);
     TRUE
 }
@@ -910,7 +1082,7 @@ unsafe extern "C" fn on_review_bottom_expose(
     _data: gpointer,
 ) -> gboolean {
     let cr = gdk_cairo_create((*event).window);
-    with_app_ref(|app| app.review_view.draw_bottom(cr));
+    with_app_ref(|app| app.review_view.draw_bottom(cr, app.config.language));
     cairo_destroy(cr);
     TRUE
 }
@@ -1109,6 +1281,7 @@ unsafe extern "C" fn on_settings_top_release(
     if back {
         eink::close_keyboard();
         with_app(|app| {
+            gtk_window_set_focus(app.window, ptr::null_mut());
             let ret = app.settings_return_page;
             if ret == PAGE_DECKS {
                 app.deck_view.queue_redraw_all();
@@ -1144,60 +1317,116 @@ unsafe extern "C" fn on_entry_focus_out(
     FALSE
 }
 
-unsafe extern "C" fn on_settings_login_click(_w: *mut GtkWidget, _data: gpointer) {
-    eink::close_keyboard();
-    with_app(|app| {
-        if app.login_rx.is_some() {
-            return;
+unsafe extern "C" fn on_settings_ctrl_expose(
+    _w: *mut GtkWidget,
+    event: *mut GdkEventExpose,
+    _data: gpointer,
+) -> gboolean {
+    let cr = gdk_cairo_create((*event).window);
+    with_app_ref(|app| app.settings_view.draw_controls(cr));
+    cairo_destroy(cr);
+    TRUE
+}
+
+unsafe extern "C" fn on_settings_ctrl_press(
+    _w: *mut GtkWidget,
+    event: *mut GdkEventButton,
+    _data: gpointer,
+) -> gboolean {
+    with_app(|app| app.settings_view.on_ctrl_press((*event).x, (*event).y));
+    TRUE
+}
+
+unsafe extern "C" fn on_settings_ctrl_release(
+    _w: *mut GtkWidget,
+    event: *mut GdkEventButton,
+    _data: gpointer,
+) -> gboolean {
+    let act = with_app(|app| app.settings_view.on_ctrl_release((*event).x, (*event).y))
+        .unwrap_or(SettingsAction::None);
+    handle_settings_action(act);
+    TRUE
+}
+
+unsafe fn handle_settings_action(action: SettingsAction) {
+    match action {
+        SettingsAction::None => {}
+        SettingsAction::Login => {
+            eink::close_keyboard();
+            with_app(|app| {
+                gtk_window_set_focus(app.window, ptr::null_mut());
+                if app.login_rx.is_some() {
+                    return;
+                }
+                let lang = app.config.language;
+                let (user, pass, srv) = app.settings_view.read_credentials();
+                app.settings_view
+                    .set_status_for_config(&app.config, Some(lang.msg_signing_in()));
+                app.login_rx = Some(spawn_login(user, pass, srv, lang));
+                g_timeout_add(120, on_login_poll, ptr::null_mut());
+            });
         }
-        let (user, pass, srv) = app.settings_view.read_credentials();
-        app.settings_view
-            .set_status_for_config(&app.config, Some("正在连接服务器验证账号，请稍候..."));
-        app.login_rx = Some(spawn_login(user, pass, srv));
-        g_timeout_add(120, on_login_poll, ptr::null_mut());
-    });
-}
-
-unsafe extern "C" fn on_settings_save_server_click(_w: *mut GtkWidget, _data: gpointer) {
-    eink::close_keyboard();
-    with_app(|app| {
-        let (_, _, srv) = app.settings_view.read_credentials();
-        app.config.set_custom_sync_server(&srv);
-        let _ = app.config.save();
-        app.settings_view
-            .sync_from_config(&app.config, Some("同步服务器地址已保存。"));
-    });
-}
-
-unsafe extern "C" fn on_settings_logout_click(_w: *mut GtkWidget, _data: gpointer) {
-    eink::close_keyboard();
-    with_app(|app| {
-        app.config.clear_sync_auth();
-        let _ = app.config.save();
-        app.settings_view.clear_password_entry();
-        app.settings_view
-            .set_status_for_config(&app.config, Some("已清除本地登录 Token。"));
-    });
-}
-
-unsafe extern "C" fn on_settings_font_down_click(_w: *mut GtkWidget, _data: gpointer) {
-    with_app(|app| {
-        let next = app.config.font_size_px.saturating_sub(2).max(MIN_FONT_SIZE_PX);
-        app.config.set_font_size_px(next);
-        let _ = app.config.save();
-        app.settings_view.sync_reading_controls(&app.config);
-    });
-    push_card_config_to_webview();
-}
-
-unsafe extern "C" fn on_settings_font_up_click(_w: *mut GtkWidget, _data: gpointer) {
-    with_app(|app| {
-        let next = (app.config.font_size_px + 2).min(MAX_FONT_SIZE_PX);
-        app.config.set_font_size_px(next);
-        let _ = app.config.save();
-        app.settings_view.sync_reading_controls(&app.config);
-    });
-    push_card_config_to_webview();
+        SettingsAction::SaveServer => {
+            eink::close_keyboard();
+            with_app(|app| {
+                gtk_window_set_focus(app.window, ptr::null_mut());
+                let (_, _, srv) = app.settings_view.read_credentials();
+                app.config.set_custom_sync_server(&srv);
+                let _ = app.config.save();
+                let msg = app.config.language.msg_server_saved();
+                app.settings_view.sync_from_config(&app.config, Some(msg));
+            });
+        }
+        SettingsAction::Logout => {
+            eink::close_keyboard();
+            with_app(|app| {
+                gtk_window_set_focus(app.window, ptr::null_mut());
+                app.config.clear_sync_auth();
+                let _ = app.config.save();
+                app.settings_view.clear_password_entry();
+                let msg = app.config.language.msg_signed_out();
+                app.settings_view.set_status_for_config(&app.config, Some(msg));
+            });
+        }
+        SettingsAction::FontDown => {
+            with_app(|app| {
+                let next = app.config.font_size_px.saturating_sub(2).max(MIN_FONT_SIZE_PX);
+                app.config.set_font_size_px(next);
+                let _ = app.config.save();
+                app.settings_view.sync_reading_controls(&app.config);
+            });
+            push_card_config_to_webview();
+        }
+        SettingsAction::FontUp => {
+            with_app(|app| {
+                let next = (app.config.font_size_px + 2).min(MAX_FONT_SIZE_PX);
+                app.config.set_font_size_px(next);
+                let _ = app.config.save();
+                app.settings_view.sync_reading_controls(&app.config);
+            });
+            push_card_config_to_webview();
+        }
+        SettingsAction::SetLang(new_lang) => {
+            eink::close_keyboard();
+            let changed = with_app(|app| {
+                gtk_window_set_focus(app.window, ptr::null_mut());
+                if app.config.language == new_lang {
+                    return false;
+                }
+                app.config.language = new_lang;
+                let _ = app.config.save();
+                app.settings_view.sync_from_config(&app.config, None);
+                app.deck_view.queue_redraw_all();
+                app.review_view.queue_redraw_bars();
+                println!("[CONFIG] Switched UI language -> {}", new_lang.as_code());
+                true
+            })
+            .unwrap_or(false);
+            if changed {
+                push_card_config_to_webview();
+            }
+        }
+    }
 }
 
 unsafe extern "C" fn on_login_poll(_data: gpointer) -> gboolean {
@@ -1210,7 +1439,9 @@ unsafe extern "C" fn on_login_poll(_data: gpointer) -> gboolean {
             Err(TryRecvError::Empty) => None,
             Err(TryRecvError::Disconnected) => {
                 app.login_rx = None;
-                Some(LoginOutcome::Error("登录后台线程异常中断".to_string()))
+                Some(LoginOutcome::Error(
+                    app.config.language.err_login_thread().to_string(),
+                ))
             }
         },
         None => Some(LoginOutcome::Error(String::new())),
@@ -1225,10 +1456,8 @@ unsafe extern "C" fn on_login_poll(_data: gpointer) -> gboolean {
                 app.config.sync_endpoint_cache.clear();
                 let _ = app.config.save();
                 app.settings_view.clear_password_entry();
-                app.settings_view.sync_from_config(
-                    &app.config,
-                    Some("登录成功！安全 Token 已保存，即将自动同步集合..."),
-                );
+                let msg = app.config.language.msg_login_success();
+                app.settings_view.sync_from_config(&app.config, Some(msg));
                 gtk_notebook_set_current_page(app.notebook, PAGE_DECKS);
             });
             start_collection_sync(SyncMode::Normal);
@@ -1255,7 +1484,9 @@ unsafe extern "C" fn on_sync_poll(_data: gpointer) -> gboolean {
             Err(TryRecvError::Empty) => None,
             Err(TryRecvError::Disconnected) => {
                 app.sync_rx = None;
-                Some(SyncOutcome::Error("同步后台线程异常中断".to_string()))
+                Some(SyncOutcome::Error(
+                    app.config.language.err_sync_thread().to_string(),
+                ))
             }
         },
         None => Some(SyncOutcome::Error(String::new())),
@@ -1302,24 +1533,26 @@ unsafe extern "C" fn on_sync_poll(_data: gpointer) -> gboolean {
                     new_endpoint,
                 } => {
                     persist_redirected_endpoint(new_endpoint);
-                    show_deck_banner("需要全量同步，请选择方向", Some(3000));
-                    let parent = with_app_ref(|app| app.window);
-                    if let Some(win) = parent {
-                        let body = if server_message.trim().is_empty() {
-                            "本地与云端集合存在结构差异，必须执行单向全量同步（仅同步数据库，不下载媒体）：".to_string()
-                        } else {
-                            format!("{}\n\n请选择全量同步方向：", server_message)
-                        };
+                    let ctx = with_app_ref(|app| (app.window, app.config.language));
+                    if let Some((win, lang)) = ctx {
+                        show_deck_banner(lang.banner_full_sync_needed(), Some(3000));
+                        let body = lang.dialog_full_sync_body(&server_message);
                         let mut choices: Vec<(&str, i32)> = Vec::new();
                         if download_ok {
-                            choices.push(("从云端下载覆盖本地", RESP_FULL_DOWNLOAD));
+                            choices.push((lang.btn_full_download(), RESP_FULL_DOWNLOAD));
                         }
                         if upload_ok {
-                            choices.push(("上传本地覆盖云端", RESP_FULL_UPLOAD));
+                            choices.push((lang.btn_full_upload(), RESP_FULL_UPLOAD));
                         }
-                        choices.push(("取消", RESP_CANCEL));
+                        choices.push((lang.btn_cancel(), RESP_CANCEL));
 
-                        let picked = run_choice_dialog(win, "需要全量同步", &body, &choices);
+                        let picked = run_choice_dialog(
+                            win,
+                            lang,
+                            lang.dialog_full_sync_title(),
+                            &body,
+                            &choices,
+                        );
                         match picked {
                             RESP_FULL_DOWNLOAD => start_collection_sync(SyncMode::FullDownload),
                             RESP_FULL_UPLOAD => start_collection_sync(SyncMode::FullUpload),

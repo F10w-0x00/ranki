@@ -4,6 +4,8 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
+use crate::i18n::UiLang;
+
 pub const DEFAULT_FONT_SIZE_PX: u32 = 42;
 pub const MIN_FONT_SIZE_PX: u32 = 28;
 pub const MAX_FONT_SIZE_PX: u32 = 54;
@@ -19,6 +21,7 @@ pub struct AppConfig {
     /// Kept separate from user's manual `sync_server` so clearing/changing server resets it cleanly.
     pub sync_endpoint_cache: String,
     pub font_size_px: u32,
+    pub language: UiLang,
 }
 
 impl AppConfig {
@@ -30,6 +33,7 @@ impl AppConfig {
             sync_server: String::new(),
             sync_endpoint_cache: String::new(),
             font_size_px: DEFAULT_FONT_SIZE_PX,
+            language: UiLang::En,
         }
     }
 
@@ -58,10 +62,11 @@ impl AppConfig {
         if let Ok(content) = fs::read_to_string(&path) {
             config.parse_ini_str(&content);
             println!(
-                "[CONFIG] Loaded {:?} (hkey_len={}, font_size_px={}, sync_endpoint_cache={:?})",
+                "[CONFIG] Loaded {:?} (hkey_len={}, font_size_px={}, lang={}, sync_endpoint_cache={:?})",
                 path,
                 config.hkey.len(),
                 config.font_size_px,
+                config.language.as_code(),
                 config.sync_endpoint_cache
             );
         } else {
@@ -101,6 +106,9 @@ impl AppConfig {
                             self.font_size_px = clamp_font_size(px);
                         }
                     }
+                    "language" => {
+                        self.language = UiLang::from_code(val);
+                    }
                     _ => {}
                 }
             }
@@ -135,12 +143,13 @@ impl AppConfig {
 
     pub fn serialize_ini(&self) -> String {
         format!(
-            "[General]\ncollection_dir={}\nhkey={}\nsync_server={}\nsync_endpoint_cache={}\nfont_size_px={}\n",
+            "[General]\ncollection_dir={}\nhkey={}\nsync_server={}\nsync_endpoint_cache={}\nfont_size_px={}\nlanguage={}\n",
             self.collection_dir,
             self.hkey,
             self.sync_server,
             self.sync_endpoint_cache,
-            clamp_font_size(self.font_size_px)
+            clamp_font_size(self.font_size_px),
+            self.language.as_code()
         )
     }
 
@@ -214,6 +223,7 @@ mod tests {
         assert_eq!(cfg.collection_dir, "/mnt/us/anki_data_test");
         assert!(cfg.hkey.is_empty());
         assert_eq!(cfg.font_size_px, 42);
+        assert_eq!(cfg.language, UiLang::En);
         assert_eq!(BUILTIN_FOCUS_TIMER_SECS, 20);
     }
 
@@ -226,15 +236,18 @@ mod tests {
              hkey=tok_abc123\n\
              sync_server=https://sync.example.com/\n\
              font_size_px=12\n\
+             language=zh\n\
              math_engine=katex\n\
              scale=1.2\n",
         );
         assert_eq!(cfg.hkey, "tok_abc123");
         assert_eq!(cfg.sync_server, "https://sync.example.com/");
         assert_eq!(cfg.font_size_px, MIN_FONT_SIZE_PX);
+        assert_eq!(cfg.language, UiLang::Zh);
 
-        cfg.parse_ini_str("font_size_px=999\n");
+        cfg.parse_ini_str("font_size_px=999\nlanguage=en\n");
         assert_eq!(cfg.font_size_px, MAX_FONT_SIZE_PX);
+        assert_eq!(cfg.language, UiLang::En);
     }
 
     #[test]
@@ -251,6 +264,7 @@ mod tests {
         cfg.sync_server = "https://anki.local".to_string();
         cfg.sync_endpoint_cache = "https://sync11.ankiweb.net/".to_string();
         cfg.set_font_size_px(46);
+        cfg.language = UiLang::Zh;
         cfg.save().expect("save should succeed");
 
         let loaded = AppConfig::load_from_path(path);

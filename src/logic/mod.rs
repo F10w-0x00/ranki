@@ -90,7 +90,7 @@ impl DeckBrowserState {
         Self {
             decks: Vec::new(),
             total_due: 0,
-            studied_today: "今天在 0 秒内学习了 0 张卡片".to_string(),
+            studied_today: String::new(),
             collapsed: HashSet::new(),
             page: 0,
         }

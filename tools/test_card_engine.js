@@ -22,7 +22,7 @@ function createMockEnv(userAgent) {
     var ids = [
         'slot-a-front', 'slot-a-back', 'slot-b-front', 'slot-b-back',
         'card-a-front', 'card-a-back', 'card-b-front', 'card-b-back',
-        'slot-finished', 'card-note-style', 'card-font-override', 'finished-sub'
+        'slot-finished', 'card-note-style', 'card-font-override', 'finished-title', 'finished-sub'
     ];
     for (var i = 0; i < ids.length; i++) {
         elements[ids[i]] = {
@@ -129,7 +129,8 @@ assert.strictEqual(env.engine.getState().mathEngine, 'mathjax', 'Engine must be 
 assert.ok(env.titles[0] && env.titles[0].indexOf('RA:CARD_READY:') === 0, 'CARD_READY must fire on init');
 console.log('[PASS] Test 1: Pure MathJax 2.7.9 CardEngine initializes and emits CARD_READY.');
 
-// Test 2: HTML preprocessor (scripts, bare \ce, unified color normalization, media placeholders, anti-tofu)
+// Test 2: HTML preprocessor (scripts, bare \ce, unified color normalization, bilingual media placeholders, anti-tofu)
+assert.strictEqual(env.engine.getState().uiLang, 'en', 'Default UI language must be English');
 var pp = env.engine._preprocessCardHtml;
 assert.strictEqual(pp('<script>alert(1)</script><b>Hi</b>'), '<b>Hi</b>');
 assert.strictEqual(pp('Water \\ce{H2O} and \\(\\ce{Ca^2+}\\)'), 'Water \\(\\ce{H2O}\\) and \\(\\ce{Ca^2+}\\)');
@@ -138,12 +139,22 @@ assert.ok(pp('<span style="color: #0066cc">blue</span>').indexOf('class="eink-co
 assert.ok(pp('<font color="green">green</font>').indexOf('class="eink-color"') !== -1);
 assert.ok(pp('<span style="background-color: yellow">hl</span>').indexOf('class="eink-mark"') !== -1);
 assert.strictEqual(pp('<span style="color: #555555">gray</span>').indexOf('eink-color'), -1, 'Neutral gray must not get artificial underline');
+assert.ok(pp('Listen [sound:test_01.mp3]').indexOf('[Audio unsupported]') !== -1);
+assert.ok(pp('<video src="a.mp4"></video>').indexOf('[Video/Embed unsupported]') !== -1);
+assert.ok(pp('Figure: <img src="fig1.png">').indexOf('[Image unsupported]') !== -1);
+assert.strictEqual(pp('\u2068OK\u2069 \uD83C\uDF89 \u2705 \u274C \u26A0\uFE0F'), 'OK  [OK] [X] [!]');
+// Switch to Chinese and verify localized placeholders & finished title
+env.engine.setConfig({ lang: 'zh' });
+assert.strictEqual(env.engine.getState().uiLang, 'zh');
 assert.ok(pp('Listen [sound:test_01.mp3]').indexOf('[\u4e0d\u652f\u6301\u97f3\u9891]') !== -1);
 assert.ok(pp('<video src="a.mp4"></video>').indexOf('[\u4e0d\u652f\u6301\u89c6\u9891/\u5d4c\u5165\u5185\u5bb9]') !== -1);
 assert.ok(pp('Figure: <img src="fig1.png">').indexOf('[\u4e0d\u652f\u6301\u56fe\u7247]') !== -1);
 assert.strictEqual(pp('\u2068OK\u2069 \uD83C\uDF89 \u2705 \u274C \u26A0\uFE0F'), 'OK  [\u5bf9] [\u9519] [!]');
+assert.strictEqual(env.elements['finished-title'].textContent, '\u4eca\u65e5\u590d\u4e60\u5df2\u5b8c\u6210');
+env.engine.setConfig({ lang: 'en' });
+assert.strictEqual(env.elements['finished-title'].textContent, 'Congratulations!');
 assert.strictEqual(pp('Plain Chinese & English card with no math'), 'Plain Chinese & English card with no math');
-console.log('[PASS] Test 2: HTML preprocessor handles colors, media placeholders, and anti-tofu sanitization.');
+console.log('[PASS] Test 2: HTML preprocessor handles colors, bilingual placeholders, and anti-tofu sanitization.');
 
 // Test 3: Font size defaults to 42px and clamps strictly within [28, 54]
 assert.strictEqual(env.engine.getState().fontSizePx, 42);

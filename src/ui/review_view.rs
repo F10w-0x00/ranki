@@ -11,14 +11,15 @@ use crate::anki::{ActiveQueue, QueueCounts};
 use crate::ffi::cairo::*;
 use crate::ffi::gtk::*;
 use crate::ffi::webkit::*;
+use crate::i18n::UiLang;
 use crate::logic::{classify_card_gesture, CardGesture};
 use crate::ui::focus_timer::FocusTimerWidget;
 use crate::ui::theme::*;
 
 const TOP_AREA_W: i32 = SCREEN_W - 68; // 1004px left/center + 68px isolated timer slot
 
-// Top bar hitboxes (1004x84)
-const BTN_BACK: Rect = Rect::new(20.0, 16.0, 118.0, 52.0);
+// Top bar hitboxes (1004x84) — sized cleanly for both EN ("< Decks"/"Undo") & ZH
+const BTN_BACK: Rect = Rect::new(20.0, 16.0, 134.0, 52.0);
 const BTN_UNDO: Rect = Rect::new(782.0, 16.0, 96.0, 52.0);
 const BTN_MENU: Rect = Rect::new(890.0, 16.0, 94.0, 52.0);
 
@@ -180,7 +181,7 @@ impl ReviewView {
             webview,
             bottom_area,
             stage: ReviewStage::Unflipped,
-            deck_name: "复习".to_string(),
+            deck_name: "Review".to_string(),
             counts: QueueCounts {
                 new: 0,
                 learn: 0,
@@ -205,17 +206,19 @@ impl ReviewView {
         gtk_widget_queue_draw(self.bottom_area);
     }
 
-    pub unsafe fn draw_top(&self, cr: *mut cairo_t) {
+    pub unsafe fn draw_top(&self, cr: *mut cairo_t, lang: UiLang) {
         fill_white(cr);
         draw_hline(cr, 0.0, TOP_AREA_W as f64, (TOP_BAR_H as f64) - 0.75, 1.5, 0.0);
+
+        let btn_bold = !lang.is_cjk();
 
         // Back button
         draw_pill_button(
             cr,
             BTN_BACK,
-            "< 牌组",
+            lang.btn_decks(),
             24.0,
-            true,
+            btn_bold,
             0.0,
             0.0,
             self.top_pressed == TopPress::Back,
@@ -237,13 +240,13 @@ impl ReviewView {
         let counter_start_x = (((SCREEN_W as f64) - total_w) / 2.0).clamp(320.0, 660.0 - total_w);
 
         // Deck short name (clamped cleanly to the left of the centered 3-queue counter)
-        let deck_max_w = (counter_start_x - 16.0 - 152.0).max(120.0);
+        let deck_max_w = (counter_start_x - 16.0 - 168.0).max(120.0);
         draw_text_left(
             cr,
-            Rect::new(152.0, 0.0, deck_max_w, TOP_BAR_H as f64),
+            Rect::new(168.0, 0.0, deck_max_w, TOP_BAR_H as f64),
             &self.deck_name,
             26.0,
-            true,
+            self.deck_name.is_ascii(),
             0.0,
             true,
         );
@@ -296,9 +299,9 @@ impl ReviewView {
         draw_pill_button(
             cr,
             BTN_UNDO,
-            "撤销",
+            lang.btn_undo(),
             23.0,
-            self.can_undo,
+            self.can_undo && btn_bold,
             if self.can_undo { 0.72 } else { 0.88 },
             if self.can_undo { 0.12 } else { 0.68 },
             self.can_undo && self.top_pressed == TopPress::Undo,
@@ -369,18 +372,20 @@ impl ReviewView {
         Rect::new(x, RATE_Y, RATE_W, RATE_H)
     }
 
-    pub unsafe fn draw_bottom(&self, cr: *mut cairo_t) {
+    pub unsafe fn draw_bottom(&self, cr: *mut cairo_t, lang: UiLang) {
         fill_white(cr);
         draw_hline(cr, 0.0, SCREEN_W as f64, 0.75, 1.5, 0.0);
+
+        let btn_bold = !lang.is_cjk();
 
         match self.stage {
             ReviewStage::Unflipped => {
                 draw_pill_button(
                     cr,
                     BTN_FULL,
-                    "显  示  答  案",
+                    lang.btn_show_answer(),
                     34.0,
-                    true,
+                    btn_bold,
                     0.0,
                     0.0,
                     self.bottom_pressed == BottomPress::Full,
@@ -390,16 +395,16 @@ impl ReviewView {
                 draw_pill_button(
                     cr,
                     BTN_FULL,
-                    "返回牌组大厅",
+                    lang.btn_back_to_decks(),
                     32.0,
-                    true,
+                    btn_bold,
                     0.0,
                     0.0,
                     self.bottom_pressed == BottomPress::Full,
                 );
             }
             ReviewStage::Flipped => {
-                let labels = ["重来", "困难", "良好", "简单"];
+                let labels = lang.rating_labels();
                 for (i, label) in labels.iter().enumerate() {
                     let r = Self::rate_rect(i);
                     let pressed = self.bottom_pressed == BottomPress::RateIdx(i);
@@ -433,7 +438,7 @@ impl ReviewView {
                         Rect::new(r.x, r.y + 40.0, r.w, 46.0),
                         label,
                         32.0,
-                        true,
+                        btn_bold,
                         lbl_fg,
                     );
                 }

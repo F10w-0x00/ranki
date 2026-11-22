@@ -13,6 +13,10 @@ pub const CAIRO_ANTIALIAS_GRAY: c_int = 2;
 pub const PANGO_ELLIPSIZE_NONE: c_int = 0;
 pub const PANGO_ELLIPSIZE_END: c_int = 3;
 
+pub const PANGO_WRAP_WORD: c_int = 0;
+pub const PANGO_WRAP_CHAR: c_int = 1;
+pub const PANGO_WRAP_WORD_CHAR: c_int = 2;
+
 pub const PANGO_ALIGN_LEFT: c_int = 0;
 pub const PANGO_ALIGN_CENTER: c_int = 1;
 pub const PANGO_ALIGN_RIGHT: c_int = 2;
@@ -80,6 +84,7 @@ extern "C" {
     );
     pub fn pango_layout_set_text(layout: *mut PangoLayout, text: *const c_char, length: c_int);
     pub fn pango_layout_set_width(layout: *mut PangoLayout, width: c_int);
+    pub fn pango_layout_set_wrap(layout: *mut PangoLayout, wrap: c_int);
     pub fn pango_layout_set_ellipsize(layout: *mut PangoLayout, ellipsize: c_int);
     pub fn pango_layout_set_alignment(layout: *mut PangoLayout, alignment: c_int);
     pub fn pango_layout_get_pixel_size(

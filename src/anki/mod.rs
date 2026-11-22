@@ -218,7 +218,7 @@ impl AnkiService {
         let studied_today = strip_invisible_bidi(
             &col.studied_today()
                 .map(|s| s.replace('\n', " "))
-                .unwrap_or_else(|_| "今天在 0 秒内学习了 0 张卡片".to_string()),
+                .unwrap_or_else(|_| "Studied 0 cards in 0 seconds today".to_string()),
         );
 
         Ok(DeckListData {
@@ -233,10 +233,10 @@ impl AnkiService {
             let raw = col
                 .studied_today()
                 .map(|s| s.replace('\n', " "))
-                .unwrap_or_else(|_| "今天在 0 秒内学习了 0 张卡片".to_string());
+                .unwrap_or_else(|_| "Studied 0 cards in 0 seconds today".to_string());
             strip_invisible_bidi(&raw)
         } else {
-            "今天在 0 秒内学习了 0 张卡片".to_string()
+            "Studied 0 cards in 0 seconds today".to_string()
         }
     }
 
@@ -357,7 +357,7 @@ impl AnkiService {
         let deck_name = col
             .get_current_deck()
             .map(|d| short_deck_name(&d.name.human_name()))
-            .unwrap_or_else(|_| "复习".to_string());
+            .unwrap_or_else(|_| "Review".to_string());
 
         let queued = col
             .get_queued_cards(2, false)

@@ -7,6 +7,7 @@ use std::ptr;
 
 use crate::ffi::cairo::*;
 use crate::ffi::gtk::*;
+use crate::i18n::UiLang;
 use crate::logic::{classify_deck_swipe, DeckBrowserState, DeckSwipe};
 use crate::ui::theme::*;
 
@@ -15,11 +16,11 @@ const COL_W: f64 = 960.0;
 const ROW_TOP_Y: f64 = 16.0;
 const ROW_H: f64 = 114.0;
 
-// Top bar action pill hitboxes (1072x84)
-const BTN_SYNC: Rect = Rect::new(626.0, 16.0, 96.0, 52.0);
-const BTN_SETTINGS: Rect = Rect::new(734.0, 16.0, 96.0, 52.0);
-const BTN_REFRESH: Rect = Rect::new(842.0, 16.0, 94.0, 52.0);
-const BTN_EXIT: Rect = Rect::new(948.0, 16.0, 94.0, 52.0);
+// Top bar action pill hitboxes (1072x84) — sized generously for both EN ("Settings"/"Refresh") & ZH
+const BTN_SYNC: Rect = Rect::new(570.0, 16.0, 96.0, 52.0);
+const BTN_SETTINGS: Rect = Rect::new(678.0, 16.0, 132.0, 52.0);
+const BTN_REFRESH: Rect = Rect::new(822.0, 16.0, 122.0, 52.0);
+const BTN_EXIT: Rect = Rect::new(956.0, 16.0, 88.0, 52.0);
 
 // Footer pager pill hitboxes (1072x112)
 const BTN_PREV_PAGE: Rect = Rect::new(244.0, 12.0, 164.0, 52.0);
@@ -116,20 +117,21 @@ impl DeckView {
         gtk_widget_queue_draw(self.footer_area);
     }
 
-    pub unsafe fn draw_top(&self, cr: *mut cairo_t) {
+    pub unsafe fn draw_top(&self, cr: *mut cairo_t, lang: UiLang) {
         fill_white(cr);
         draw_hline(cr, 0.0, SCREEN_W as f64, (TOP_BAR_H as f64) - 0.75, 1.5, 0.0);
 
         // Left: Brand + deduplicated root due count
-        draw_text_left(cr, Rect::new(32.0, 0.0, 140.0, TOP_BAR_H as f64), "RAnki", 32.0, true, 0.0, false);
-        let sub = format!("待复习 {} 张", self.state.total_due);
-        draw_text_left(cr, Rect::new(160.0, 2.0, 440.0, TOP_BAR_H as f64), &sub, 23.0, false, 0.35, true);
+        draw_text_left(cr, Rect::new(32.0, 0.0, 132.0, TOP_BAR_H as f64), "RAnki", 32.0, true, 0.0, false);
+        let sub = lang.deck_due_summary(self.state.total_due);
+        draw_text_left(cr, Rect::new(158.0, 2.0, 398.0, TOP_BAR_H as f64), &sub, 23.0, false, 0.35, true);
 
-        // Right: Minimalist tactile action pills
-        draw_pill_button(cr, BTN_SYNC, "同步", 24.0, true, 0.0, 0.0, self.top_pressed == TopPress::Sync);
-        draw_pill_button(cr, BTN_SETTINGS, "设置", 24.0, true, 0.0, 0.0, self.top_pressed == TopPress::Settings);
-        draw_pill_button(cr, BTN_REFRESH, "刷新", 24.0, false, 0.78, 0.22, self.top_pressed == TopPress::Refresh);
-        draw_pill_button(cr, BTN_EXIT, "退出", 24.0, false, 0.78, 0.22, self.top_pressed == TopPress::Exit);
+        // Right: Minimalist tactile action pills (use static Bold for EN, crisp Regular for CJK)
+        let primary_bold = !lang.is_cjk();
+        draw_pill_button(cr, BTN_SYNC, lang.btn_sync(), 24.0, primary_bold, 0.0, 0.0, self.top_pressed == TopPress::Sync);
+        draw_pill_button(cr, BTN_SETTINGS, lang.btn_settings(), 24.0, primary_bold, 0.0, 0.0, self.top_pressed == TopPress::Settings);
+        draw_pill_button(cr, BTN_REFRESH, lang.btn_refresh(), 24.0, false, 0.72, 0.18, self.top_pressed == TopPress::Refresh);
+        draw_pill_button(cr, BTN_EXIT, lang.btn_exit(), 24.0, false, 0.72, 0.18, self.top_pressed == TopPress::Exit);
     }
 
     pub unsafe fn on_top_press(&mut self, x: f64, y: f64) {
@@ -163,7 +165,7 @@ impl DeckView {
         }
     }
 
-    pub unsafe fn draw_list(&self, cr: *mut cairo_t) {
+    pub unsafe fn draw_list(&self, cr: *mut cairo_t, lang: UiLang) {
         fill_white(cr);
 
         let page_rows = self.state.current_page_slice();
@@ -171,7 +173,7 @@ impl DeckView {
             draw_text_centered(
                 cr,
                 Rect::new(COL_X, 240.0, COL_W, 80.0),
-                "暂无牌组（请点击右上角「设置」登录并同步 AnkiWeb）",
+                lang.empty_decks_hint(),
                 26.0,
                 false,
                 0.4,
@@ -218,25 +220,30 @@ impl DeckView {
 
                 let name_w = (COL_X + COL_W - 246.0 - text_x).max(160.0);
                 let name_px = if deck.has_children { 31.0 } else { 29.0 };
-                draw_text_left(
+                // Use true static Anthropic Mono Web so ASCII prefixes (L1/L2/M0/M1...) align strictly!
+                // Avoid FreeType synthetic fake-bold on CJK parent deck names (SonyReader Ming is Regular-only).
+                let name_bold = deck.has_children && deck.name.is_ascii();
+                draw_text_left_for(
                     cr,
                     Rect::new(text_x, ry, name_w, ROW_H),
                     &deck.name,
+                    FONT_FAMILY_MONO,
                     name_px,
-                    deck.has_children,
+                    name_bold,
                     fg,
                     true,
                 );
 
-                // Right-aligned 3 tabular columns: New | Learn | Review
+                // Right-aligned 3 tabular monospace columns: New | Learn | Review (true static Bold for > 0)
                 let counts = [deck.new_count, deck.learn_count, deck.review_count];
                 for (ci, &val) in counts.iter().enumerate() {
                     let cx = COL_X + COL_W - 236.0 + (ci as f64) * 78.0;
                     let s = val.to_string();
-                    draw_text_right(
+                    draw_text_right_for(
                         cr,
                         Rect::new(cx, ry, 68.0, ROW_H),
                         &s,
+                        FONT_FAMILY_MONO,
                         27.0,
                         val > 0,
                         if val > 0 { fg } else { zero_fg },
@@ -249,11 +256,11 @@ impl DeckView {
 
         // Optional clean inline status banner near bottom of list canvas
         if let Some(ref msg) = self.status_banner {
-            let banner = Rect::new(COL_X + 40.0, 1170.0, COL_W - 80.0, 58.0);
+            let banner = Rect::new(COL_X + 20.0, 1170.0, COL_W - 40.0, 58.0);
             rounded_rect_path(cr, banner, 8.0);
             cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
             cairo_fill(cr);
-            draw_text_centered(cr, banner, msg, 24.0, true, 1.0);
+            draw_text_centered(cr, banner, msg, 24.0, !lang.is_cjk(), 1.0);
         }
     }
 
@@ -314,7 +321,7 @@ impl DeckView {
         }
     }
 
-    pub unsafe fn draw_footer(&self, cr: *mut cairo_t) {
+    pub unsafe fn draw_footer(&self, cr: *mut cairo_t, lang: UiLang) {
         fill_white(cr);
         draw_hline(cr, COL_X, COL_X + COL_W, 1.0, 1.5, 0.0);
 
@@ -322,37 +329,52 @@ impl DeckView {
         let tot_p = self.state.total_pages();
         let has_prev = cur_p > 1;
         let has_next = cur_p < tot_p;
+        let btn_bold = !lang.is_cjk();
 
         draw_pill_button(
             cr,
             BTN_PREV_PAGE,
-            "< 上一页",
+            lang.btn_prev_page(),
             23.0,
-            has_prev,
+            has_prev && btn_bold,
             if has_prev { 0.0 } else { 0.80 },
             if has_prev { 0.0 } else { 0.65 },
             has_prev && self.footer_pressed == FooterPress::Prev,
         );
 
-        let info = format!("第 {} / {} 页", cur_p, tot_p);
-        draw_text_centered(cr, Rect::new(416.0, 12.0, 240.0, 52.0), &info, 24.0, true, 0.15);
+        let info = lang.page_of(cur_p, tot_p);
+        draw_text_centered_for(
+            cr,
+            Rect::new(416.0, 12.0, 240.0, 52.0),
+            &info,
+            FONT_FAMILY_MONO,
+            24.0,
+            btn_bold,
+            0.15,
+        );
 
         draw_pill_button(
             cr,
             BTN_NEXT_PAGE,
-            "下一页 >",
+            lang.btn_next_page(),
             23.0,
-            has_next,
+            has_next && btn_bold,
             if has_next { 0.0 } else { 0.80 },
             if has_next { 0.0 } else { 0.65 },
             has_next && self.footer_pressed == FooterPress::Next,
         );
 
-        draw_text_centered(
+        let studied = if self.state.studied_today.trim().is_empty() {
+            lang.studied_today_fallback()
+        } else {
+            self.state.studied_today.as_str()
+        };
+        draw_text_centered_for(
             cr,
             Rect::new(COL_X, 72.0, COL_W, 34.0),
-            &self.state.studied_today,
-            21.0,
+            studied,
+            FONT_FAMILY_MONO,
+            20.0,
             false,
             0.35,
         );

@@ -13,6 +13,7 @@
     var prefetchedCardCss = '';
 
     var fontSizePx = 42;
+    var uiLang = 'en';
     var mathJaxLoaded = false;
     var mathJaxLoading = false;
     var mathJaxHooked = false;
@@ -86,8 +87,8 @@
             }
 
             // Replace common BMP Emoji / Dingbat glyphs missing on Kindle OS 5.14
-            if (code === 0x2705 || code === 0x2714) { out.push('[\u5bf9]'); continue; }
-            if (code === 0x274C || code === 0x2716) { out.push('[\u9519]'); continue; }
+            if (code === 0x2705 || code === 0x2714) { out.push(uiLang === 'zh' ? '[\u5bf9]' : '[OK]'); continue; }
+            if (code === 0x274C || code === 0x2716) { out.push(uiLang === 'zh' ? '[\u9519]' : '[X]'); continue; }
             if (code === 0x26A0) {
                 if (i + 1 < str.length && str.charCodeAt(i + 1) === 0xFE0F) i++;
                 out.push('[!]');
@@ -176,15 +177,18 @@
         var clean = String(html).replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '');
 
         // 2. Replace unsupported media with clean monochrome notice badges (zero tofu / broken icons)
-        clean = clean.replace(/\[sound:[^\]]+\]/gi, '<span class="eink-unsupported">[\u4e0d\u652f\u6301\u97f3\u9891]</span>');
-        clean = clean.replace(/<audio\b[^>]*>[\s\S]*?<\/audio>/gi, '<span class="eink-unsupported">[\u4e0d\u652f\u6301\u97f3\u9891]</span>');
-        clean = clean.replace(/<audio\b[^>]*\/?>/gi, '<span class="eink-unsupported">[\u4e0d\u652f\u6301\u97f3\u9891]</span>');
-        clean = clean.replace(/<video\b[^>]*>[\s\S]*?<\/video>/gi, '<span class="eink-unsupported">[\u4e0d\u652f\u6301\u89c6\u9891/\u5d4c\u5165\u5185\u5bb9]</span>');
-        clean = clean.replace(/<video\b[^>]*\/?>/gi, '<span class="eink-unsupported">[\u4e0d\u652f\u6301\u89c6\u9891/\u5d4c\u5165\u5185\u5bb9]</span>');
-        clean = clean.replace(/<iframe\b[^>]*>[\s\S]*?<\/iframe>/gi, '<span class="eink-unsupported">[\u4e0d\u652f\u6301\u89c6\u9891/\u5d4c\u5165\u5185\u5bb9]</span>');
-        clean = clean.replace(/<object\b[^>]*>[\s\S]*?<\/object>/gi, '<span class="eink-unsupported">[\u4e0d\u652f\u6301\u89c6\u9891/\u5d4c\u5165\u5185\u5bb9]</span>');
-        clean = clean.replace(/<embed\b[^>]*\/?>/gi, '<span class="eink-unsupported">[\u4e0d\u652f\u6301\u89c6\u9891/\u5d4c\u5165\u5185\u5bb9]</span>');
-        clean = clean.replace(/<img\b[^>]*\/?>/gi, '<span class="eink-unsupported">[\u4e0d\u652f\u6301\u56fe\u7247]</span>');
+        var lblAudio = uiLang === 'zh' ? '[\u4e0d\u652f\u6301\u97f3\u9891]' : '[Audio unsupported]';
+        var lblVideo = uiLang === 'zh' ? '[\u4e0d\u652f\u6301\u89c6\u9891/\u5d4c\u5165\u5185\u5bb9]' : '[Video/Embed unsupported]';
+        var lblImage = uiLang === 'zh' ? '[\u4e0d\u652f\u6301\u56fe\u7247]' : '[Image unsupported]';
+        clean = clean.replace(/\[sound:[^\]]+\]/gi, '<span class="eink-unsupported">' + lblAudio + '</span>');
+        clean = clean.replace(/<audio\b[^>]*>[\s\S]*?<\/audio>/gi, '<span class="eink-unsupported">' + lblAudio + '</span>');
+        clean = clean.replace(/<audio\b[^>]*\/?>/gi, '<span class="eink-unsupported">' + lblAudio + '</span>');
+        clean = clean.replace(/<video\b[^>]*>[\s\S]*?<\/video>/gi, '<span class="eink-unsupported">' + lblVideo + '</span>');
+        clean = clean.replace(/<video\b[^>]*\/?>/gi, '<span class="eink-unsupported">' + lblVideo + '</span>');
+        clean = clean.replace(/<iframe\b[^>]*>[\s\S]*?<\/iframe>/gi, '<span class="eink-unsupported">' + lblVideo + '</span>');
+        clean = clean.replace(/<object\b[^>]*>[\s\S]*?<\/object>/gi, '<span class="eink-unsupported">' + lblVideo + '</span>');
+        clean = clean.replace(/<embed\b[^>]*\/?>/gi, '<span class="eink-unsupported">' + lblVideo + '</span>');
+        clean = clean.replace(/<img\b[^>]*\/?>/gi, '<span class="eink-unsupported">' + lblImage + '</span>');
 
         // 3. Anti-tofu sanitization (strip invisible control chars & Kindle-unsupported Emoji)
         clean = sanitizeUnicodeForKindle(clean);
@@ -259,6 +263,16 @@
         if (fontOverrideEl) {
             fontOverrideEl.textContent =
                 '.card.kindle { font-size: ' + fontSizePx + 'px !important; }';
+        }
+    }
+
+    function applyUiLang(lang) {
+        uiLang = (lang === 'zh') ? 'zh' : 'en';
+        if (typeof document !== 'undefined') {
+            var titleEl = document.getElementById('finished-title');
+            if (titleEl) {
+                titleEl.textContent = (uiLang === 'zh') ? '\u4eca\u65e5\u590d\u4e60\u5df2\u5b8c\u6210' : 'Congratulations!';
+            }
         }
     }
 
@@ -712,6 +726,9 @@
             if (typeof cfg.font_size_px === 'number') {
                 applyFontSize(cfg.font_size_px);
             }
+            if (typeof cfg.lang === 'string') {
+                applyUiLang(cfg.lang);
+            }
             // Refit active viewport & report updated pagination after font change
             var vp = getActiveViewport();
             if (vp && vp.className === 'slot-viewport') {
@@ -876,6 +893,7 @@
                 prefetchedCardId: prefetchedCardId,
                 isFlipped: isFlipped,
                 fontSizePx: fontSizePx,
+                uiLang: uiLang,
                 mathEngine: 'mathjax'
             };
         }

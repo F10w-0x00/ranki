@@ -13,6 +13,7 @@ pub const DECK_FOOTER_H: i32 = 112;
 pub const TIMER_SIZE: i32 = 54;
 
 pub const FONT_FAMILY: &str = "Anthropic Sans Web, SonyReader Ming, Serif";
+pub const FONT_FAMILY_MONO: &str = "Anthropic Mono Web, SonyReader Ming, Serif";
 
 #[derive(Clone, Copy, Debug)]
 pub struct Rect {
@@ -32,12 +33,15 @@ impl Rect {
     }
 }
 
-/// Register local Anthropic Sans & Kindle SonyReader Ming fonts with Fontconfig so PangoCairo
-/// renders the exact same paper-book typography as the card canvas.
+/// Register local Anthropic Sans / Mono (including static Bold weights!) & Kindle SonyReader Ming
+/// fonts with Fontconfig so PangoCairo renders razor-sharp paper-book typography without fake-bold blur.
 pub fn register_app_fonts(views_dir: &Path) {
     let candidates = [
         views_dir.join("fonts/anthropic/AnthropicSans-Regular.ttf"),
+        views_dir.join("fonts/anthropic/AnthropicSans-Bold.ttf"),
         views_dir.join("fonts/anthropic/AnthropicSans-Italic.ttf"),
+        views_dir.join("fonts/anthropic/AnthropicMono-Regular.ttf"),
+        views_dir.join("fonts/anthropic/AnthropicMono-Bold.ttf"),
         Path::new("/mnt/us/fonts/SonyReader Ming.ttf").to_path_buf(),
     ];
 
@@ -53,10 +57,10 @@ pub fn register_app_fonts(views_dir: &Path) {
     }
 }
 
-/// Create an absolute-pixel-sized PangoFontDescription (DPI-independent on KPW3 X11!)
-pub unsafe fn make_font_desc(px: f64, bold: bool) -> *mut PangoFontDescription {
+/// Create an absolute-pixel-sized PangoFontDescription for a specific font family stack.
+pub unsafe fn make_font_desc_for(family: &str, px: f64, bold: bool) -> *mut PangoFontDescription {
     let desc = pango_font_description_new();
-    let fam = CString::new(FONT_FAMILY).unwrap_or_else(|_| CString::new("Serif").unwrap());
+    let fam = CString::new(family).unwrap_or_else(|_| CString::new("Serif").unwrap());
     pango_font_description_set_family(desc, fam.as_ptr());
     pango_font_description_set_weight(
         desc,
@@ -68,6 +72,11 @@ pub unsafe fn make_font_desc(px: f64, bold: bool) -> *mut PangoFontDescription {
     );
     pango_font_description_set_absolute_size(desc, px * (PANGO_SCALE as f64));
     desc
+}
+
+/// Create an absolute-pixel-sized PangoFontDescription (DPI-independent on KPW3 X11!)
+pub unsafe fn make_font_desc(px: f64, bold: bool) -> *mut PangoFontDescription {
+    make_font_desc_for(FONT_FAMILY, px, bold)
 }
 
 pub unsafe fn fill_white(cr: *mut cairo_t) {
@@ -120,11 +129,12 @@ pub unsafe fn draw_pill_button(
     draw_text_centered(cr, r, label, font_px, bold, fg);
 }
 
-/// Draw UTF-8 text horizontally centered and vertically centered inside `r`.
-pub unsafe fn draw_text_centered(
+/// Draw UTF-8 text horizontally centered and vertically centered inside `r` with explicit font family.
+pub unsafe fn draw_text_centered_for(
     cr: *mut cairo_t,
     r: Rect,
     text: &str,
+    family: &str,
     px: f64,
     bold: bool,
     gray: f64,
@@ -134,7 +144,7 @@ pub unsafe fn draw_text_centered(
         Err(_) => return,
     };
     let layout = pango_cairo_create_layout(cr);
-    let desc = make_font_desc(px, bold);
+    let desc = make_font_desc_for(family, px, bold);
     pango_layout_set_font_description(layout, desc);
     pango_layout_set_text(layout, c_text.as_ptr(), -1);
     pango_layout_set_width(layout, ((r.w - 8.0).max(16.0) as i32) * PANGO_SCALE);
@@ -156,6 +166,54 @@ pub unsafe fn draw_text_centered(
     g_object_unref(layout as *mut c_void);
 }
 
+/// Draw UTF-8 text horizontally centered and vertically centered inside `r`.
+pub unsafe fn draw_text_centered(
+    cr: *mut cairo_t,
+    r: Rect,
+    text: &str,
+    px: f64,
+    bold: bool,
+    gray: f64,
+) {
+    draw_text_centered_for(cr, r, text, FONT_FAMILY, px, bold, gray);
+}
+
+/// Draw left-aligned wrapped multi-line text starting at `(x, y)` within `max_w`, returning pixel height.
+pub unsafe fn draw_text_wrapped(
+    cr: *mut cairo_t,
+    x: f64,
+    y: f64,
+    max_w: f64,
+    text: &str,
+    px: f64,
+    bold: bool,
+    gray: f64,
+) -> i32 {
+    let c_text = match CString::new(text) {
+        Ok(s) => s,
+        Err(_) => return 0,
+    };
+    let layout = pango_cairo_create_layout(cr);
+    let desc = make_font_desc(px, bold);
+    pango_layout_set_font_description(layout, desc);
+    pango_layout_set_text(layout, c_text.as_ptr(), -1);
+    pango_layout_set_width(layout, (max_w.max(32.0) as i32) * PANGO_SCALE);
+    pango_layout_set_wrap(layout, PANGO_WRAP_WORD_CHAR);
+    pango_layout_set_alignment(layout, PANGO_ALIGN_LEFT);
+
+    let mut tw: i32 = 0;
+    let mut th: i32 = 0;
+    pango_layout_get_pixel_size(layout, &mut tw, &mut th);
+
+    cairo_set_source_rgb(cr, gray, gray, gray);
+    cairo_move_to(cr, x, y);
+    pango_cairo_show_layout(cr, layout);
+
+    pango_font_description_free(desc);
+    g_object_unref(layout as *mut c_void);
+    th
+}
+
 /// Measure UTF-8 text pixel (width, height) without painting (for exact optical centering).
 pub unsafe fn measure_text_px(cr: *mut cairo_t, text: &str, px: f64, bold: bool) -> (i32, i32) {
     let c_text = match CString::new(text) {
@@ -174,11 +232,12 @@ pub unsafe fn measure_text_px(cr: *mut cairo_t, text: &str, px: f64, bold: bool)
     (tw, th)
 }
 
-/// Draw left-aligned text vertically centered inside `r`, returning pixel width drawn.
-pub unsafe fn draw_text_left(
+/// Draw left-aligned text vertically centered inside `r` with explicit font family.
+pub unsafe fn draw_text_left_for(
     cr: *mut cairo_t,
     r: Rect,
     text: &str,
+    family: &str,
     px: f64,
     bold: bool,
     gray: f64,
@@ -189,7 +248,7 @@ pub unsafe fn draw_text_left(
         Err(_) => return (0, 0),
     };
     let layout = pango_cairo_create_layout(cr);
-    let desc = make_font_desc(px, bold);
+    let desc = make_font_desc_for(family, px, bold);
     pango_layout_set_font_description(layout, desc);
     pango_layout_set_text(layout, c_text.as_ptr(), -1);
     if ellipsize {
@@ -212,11 +271,25 @@ pub unsafe fn draw_text_left(
     (tw, th)
 }
 
-/// Draw right-aligned text vertically centered inside `r`.
-pub unsafe fn draw_text_right(
+/// Draw left-aligned text vertically centered inside `r`, returning pixel width drawn.
+pub unsafe fn draw_text_left(
     cr: *mut cairo_t,
     r: Rect,
     text: &str,
+    px: f64,
+    bold: bool,
+    gray: f64,
+    ellipsize: bool,
+) -> (i32, i32) {
+    draw_text_left_for(cr, r, text, FONT_FAMILY, px, bold, gray, ellipsize)
+}
+
+/// Draw right-aligned text vertically centered inside `r` with explicit font family.
+pub unsafe fn draw_text_right_for(
+    cr: *mut cairo_t,
+    r: Rect,
+    text: &str,
+    family: &str,
     px: f64,
     bold: bool,
     gray: f64,
@@ -226,7 +299,7 @@ pub unsafe fn draw_text_right(
         Err(_) => return,
     };
     let layout = pango_cairo_create_layout(cr);
-    let desc = make_font_desc(px, bold);
+    let desc = make_font_desc_for(family, px, bold);
     pango_layout_set_font_description(layout, desc);
     pango_layout_set_text(layout, c_text.as_ptr(), -1);
     pango_layout_set_width(layout, (r.w.max(16.0) as i32) * PANGO_SCALE);
@@ -243,4 +316,16 @@ pub unsafe fn draw_text_right(
 
     pango_font_description_free(desc);
     g_object_unref(layout as *mut c_void);
+}
+
+/// Draw right-aligned text vertically centered inside `r`.
+pub unsafe fn draw_text_right(
+    cr: *mut cairo_t,
+    r: Rect,
+    text: &str,
+    px: f64,
+    bold: bool,
+    gray: f64,
+) {
+    draw_text_right_for(cr, r, text, FONT_FAMILY, px, bold, gray);
 }
